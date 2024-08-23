@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>HelloChess</title>
+</head>
+<body>
+<header class="header">
+    <a href="/" id="logo"> HelloChess</a>
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="#game" class="navbar-link">ИГРА</a></li>
+            <li class="navbar-item"><a href="#study" class="navbar-link">ОБУЧЕНИЕ</a></li>
+            <li class="navbar-item"><a href="#tr" class="navbar-link">ЗАДАЧИ</a></li>
+            <li class="navbar-item"><a href="#about" class="navbar-link">О НАС</a></li>
+        </ul>
+    </nav>
+    <div id="fast-nav">
+        <button id="versus-btn"></button>
+    </div>
+    <div id="profile-box">
+        <button id="profile-box-nickname">madi_nusha</button>
+        <div id="profile-box-avatar"></div>
+    </div>
+    <div id="dropdown-navbar" class="hidden">
+        <div class="dropdown-navbar-menu-item">
+            <img src="images/dropdown-navbar-exit.png">
+            <a href="#">Профиль</a>
+        </div>
+        <div class="dropdown-navbar-menu-item">
+            <img src="images/dropdown-navbar-settings.png">
+            <a href="#">Насройки</a>
+        </div>
+        <div class="dropdown-navbar-menu-item">
+            <img src="images/dropdown-navbar-exit.png">
+            <a href="#">Выйти</a>
+        </div>
+        <hr>
+    </div>
+    <audio id="moveSound" src="sounds/movePiece.wav"></audio>
+    <audio id="eatSound" src="sounds/eatPiece.wav"></audio>
+</header>
+<div class="main">
+    <div id="chat-box">
+        <div id="chat-box-header">Чат с Bull_Digga
+            <button id="toggle-button"></button>
+        </div>
+        <div id="chat-box-window">
+            <div id="chat-box-window-start-message">Добро пожаловать <br>в чат!</div>
+        </div>
+        <div id="chat-box-footer">
+            <input type="text" id="chat-box-input-text" placeholder="Напишите сообщение...">
+            <button id="chat-box-send-button"></button>
+        </div>
+    </div>
+    <div id="chess-board"></div>
+    <div id="move-box">
+        <div id="move-box-header">Bull_Digga</div>
+        <div id="move-box-window"></div>
+        <div id="move-box-footer">madi_nusha</div>
+    </div>
+
+</div>
+<footer>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>
+<script src="js/scripts.js"></script>
+
+</body>
+</html>
