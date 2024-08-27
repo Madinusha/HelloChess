@@ -1,12 +1,15 @@
 package org.madi.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 public class King extends Piece{
+	@JsonProperty("hasMoved")
 	private boolean hasMoved = false;
+	@JsonProperty("hasChecked")
 	private boolean hasChecked = false;
 	public King(String color) {
 		super(color);

@@ -1,6 +1,7 @@
 package org.madi.demo.model;
 
 import org.apache.commons.lang3.tuple.MutablePair;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,8 @@ public class Pawn extends Piece {
 	public Pawn(String color) {
 		super(color);
 	}
+
+	@JsonProperty("hasMoved")
 	private boolean hasMoved = false;
 
 	public void setHasMoved() {

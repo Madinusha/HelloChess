@@ -9,6 +9,8 @@ import org.madi.demo.service.ChessService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 
 @RestController
@@ -28,15 +30,24 @@ public class ChessController {
 	}
 
 	@PostMapping("/make-move")
-	public ResponseEntity<Chessboard> makeMove(@RequestBody MoveRequest moveRequest) {
-		Chessboard updatedChessboard = chessService.makeMove(moveRequest.getFrom(), moveRequest.getTo());
-		return ResponseEntity.ok(updatedChessboard);
+	public ResponseEntity<Map<String, Object>> makeMove(@RequestBody MoveRequest moveRequest) {
+		Map<String, Object> result = chessService.makeMove(moveRequest.getFrom(), moveRequest.getTo());
+
+		return ResponseEntity.ok(result);
 	}
+
 
 	@GetMapping("/chessboard")
 	public ResponseEntity<Chessboard> getChessboard() {
 		Chessboard chessboard = chessService.getChessboard();
 		return ResponseEntity.ok(chessboard);
+	}
+
+	@PostMapping("/promotion")
+	public Chessboard promotePawn(@RequestBody PromotionRequest request) {
+		Position position = request.getPosition();
+		String newPieceType = request.getNewPieceType();
+		return chessService.promotePawn(position, newPieceType);
 	}
 
 	@Setter
@@ -47,4 +58,14 @@ public class ChessController {
 		private Position to;
 
 	}
+
+	@Setter
+	@Getter
+	@AllArgsConstructor
+	public static class PromotionRequest {
+		private Position position;
+		private String newPieceType;
+
+	}
+
 }

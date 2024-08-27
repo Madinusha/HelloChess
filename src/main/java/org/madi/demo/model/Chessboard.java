@@ -415,11 +415,13 @@ public class Chessboard {
 		}
 		return false;
 	}
-	public boolean moveFigure(Position from, Position to){
+	public Map<String, Object> moveFigure(Position from, Position to){
 		return moveFigure(from, to, this);
 	}
 
-	public boolean moveFigure(Position from, Position to, Chessboard board) {
+	public Map<String, Object> moveFigure(Position from, Position to, Chessboard board) {
+		Map<String, Object> result = new HashMap<>();
+
 		Piece movingFigure = board.getFigureAt(from);
 		Piece targetFigure = board.getFigureAt(to);
 		if (movingFigure != null) {
@@ -439,7 +441,9 @@ public class Chessboard {
 
 			// Проверяем, если это пешка, меняем флаг
 			if (movingFigure instanceof Pawn) {
-				checkPromotion(to);
+				if (checkPromotion(to)) {
+					result.put("promotePawn", to);
+				}
 				((Pawn) movingFigure).setHasMoved();
 			}
 			if (movingFigure instanceof King) ((King) movingFigure).setHasMoved();
@@ -462,24 +466,24 @@ public class Chessboard {
 
 			// проверим на ничью
 
-			return true;
 		}
+		return result;
+	}
 
+	public boolean checkPromotion(Position position) {
+		Piece pawn = getFigureAt(position);
+
+		// Проверка, что это пешка, и что она дошла до противоположного конца доски
+		if (pawn instanceof Pawn) {
+			if (position.getRow() == 1 && pawn.getColor().equals("black")) {
+				return true;
+			} else if (position.getRow() == 8 && pawn.getColor().equals("white")) {
+				return true;
+			}
+		}
 		return false;
 	}
 
-	public void checkPromotion(Position position) { // Только для пешек. Проверяет, оказались ли они на противоположном конце доски
-		Piece pawn = getFigureAt(position);
-//		if (position.getRow() == 1 && pawn.getColor().equals("black") || position.getRow() == 8 && pawn.getColor().equals("white")) {
-//			controller.displayPromotionMenu(position, controller.gridPane1);
-//		}
-		if (position.getRow() == 1 && pawn.getColor().equals("black")){
-//			controller.displayPromotionMenu(position, controller.gridPane2);
-		} else if (position.getRow() == 8 && pawn.getColor().equals("white")) {
-//			controller.displayPromotionMenu(position, controller.gridPane1);
-		}
-
-	}
 	public void exchangePawn(Position position, String figName)
 	{
 		Piece Piece = getFigureAt(position);

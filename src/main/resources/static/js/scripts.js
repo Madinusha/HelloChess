@@ -174,6 +174,63 @@ function movePiece(selectedSquare, targetSquare) {
     });
 }
 
+// Подключение к WebSocket
+const socket = new SockJS('/ws');
+const stompClient = Stomp.over(socket);
+
+stompClient.connect({}, function (frame) {
+    console.log('Connected: ' + frame);
+
+    // Подписка на канал "/topic/promotion"
+    stompClient.subscribe('/topic/promotion', function (message) {
+        const position = JSON.parse(message.body); // Парсинг JSON, если нужно
+        showPromotionMenu(position);
+    });
+}, function (error) {
+    console.error('Ошибка при подключении в WebSocket:', error);
+});
+
+function showPromotionMenu(position) {
+    console.log("showPromotionMenu");
+}
+
+// Функция для отображения диалога выбора фигуры
+function showPromotionDialog(position) {
+    // Например, вывод диалога с кнопками выбора
+    const promotionDialog = document.getElementById('promotion-dialog');
+    promotionDialog.style.display = 'block';
+
+    // Пример обработки выбора фигуры пользователем
+    document.querySelectorAll('.promotion-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const selectedPiece = this.getAttribute('data-piece'); // выбранная фигура
+
+            // Отправляем серверу информацию о выбранной фигуре и позиции
+            sendPromotionChoice(position, selectedPiece);
+
+            // Закрываем диалог
+            promotionDialog.style.display = 'none';
+        });
+    });
+}
+
+// Функция для отправки выбора пользователя на сервер
+function sendPromotionChoice(position, selectedPiece) {
+    fetch('/api/chess/promotion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ position: position, piece: selectedPiece })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Обновляем доску с новой фигурой
+        renderChessboard(data);
+    });
+}
+
+
 function buttonsInit() {
     const board = document.getElementById('chess-board');
     const chatBox = document.getElementById('chat-box');
@@ -302,12 +359,23 @@ async function makeMove(fromPosition, toPosition) {
             to: toPosition
         })
     });
+    const result = await response.json();
 
-    const newChessboard = await response.json();
+    const newChessboard = result.chessboard;
     Object.keys(chessboard).forEach(key => delete chessboard[key]);
     Object.assign(chessboard, newChessboard);
+
+    // Проверяем, есть ли информация о промоушене
+    if (result.promotionRequired) {
+        const promotionPosition = result.promotionPosition;
+        // Показать меню выбора фигуры для промоушена
+        showPromotionMenu(promotionPosition);
+    }
+
     return chessboard;
 }
+
+
 
 async function fetchChessboard() {
     const response = await fetch('/api/chess/chessboard');

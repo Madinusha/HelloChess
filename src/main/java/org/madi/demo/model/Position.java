@@ -1,5 +1,6 @@
 package org.madi.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,9 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Position {
 
+	@JsonProperty("col")
 	private char col;
+	@JsonProperty("row")
 	private int row;
 
 	public Position(int col, int row) {
