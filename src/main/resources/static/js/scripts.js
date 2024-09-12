@@ -40,6 +40,22 @@ const promoteMenuPieces = {
     "4": { "fileName": "Knight"}
 }
 
+function updateChessboard(chessboard, fromPosition, toPosition) {
+    // Получаем данные о фигуре, которую перемещаем
+    const piece = chessboard.board[fromPosition];
+    // Проверяем, что на исходной позиции есть фигура
+    if (!piece) {
+        console.error(`Нет фигуры на позиции ${fromPosition}`);
+        return;
+    }
+    // Удаляем фигуру с исходной позиции
+    delete chessboard.board[fromPosition];
+    // Записываем фигуру на новую позицию
+    chessboard.board[toPosition] = piece;
+
+    console.log(`Фигура ${piece.fileName} перемещена с ${fromPosition} на ${toPosition}`);
+}
+
 
 document.addEventListener("DOMContentLoaded", function() {
     fetchChessboard().then(newChessboard => {
@@ -200,7 +216,7 @@ function showPromotionMenu(position) {
     console.log("showPromotionMenu: ", position);
     const posToStr = position.col + parseInt(position.row);
 
-    const playerColor = "white"; // Убедитесь, что кавычки правильные
+    const playerColor = getPieceAt(posToStr).color;
     const dir = position.row === 1 ? 1 : -1;
 
     for (let i = 0; i < 4; i++) {
@@ -221,9 +237,13 @@ function showPromotionMenu(position) {
         button.addEventListener('click', () => {
             sendPromotionChoice(posToStr, piece.fileName);
 
-            fetchChessboard().then(newChessboard => {
-                renderChessboard(chessboard);
-            });
+
+            const mySquare = document.getElementById(posToStr);
+            const pawnPiece = mySquare.querySelector('img');
+            if (pawnPiece) {
+                pawnPiece.remove(); // Удаляет элемент напрямую
+            }
+            mySquare.appendChild(pieceElement);
 
             document.querySelectorAll('.promote-button').forEach(button => {
                 button.remove();
@@ -298,6 +318,43 @@ function buttonsInit() {
     });
 }
 
+let moveCount = 0; // Счетчик ходов
+function addMoveToBox(fromPosition, toPosition) {
+    const moveBox = document.getElementById('move-box-window');
+    const moveNumbers = document.getElementById('move-numbers');
+    const whiteMoves = document.getElementById('white-moves');
+    const blackMoves = document.getElementById('black-moves');
+
+    // Форматируем ход как строку "e2-e4"
+    const move = fromPosition + '-' + toPosition;
+
+    const currentMoveBox = moveBox.querySelector('.current');
+    if (currentMoveBox) {
+        currentMoveBox.classList.remove('current');
+    }
+
+    // Проверяем, чей ход
+    if (moveCount % 2 === 0) { // Ход белых
+        const moveNumber = Math.floor(moveCount / 2) + 1;
+        const numberElement = document.createElement('div');
+        numberElement.classList.add('move-box-row');
+        numberElement.textContent = moveNumber + '.';
+        moveNumbers.appendChild(numberElement);
+        // Добавляем ход белых
+        const whiteMoveElement = document.createElement('div');
+        whiteMoveElement.classList.add('current', 'move-box-row', 'to-bord');
+        whiteMoveElement.textContent = move;
+        whiteMoves.appendChild(whiteMoveElement);
+        moveBox.scrollTop = moveBox.scrollHeight;
+    } else { // Ход черных
+        const blackMoveElement = document.createElement('div');
+        blackMoveElement.textContent = move;
+        blackMoveElement.classList.add('current', 'move-box-row');
+        blackMoves.appendChild(blackMoveElement);
+    }
+
+    moveCount++;
+}
 
 function resizeBoard() {
     const board = document.getElementById('chess-board');
@@ -371,6 +428,8 @@ async function makeMove(fromPosition, toPosition) {
         // Показать меню выбора фигуры для промоушена
         showPromotionMenu(promotionPosition);
     }
+    addMoveToBox(fromPosition, toPosition);
+    updateChessboard(chessboard, fromPosition, toPosition);
     return chessboard;
 }
 
@@ -385,8 +444,8 @@ async function sendPromotionChoice(position, selectedPieceType) {
             newPieceType: selectedPieceType
         })
     }).catch(error => {
-            console.error('Ошибка при отправке запроса на промоушен:', error.message);
-        });
+        console.error('Ошибка при отправке запроса на промоушен:', error.message);
+    });
     const result = await response.json();
 
     console.log("рендер пешки");

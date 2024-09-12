@@ -291,6 +291,7 @@ header {
     font-size: 0.8em;
     padding: 0.3em;
     align-items: center;
+    box-shadow: 0px 3px 8px -1px rgba(34, 60, 80, 0.2) inset;
 }
 #chat-box-window.hidden  {
     max-height: 0;
@@ -416,10 +417,49 @@ input[type="text"]:focus  {
     align-items: center;
     margin-left: 0.5em;
 }
-#move-box-window{
+#move-box-window {
+    flex: 1;
+    display: flex;
     background-color: #f2e6cf;
+    overflow-y: auto;
+    box-shadow: 0px 3px 8px -1px rgba(34, 60, 80, 0.2) inset;
+
+}
+#move-box-window::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.move-box-column {
     flex: 1;
 }
+.move-box-column:not(:last-child) {
+    /*border-right: 1px solid #957377;*/
+}
+#move-numbers {
+    flex: 0.3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#white-moves, #black-moves {
+    flex: 1;
+    cursor: pointer;
+    /*border-left: 1px solid #957377;*/
+}
+.move-box-row {
+    border-bottom: 1px solid #957377;
+    padding: 0.2em;
+}
+.to-bord {
+    border-left: 1px solid #957377;
+    border-right: 1px solid #957377;
+}
+.current {
+    background-color: #c73136;
+    color: white;
+}
+
 #move-box-footer {
     height: 7vh;
     display: flex;
