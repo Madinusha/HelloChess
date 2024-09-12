@@ -1,6 +1,8 @@
 package org.madi.demo.service;
 
 import org.madi.demo.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -13,6 +15,8 @@ public class ChessService {
 
 	private final SimpMessagingTemplate messagingTemplate;
 	private Chessboard chessboard = new Chessboard();
+
+	private static final Logger logger = LoggerFactory.getLogger(ChessService.class);
 
 	public ChessService(SimpMessagingTemplate messagingTemplate) {
 		this.messagingTemplate = messagingTemplate;
@@ -42,32 +46,31 @@ public class ChessService {
 			initiatePromotion(promotionPosition); // Отправляем сообщение клиенту с позицией для промоушена
 		}
 
-		// Добавляем актуальное состояние доски в результат
-		result.put("chessboard", chessboard);
-
 		return result;
 	}
 
 	public Chessboard promotePawn(Position position, String newPieceType) {
 		Piece pawn = chessboard.getFigureAt(position);
+		logger.info("newPieceType: " + newPieceType);
 		if (pawn instanceof Pawn) {
 			Piece newPiece = null;
-			switch (newPieceType.toLowerCase()) {
-				case "queen":
+			switch (newPieceType) {
+				case "Queen":
 					newPiece = new Queen(pawn.getColor());
 					break;
-				case "rook":
+				case "Rook":
 					newPiece = new Rook(pawn.getColor());
 					break;
-				case "bishop":
+				case "Bishop":
 					newPiece = new Bishop(pawn.getColor());
 					break;
-				case "knight":
+				case "Knight":
 					newPiece = new Knight(pawn.getColor());
 					break;
 			}
 			if (newPiece != null) {
 				chessboard.placeFigure(newPiece, position);
+				logger.info(String.valueOf(chessboard));
 			}
 		}
 		return chessboard;

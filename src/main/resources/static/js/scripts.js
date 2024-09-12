@@ -1,44 +1,50 @@
 // Пример использования
 const chessboard = {
-    "board": {
-        "a1": {"color": "white", "hasMoved": false, "fileName": "Rook"},
-        "a2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "a7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "a8": {"color": "black", "hasMoved": false, "fileName": "Rook"},
-        "b1": {"color": "white", "fileName": "Knight"},
-        "b2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "b7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "b8": {"color": "black", "fileName": "Knight"},
-        "c1": {"color": "white", "fileName": "Bishop"},
-        "c2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "c7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "c8": {"color": "black", "fileName": "Bishop"},
-        "d1": {"color": "white", "fileName": "Queen"},
-        "d2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "d7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "d8": {"color": "black", "fileName": "Queen"},
-        "e1": {"color": "white", "hasMoved": false, "hasChecked": false, "fileName": "King"},
-        "e2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "e7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "e8": {"color": "black", "hasMoved": false, "hasChecked": false, "fileName": "King"},
-        "f1": {"color": "white", "fileName": "Bishop"},
-        "f2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "f7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "f8": {"color": "black", "fileName": "Bishop"},
-        "g1": {"color": "white", "fileName": "Knight"},
-        "g2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "g7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "g8": {"color": "black", "fileName": "Knight"},
-        "h1": {"color": "white", "hasMoved": false, "fileName": "Rook"},
-        "h2": {"color": "white", "hasMoved": false, "fileName": "Pawn"},
-        "h7": {"color": "black", "hasMoved": false, "fileName": "Pawn"},
-        "h8": {"color": "black", "hasMoved": false, "fileName": "Rook"}
-    }
+      "a1": { "fileName": "Rook", "color": "white", "hasMoved": false },
+      "a2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "a7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "a8": { "fileName": "Rook", "color": "black", "hasMoved": false },
+      "b1": { "fileName": "Knight", "color": "white" },
+      "b2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "b7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "b8": { "fileName": "Knight", "color": "black" },
+      "c1": { "fileName": "Bishop", "color": "white" },
+      "c2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "c7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "c8": { "fileName": "Bishop", "color": "black" },
+      "d1": { "fileName": "Queen", "color": "white" },
+      "d2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "d7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "d8": { "fileName": "Queen", "color": "black" },
+      "e1": { "fileName": "King", "color": "white", "hasMoved": false, "hasChecked": false },
+      "e2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "e7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "e8": { "fileName": "King", "color": "black", "hasMoved": false, "hasChecked": false },
+      "f1": { "fileName": "Bishop", "color": "white" },
+      "f2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "f7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "f8": { "fileName": "Bishop", "color": "black" },
+      "g1": { "fileName": "Knight", "color": "white" },
+      "g2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "g7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "g8": { "fileName": "Knight", "color": "black" },
+      "h1": { "fileName": "Rook", "color": "white", "hasMoved": false },
+      "h2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
+      "h7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
+      "h8": { "fileName": "Rook", "color": "black", "hasMoved": false }
 };
+const promoteMenuPieces = {
+    "1": { "fileName": "Queen"},
+    "2": { "fileName": "Bishop"},
+    "3": { "fileName": "Rook"},
+    "4": { "fileName": "Knight"}
+}
+
 
 document.addEventListener("DOMContentLoaded", function() {
     fetchChessboard().then(newChessboard => {
         renderChessboard(chessboard);
+        console.log(chessboard);
     });
     resizeBoard();
     buttonsInit();
@@ -54,6 +60,7 @@ function renderChessboard(chessboard) {
         for (let col = 'a'; col <= 'h'; col = String.fromCharCode(col.charCodeAt(0) + 1)) {
             const position = col + row;
             const piece = chessboard.board[position];
+            console.log("piece: ", piece);
 
             // Создание элемента для клетки
             const square = document.createElement('div');
@@ -102,8 +109,8 @@ function handleSquareClick(position) {
     }
 }
 
-function getFigureAt(position) {
-    return chessboard[position] || null;
+function getPieceAt(position) {
+    return chessboard.board[position] || null;
 }
 
 function showValidMovesFrom(position) {
@@ -137,7 +144,6 @@ function hideValidMove() {
 function movePiece(selectedSquare, targetSquare) {
     // Получаем изображение фигуры
     const piece = selectedSquare.querySelector('.piece');
-    console.log(piece.src);
 
     // Получаем координаты начального и конечного квадрата
     const startPos = selectedSquare.getBoundingClientRect();
@@ -177,7 +183,6 @@ function movePiece(selectedSquare, targetSquare) {
 // Подключение к WebSocket
 const socket = new SockJS('/ws');
 const stompClient = Stomp.over(socket);
-
 stompClient.connect({}, function (frame) {
     console.log('Connected: ' + frame);
 
@@ -190,46 +195,45 @@ stompClient.connect({}, function (frame) {
     console.error('Ошибка при подключении в WebSocket:', error);
 });
 
+
 function showPromotionMenu(position) {
-    console.log("showPromotionMenu");
-}
+    console.log("showPromotionMenu: ", position);
+    const posToStr = position.col + parseInt(position.row);
 
-// Функция для отображения диалога выбора фигуры
-function showPromotionDialog(position) {
-    // Например, вывод диалога с кнопками выбора
-    const promotionDialog = document.getElementById('promotion-dialog');
-    promotionDialog.style.display = 'block';
+    const playerColor = "white"; // Убедитесь, что кавычки правильные
+    const dir = position.row === 1 ? 1 : -1;
 
-    // Пример обработки выбора фигуры пользователем
-    document.querySelectorAll('.promotion-option').forEach(option => {
-        option.addEventListener('click', function() {
-            const selectedPiece = this.getAttribute('data-piece'); // выбранная фигура
+    for (let i = 0; i < 4; i++) {
+        const squareId = position.col + ((parseInt(position.row) + i * dir));
+        const square = document.getElementById(squareId);
+        console.log(square.id);
 
-            // Отправляем серверу информацию о выбранной фигуре и позиции
-            sendPromotionChoice(position, selectedPiece);
+        const button = document.createElement('button');
+        button.classList.add('promote-button');
 
-            // Закрываем диалог
-            promotionDialog.style.display = 'none';
+        const piece = promoteMenuPieces[(i + 1).toString()];
+        const pieceElement = document.createElement('img');
+        button.appendChild(pieceElement);
+        pieceElement.classList.add('piece');
+        pieceElement.src = `images/${playerColor}/${piece.fileName}.png`;
+
+        // Добавляем обработчик нажатия кнопки
+        button.addEventListener('click', () => {
+            sendPromotionChoice(posToStr, piece.fileName);
+
+            fetchChessboard().then(newChessboard => {
+                renderChessboard(chessboard);
+            });
+
+            document.querySelectorAll('.promote-button').forEach(button => {
+                button.remove();
+            });
+
         });
-    });
-}
 
-// Функция для отправки выбора пользователя на сервер
-function sendPromotionChoice(position, selectedPiece) {
-    fetch('/api/chess/promotion', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ position: position, piece: selectedPiece })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Обновляем доску с новой фигурой
-        renderChessboard(data);
-    });
+        square.appendChild(button);
+    }
 }
-
 
 function buttonsInit() {
     const board = document.getElementById('chess-board');
@@ -361,21 +365,33 @@ async function makeMove(fromPosition, toPosition) {
     });
     const result = await response.json();
 
-    const newChessboard = result.chessboard;
-    Object.keys(chessboard).forEach(key => delete chessboard[key]);
-    Object.assign(chessboard, newChessboard);
-
     // Проверяем, есть ли информация о промоушене
     if (result.promotionRequired) {
         const promotionPosition = result.promotionPosition;
         // Показать меню выбора фигуры для промоушена
         showPromotionMenu(promotionPosition);
     }
-
     return chessboard;
 }
 
+async function sendPromotionChoice(position, selectedPieceType) {
+    const response = await fetch('/api/chess/promotion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            position: position,
+            newPieceType: selectedPieceType
+        })
+    }).catch(error => {
+            console.error('Ошибка при отправке запроса на промоушен:', error.message);
+        });
+    const result = await response.json();
 
+    console.log("рендер пешки");
+
+}
 
 async function fetchChessboard() {
     const response = await fetch('/api/chess/chessboard');

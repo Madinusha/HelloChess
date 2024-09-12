@@ -31,11 +31,10 @@ public class ChessController {
 
 	@PostMapping("/make-move")
 	public ResponseEntity<Map<String, Object>> makeMove(@RequestBody MoveRequest moveRequest) {
-		Map<String, Object> result = chessService.makeMove(moveRequest.getFrom(), moveRequest.getTo());
-
+		Map<String, Object> result = chessService.makeMove(moveRequest.from, moveRequest.to);
 		return ResponseEntity.ok(result);
-	}
 
+	}
 
 	@GetMapping("/chessboard")
 	public ResponseEntity<Chessboard> getChessboard() {
@@ -44,10 +43,13 @@ public class ChessController {
 	}
 
 	@PostMapping("/promotion")
-	public Chessboard promotePawn(@RequestBody PromotionRequest request) {
-		Position position = request.getPosition();
-		String newPieceType = request.getNewPieceType();
-		return chessService.promotePawn(position, newPieceType);
+	public ResponseEntity<Chessboard> promotePawn(@RequestBody PromotionRequest request) {
+		Position position = request.position;
+		String newPieceType = request.newPieceType;
+		System.out.println("position: " +  position);
+		System.out.println("newPieceType: " +  newPieceType);
+		Chessboard chessboard = chessService.promotePawn(position, newPieceType);
+		return ResponseEntity.ok(chessboard);
 	}
 
 	@Setter
