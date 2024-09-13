@@ -112,7 +112,7 @@ function handleSquareClick(position) {
         hideValidMove();
         return;
     }
-    if (square.classList.contains('possible-move')) {
+    if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
        hideValidMove();
        movePiece(selectedSquare, square);
     } else {
@@ -141,7 +141,9 @@ function showValidMovesFrom(position) {
         possibleMoves.forEach(targetPosition => {
             const targetSquare = document.getElementById(`${targetPosition.col}${targetPosition.row}`);
             if (targetSquare) {
-                targetSquare.classList.add('possible-move');
+                if (chessboard.board[targetSquare.id]) {
+                    targetSquare.classList.add('possible-move-on-piece');
+                } else targetSquare.classList.add('possible-move');
             }
         });
     });
@@ -150,6 +152,9 @@ function showValidMovesFrom(position) {
 function hideValidMove() {
     document.querySelectorAll('.possible-move').forEach(square => {
         square.classList.remove('possible-move');
+    });
+     document.querySelectorAll('.possible-move-on-piece').forEach(square => {
+        square.classList.remove('possible-move-on-piece');
     });
     const selectedSquare = document.querySelector('.selected');
     if (selectedSquare) {

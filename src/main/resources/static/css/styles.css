@@ -225,6 +225,9 @@ header {
 .square.possible-move {
     position: relative;
 }
+.square.possible-move-on-piece {
+    box-shadow: 0px 0px 14px 0px rgba(0, 128, 0, 0.73) inset;
+}
 .square.selected::after {
     content: '';
     position: absolute;
