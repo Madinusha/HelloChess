@@ -33,7 +33,6 @@ public class ChessController {
 	public ResponseEntity<Map<String, Object>> makeMove(@RequestBody MoveRequest moveRequest) {
 		Map<String, Object> result = chessService.makeMove(moveRequest.from, moveRequest.to);
 		return ResponseEntity.ok(result);
-
 	}
 
 	@GetMapping("/chessboard")

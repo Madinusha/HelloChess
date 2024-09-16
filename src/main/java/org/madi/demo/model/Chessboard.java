@@ -3,6 +3,8 @@ package org.madi.demo.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.madi.demo.controller.ChessController;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -442,11 +444,22 @@ public class Chessboard {
 			// Проверяем, если это пешка, меняем флаг
 			if (movingFigure instanceof Pawn) {
 				if (checkPromotion(to)) {
-					result.put("promotePawn", to);
+					result.put("promotePawn", Map.of("position", to));
 				}
 				((Pawn) movingFigure).setHasMoved();
 			}
-			if (movingFigure instanceof King) ((King) movingFigure).setHasMoved();
+			if (movingFigure instanceof King) {
+				((King) movingFigure).setHasMoved();
+				if (Math.abs(from.getColAsNumber() - to.getColAsNumber()) == 2) {
+					Position rookFrom = from.getColAsNumber() < to.getColAsNumber()? new Position("h" + from.getRow()) : new Position("a" + from.getRow());
+					Position rookTo = from.getColAsNumber() < to.getColAsNumber()? new Position("f" + from.getRow()) : new Position("d" + from.getRow());
+					var newPiece = new Rook(getFigureAt(rookFrom).getColor(), true);
+					placeFigure(newPiece, rookTo);
+					deleteFigureAt(rookFrom);
+
+					result.put("castling", Map.of("from", rookFrom, "to", rookTo));
+				}
+			}
 			if (movingFigure instanceof Rook) ((Rook) movingFigure).setHasMoved();
 			// Вывести информацию о ходе
 			System.out.println("Успех! " + movingFigure.getColor() + " " + movingFigure.getClass().getSimpleName() + " сделал ход с " + from + " на " + to + "\n");

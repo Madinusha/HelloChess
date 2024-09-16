@@ -40,11 +40,11 @@ public class ChessService {
 		// Выполняем ход и получаем результат
 		Map<String, Object> result = chessboard.moveFigure(fromPosition, toPosition, chessboard);
 
-		// Проверяем, требуется ли промоушен
-		if (result.containsKey("promotePawn")) {
-			Position promotionPosition = (Position) result.get("promotePawn");
-			initiatePromotion(promotionPosition); // Отправляем сообщение клиенту с позицией для промоушена
-		}
+//		// Проверяем, требуется ли промоушен
+//		if (result.containsKey("promotePawn")) {
+//			Position promotionPosition = (Position) result.get("promotePawn");
+//			initiatePromotion(promotionPosition); // Отправляем сообщение клиенту с позицией для промоушена
+//		}
 
 		return result;
 	}

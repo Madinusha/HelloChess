@@ -35,25 +35,21 @@ const chessboard = {
 };
 const promoteMenuPieces = {
     "1": { "fileName": "Queen"},
-    "2": { "fileName": "Bishop"},
-    "3": { "fileName": "Rook"},
+    "2": { "fileName": "Bishop", "hasMoved": false },
+    "3": { "fileName": "Rook", "hasMoved": false },
     "4": { "fileName": "Knight"}
 }
 
 function updateChessboard(chessboard, fromPosition, toPosition) {
-    // Получаем данные о фигуре, которую перемещаем
     const piece = chessboard.board[fromPosition];
-    // Проверяем, что на исходной позиции есть фигура
     if (!piece) {
         console.error(`Нет фигуры на позиции ${fromPosition}`);
         return;
     }
     // Удаляем фигуру с исходной позиции
     delete chessboard.board[fromPosition];
-    // Записываем фигуру на новую позицию
     chessboard.board[toPosition] = piece;
 
-    console.log(`Фигура ${piece.fileName} перемещена с ${fromPosition} на ${toPosition}`);
 }
 
 
@@ -114,7 +110,7 @@ function handleSquareClick(position) {
     }
     if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
        hideValidMove();
-       movePiece(selectedSquare, square);
+       makeMove(selectedSquare.id, square.id);
     } else {
         if (!square.querySelector('.piece')) {
             hideValidMove();
@@ -162,7 +158,10 @@ function hideValidMove() {
     }
 }
 
-function movePiece(selectedSquare, targetSquare) {
+function movePiece(positionFrom, positionTo) {
+    const selectedSquare = document.getElementById(positionFrom);
+    const targetSquare = document.getElementById(positionTo);
+
     // Получаем изображение фигуры
     const piece = selectedSquare.querySelector('.piece');
 
@@ -174,8 +173,6 @@ function movePiece(selectedSquare, targetSquare) {
     const deltaX = endPos.left - startPos.left;
     const deltaY = endPos.top - startPos.top;
 
-
-
     // Добавляем анимацию
     requestAnimationFrame(() => {
         piece.style.zIndex = 1000;
@@ -185,7 +182,7 @@ function movePiece(selectedSquare, targetSquare) {
     const eatSound = document.getElementById('eatSound');
 
     piece.addEventListener('transitionend', () => {
-        makeMove(selectedSquare.id, targetSquare.id);
+
         const targetPiece = targetSquare.querySelector('.piece');
         if (targetPiece) {
             targetPiece.remove();
@@ -201,64 +198,55 @@ function movePiece(selectedSquare, targetSquare) {
     });
 }
 
-// Подключение к WebSocket
-const socket = new SockJS('/ws');
-const stompClient = Stomp.over(socket);
-stompClient.connect({}, function (frame) {
-    console.log('Connected: ' + frame);
+function showPromotionMenu(fromPosition, targetPosition) {
+//     from - переменная типа стринг
+//     targetPosition - переменная типа Position
 
-    // Подписка на канал "/topic/promotion"
-    stompClient.subscribe('/topic/promotion', function (message) {
-        const position = JSON.parse(message.body); // Парсинг JSON, если нужно
-        showPromotionMenu(position);
-    });
-}, function (error) {
-    console.error('Ошибка при подключении в WebSocket:', error);
-});
+    // Создаем промис, который завершится, когда будет сделан выбор
+    return new Promise((resolve) => {
+        const posToStr = targetPosition.col + parseInt(targetPosition.row);
+        const playerColor = getPieceAt(fromPosition).color;
+        const dir = targetPosition.row === 1 ? 1 : -1;
+        for (let i = 0; i < 4; i++) {
+            const squareId = targetPosition.col + ((parseInt(targetPosition.row) + i * dir));
+            const square = document.getElementById(squareId);
 
+            const button = document.createElement('button');
+            button.classList.add('promote-button');
 
-function showPromotionMenu(position) {
-    console.log("showPromotionMenu: ", position);
-    const posToStr = position.col + parseInt(position.row);
+            const piece = promoteMenuPieces[(i + 1).toString()];
+            piece.color = playerColor;
+            const pieceElement = document.createElement('img');
+            button.appendChild(pieceElement);
+            pieceElement.classList.add('piece');
+            pieceElement.src = `images/${playerColor}/${piece.fileName}.png`;
+            square.appendChild(button);
 
-    const playerColor = getPieceAt(posToStr).color;
-    const dir = position.row === 1 ? 1 : -1;
+            // Добавляем обработчик нажатия кнопки
+            button.addEventListener('click', () => {
+                sendPromotionChoice(posToStr, piece.fileName);
+                const targetSquare = document.getElementById(posToStr);
+                const fromSquare = document.getElementById(fromPosition);
+                const pawnPiece = fromSquare.querySelector('img');
+                if (pawnPiece) {
+                    pawnPiece.remove(); // Удаляет элемент напрямую
+                }
+                targetSquare.appendChild(pieceElement);
 
-    for (let i = 0; i < 4; i++) {
-        const squareId = position.col + ((parseInt(position.row) + i * dir));
-        const square = document.getElementById(squareId);
-        console.log(square.id);
+                // Убираем все кнопки после выбора
+                document.querySelectorAll('.promote-button').forEach(button => {
+                    button.remove();
+                });
 
-        const button = document.createElement('button');
-        button.classList.add('promote-button');
-
-        const piece = promoteMenuPieces[(i + 1).toString()];
-        const pieceElement = document.createElement('img');
-        button.appendChild(pieceElement);
-        pieceElement.classList.add('piece');
-        pieceElement.src = `images/${playerColor}/${piece.fileName}.png`;
-
-        // Добавляем обработчик нажатия кнопки
-        button.addEventListener('click', () => {
-            sendPromotionChoice(posToStr, piece.fileName);
-
-
-            const mySquare = document.getElementById(posToStr);
-            const pawnPiece = mySquare.querySelector('img');
-            if (pawnPiece) {
-                pawnPiece.remove(); // Удаляет элемент напрямую
-            }
-            mySquare.appendChild(pieceElement);
-
-            document.querySelectorAll('.promote-button').forEach(button => {
-                button.remove();
+                // Разрешаем промис, передавая выбранную фигуру
+                resolve(piece);
             });
 
-        });
 
-        square.appendChild(button);
-    }
+        }
+    });
 }
+
 
 function buttonsInit() {
     const board = document.getElementById('chess-board');
@@ -426,15 +414,26 @@ async function makeMove(fromPosition, toPosition) {
         })
     });
     const result = await response.json();
-
-    // Проверяем, есть ли информация о промоушене
-    if (result.promotionRequired) {
-        const promotionPosition = result.promotionPosition;
-        // Показать меню выбора фигуры для промоушена
-        showPromotionMenu(promotionPosition);
+    if (result.promotePawn) {
+        const promotionPosition = result.promotePawn.position;
+        const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
+        console.log("Выбрана фигура для промоушена: ", promotedPiece);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        chessboard.board[toPosition] = promotedPiece;
+    } else if (result.castling) {
+        console.log("рокировка!");
+        const { from: rookFrom, to: rookTo } = result.castling;
+        console.log(rookFrom, rookTo);
+        movePiece(fromPosition, toPosition);
+        movePiece(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
+        updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
+        updateChessboard(chessboard, fromPosition, toPosition);
+    } else {
+        movePiece(fromPosition, toPosition);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
     }
-    addMoveToBox(fromPosition, toPosition);
-    updateChessboard(chessboard, fromPosition, toPosition);
+
     return chessboard;
 }
 
@@ -453,7 +452,6 @@ async function sendPromotionChoice(position, selectedPieceType) {
     });
     const result = await response.json();
 
-    console.log("рендер пешки");
 
 }
 
