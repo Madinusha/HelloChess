@@ -39,13 +39,6 @@ public class ChessService {
 	public Map<String, Object> makeMove(Position fromPosition, Position toPosition) {
 		// Выполняем ход и получаем результат
 		Map<String, Object> result = chessboard.moveFigure(fromPosition, toPosition, chessboard);
-
-//		// Проверяем, требуется ли промоушен
-//		if (result.containsKey("promotePawn")) {
-//			Position promotionPosition = (Position) result.get("promotePawn");
-//			initiatePromotion(promotionPosition); // Отправляем сообщение клиенту с позицией для промоушена
-//		}
-
 		return result;
 	}
 

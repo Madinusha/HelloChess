@@ -240,39 +240,40 @@ public class Chessboard {
 		return false;
 	}
 
-	public boolean isCheckmate(String kingColor, Map<Position, Piece> board) {
-		// Проверяем, находится ли король нужного цвета под шахом
-		if (isKingInCheck(kingColor, board)) {
-			System.out.println("\t\t\t король " + kingColor + " под шахом ");
+//	public boolean isCheckmate(String kingColor, Map<Position, Piece> board) {
+//		// Проверяем, находится ли король нужного цвета под шахом
+//		if (isKingInCheck(kingColor, board)) {
+//			System.out.println("\t\t\t король " + kingColor + " под шахом ");
+//
+//			// Проходимся по всей доске и проверяем каждую фигуру
+//			for (Map.Entry<Position, Piece> entry : board.entrySet()) {
+//				Position currentPosition = entry.getKey();
+//				Piece currentFigure = entry.getValue();
+//
+//				if (currentFigure.getColor().equals(kingColor)) {
+//					Chessboard cb = new Chessboard();
+//					cb.board = board;
+//
+//					// Получаем список всех возможных ходов для текущей фигуры
+//					List<Position> possibleMoves = getPossibleMoves(currentPosition, cb);
+//
+//
+//					// Проходимся по каждому возможному ходу
+//					for (Position move : possibleMoves) {
+//						if (!cb.isMoveLeadsToCheck(currentPosition, move, currentFigure)){
+//							System.out.println(" ход ведет к шаху у фигуры " + cb.getFigureAt(currentPosition) + " " + move);
+//							return false;
+//						}
+//					}
+//				}
+//			}
+//			// Если не найдено ни одного хода, который бы предотвратил шах, то это мат
+//			return true;
+//		}
+//		// Если король не под шахом, то это не мат
+//		return false;
+//	}
 
-			// Проходимся по всей доске и проверяем каждую фигуру
-			for (Map.Entry<Position, Piece> entry : board.entrySet()) {
-				Position currentPosition = entry.getKey();
-				Piece currentFigure = entry.getValue();
-
-				if (currentFigure.getColor().equals(kingColor)) {
-					Chessboard cb = new Chessboard();
-					cb.board = board;
-
-					// Получаем список всех возможных ходов для текущей фигуры
-					List<Position> possibleMoves = getPossibleMoves(currentPosition, cb);
-
-
-					// Проходимся по каждому возможному ходу
-					for (Position move : possibleMoves) {
-						if (!cb.isMoveLeadsToCheck(currentPosition, move, currentFigure)){
-							//System.out.println(" ход ведет к шаху у фигуры " + cb.getFigureAt(currentPosition) + " " + move);
-							return false;
-						}
-					}
-				}
-			}
-			// Если не найдено ни одного хода, который бы предотвратил шах, то это мат
-			return true;
-		}
-		// Если король не под шахом, то это не мат
-		return false;
-	}
 	public List<Position> getPossibleMoves(Position currentPosition, Chessboard board) {
 		List<Position> possibleMoves = new ArrayList<>();
 		Piece myfigure = board.getFigureAt(currentPosition);
@@ -420,7 +421,6 @@ public class Chessboard {
 	public Map<String, Object> moveFigure(Position from, Position to){
 		return moveFigure(from, to, this);
 	}
-
 	public Map<String, Object> moveFigure(Position from, Position to, Chessboard board) {
 		Map<String, Object> result = new HashMap<>();
 
@@ -462,25 +462,41 @@ public class Chessboard {
 			}
 			if (movingFigure instanceof Rook) ((Rook) movingFigure).setHasMoved();
 			// Вывести информацию о ходе
-			System.out.println("Успех! " + movingFigure.getColor() + " " + movingFigure.getClass().getSimpleName() + " сделал ход с " + from + " на " + to + "\n");
+			System.out.println("Успех! " + movingFigure.getColor() + " " + movingFigure.getClass().getSimpleName() + " сделала ход с " + from + " на " + to + ".\n");
 
 			String opponentColor = movingFigure.getColor().equals("white")? "black" : "white";
-			// Проверяем на мат
-//			if (isCheckmate(opponentColor, board.getChessboard())) {
-//				controller.showWinMessage(movingFigure.getColor());
-//				System.out.println("Игра окончена. Шах и мат!");
-//			} else {
-//				// Проверяем на ничью
-//				if (!hasPossibleMoves(opponentColor, board)) {
-//					System.out.println("Игра окончена. Ничья!");
-//					controller.showDrawMessage();
-//				}
-//			}
-
-			// проверим на ничью
+			String checkCheckmate = isCheckmate(opponentColor, board);
+			if (checkCheckmate != null) {
+				if (checkCheckmate.equals("draw")) {
+					result.put("draw", true);
+				} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
+					result.put("victory", Map.of("winner", checkCheckmate));
+				}
+			}
 
 		}
 		return result;
+	}
+
+	public String isCheckmate(String kingColor, Chessboard board) {
+		// Проверяем, находится ли король нужного цвета под шахом
+		boolean isKingInCheck = isKingInCheck(kingColor, board.getChessboard());
+		if (!isKingInCheck){
+			if (!hasPossibleMoves(kingColor, board)) {
+				// вернуть ничью - пат
+				return "draw";
+			}
+		} else {
+			if (hasPossibleMoves(kingColor, board)) {
+				// возвращаем, что все нормально, игра идет дальше
+				return null;
+			} else {
+				// возвращаем информацию о проигрыше kingColor
+				return kingColor.equals("white")? "black" : "white";
+
+			}
+		}
+		return null;
 	}
 
 	public boolean checkPromotion(Position position) {

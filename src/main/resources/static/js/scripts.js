@@ -39,7 +39,6 @@ const promoteMenuPieces = {
     "3": { "fileName": "Rook", "hasMoved": false },
     "4": { "fileName": "Knight"}
 }
-
 function updateChessboard(chessboard, fromPosition, toPosition) {
     const piece = chessboard.board[fromPosition];
     if (!piece) {
@@ -164,6 +163,10 @@ function movePiece(positionFrom, positionTo) {
 
     // Получаем изображение фигуры
     const piece = selectedSquare.querySelector('.piece');
+    document.querySelectorAll('.last-move').forEach(square => {
+        square.classList.remove('last-move');
+    });
+
 
     // Получаем координаты начального и конечного квадрата
     const startPos = selectedSquare.getBoundingClientRect();
@@ -182,6 +185,9 @@ function movePiece(positionFrom, positionTo) {
     const eatSound = document.getElementById('eatSound');
 
     piece.addEventListener('transitionend', () => {
+
+        selectedSquare.classList.add('last-move');
+        targetSquare.classList.add('last-move');
 
         const targetPiece = targetSquare.querySelector('.piece');
         if (targetPiece) {
@@ -207,6 +213,11 @@ function showPromotionMenu(fromPosition, targetPosition) {
         const posToStr = targetPosition.col + parseInt(targetPosition.row);
         const playerColor = getPieceAt(fromPosition).color;
         const dir = targetPosition.row === 1 ? 1 : -1;
+
+        document.querySelectorAll('.square').forEach(square => {
+            square.classList.add('no-click');
+        });
+
         for (let i = 0; i < 4; i++) {
             const squareId = targetPosition.col + ((parseInt(targetPosition.row) + i * dir));
             const square = document.getElementById(squareId);
@@ -227,26 +238,28 @@ function showPromotionMenu(fromPosition, targetPosition) {
                 sendPromotionChoice(posToStr, piece.fileName);
                 const targetSquare = document.getElementById(posToStr);
                 const fromSquare = document.getElementById(fromPosition);
-                const pawnPiece = fromSquare.querySelector('img');
-                if (pawnPiece) {
-                    pawnPiece.remove(); // Удаляет элемент напрямую
+                const fromPawnPiece = fromSquare.querySelector('img');
+                if (fromPawnPiece) {
+                    fromPawnPiece.remove();
+                }
+                const targetPawnPiece = targetSquare.querySelector('img');
+                if (targetPawnPiece) {
+                    targetPawnPiece.remove();
                 }
                 targetSquare.appendChild(pieceElement);
-
                 // Убираем все кнопки после выбора
                 document.querySelectorAll('.promote-button').forEach(button => {
                     button.remove();
                 });
-
+                document.querySelectorAll('.square').forEach(square => {
+                    square.classList.remove('no-click');
+                });
                 // Разрешаем промис, передавая выбранную фигуру
                 resolve(piece);
             });
-
-
         }
     });
 }
-
 
 function buttonsInit() {
     const board = document.getElementById('chess-board');
@@ -414,12 +427,23 @@ async function makeMove(fromPosition, toPosition) {
         })
     });
     const result = await response.json();
-    if (result.promotePawn) {
+    if (result.draw) {
+        console.log("draw");
+        movePiece(fromPosition, toPosition);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
+    } else if (result.victory) {
+        console.log("winer is ");
+        movePiece(fromPosition, toPosition);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
+    } else if (result.promotePawn) {
         const promotionPosition = result.promotePawn.position;
         const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
         console.log("Выбрана фигура для промоушена: ", promotedPiece);
         updateChessboard(chessboard, fromPosition, toPosition);
         chessboard.board[toPosition] = promotedPiece;
+        addMoveToBox(fromPosition, toPosition);
     } else if (result.castling) {
         console.log("рокировка!");
         const { from: rookFrom, to: rookTo } = result.castling;
@@ -428,6 +452,7 @@ async function makeMove(fromPosition, toPosition) {
         movePiece(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
         updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
         updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
     } else {
         movePiece(fromPosition, toPosition);
         updateChessboard(chessboard, fromPosition, toPosition);
