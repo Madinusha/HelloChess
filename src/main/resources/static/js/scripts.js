@@ -39,6 +39,16 @@ const promoteMenuPieces = {
     "3": { "fileName": "Rook", "hasMoved": false },
     "4": { "fileName": "Knight"}
 }
+const myColor = "white";
+const chessSymbols = {
+    "King": { "white": "♔", "black": "♚" },
+    "Queen": { "white": "♕", "black": "♛" },
+    "Rook": { "white": "♖", "black": "♜" },
+    "Bishop": { "white": "♗", "black": "♝" },
+    "Knight": { "white": "♘", "black": "♞" },
+    "Pawn": { "white": "♙", "black": "♟" }
+};
+
 function updateChessboard(chessboard, fromPosition, toPosition) {
     const piece = chessboard.board[fromPosition];
     if (!piece) {
@@ -59,6 +69,11 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     resizeBoard();
     buttonsInit();
+
+    // Инициализация таймеров
+//     updateTimerDisplay('timer1', timer1Time);
+//     updateTimerDisplay('timer2', timer2Time);
+//     startTimer('timer2', timer2Time);
 });
 
 
@@ -193,6 +208,20 @@ function movePiece(positionFrom, positionTo) {
         if (targetPiece) {
             targetPiece.remove();
             eatSound.play();
+
+            const color = (targetPiece.src).includes("/white/") ? "white" : "black";
+            const lastSlashIndex = (targetPiece.src).lastIndexOf('/');
+            const pngIndex = (targetPiece.src).lastIndexOf('.png');
+            // Извлекаем строку между ними
+            const pieceName = (targetPiece.src).substring(lastSlashIndex + 1, pngIndex);
+            const pieceSymbol = chessSymbols[pieceName][color];
+
+            if (color == myColor) {
+                document.getElementById("opponent").textContent  += pieceSymbol;
+            } else {
+                document.getElementById("me").textContent  += pieceSymbol;
+            }
+
         } else moveSound.play();
 
         const pieceElement = document.createElement('img');
@@ -458,6 +487,7 @@ async function makeMove(fromPosition, toPosition) {
         updateChessboard(chessboard, fromPosition, toPosition);
         addMoveToBox(fromPosition, toPosition);
     }
+    resumeTimer();
 
     return chessboard;
 }
@@ -491,6 +521,61 @@ async function fetchChessboard() {
     Object.assign(chessboard, newChessboard);
 
     return chessboard;
+}
+
+let timer1Interval;
+let timer2Interval;
+let timer1Time = 180; // 3 минуты в секундах
+let timer2Time = 180;
+let activeTimer = null;
+
+function updateTimerDisplay(timerId, time) {
+    const timer = document.getElementById(timerId);
+    if (time <= 10) {
+        timer.style.backgroundColor = "orange";
+    }
+    const minutes = String(Math.floor(time / 60)).padStart(2, '0');
+    const seconds = String(time % 60).padStart(2, '0');
+    timer.textContent = `${minutes}:${seconds}`;
+
+}
+
+function startTimer(timerId, time) {
+    clearInterval(timer1Interval);
+    clearInterval(timer2Interval);
+    activeTimer = timerId;
+
+    const interval = setInterval(() => {
+        if (time > 0) {
+            time--;
+            updateTimerDisplay(timerId, time);
+        } else {
+            clearInterval(interval); // Остановить таймер, когда время истечет
+            activeTimer = null; // Сброс активного таймера
+        }
+    }, 1000);
+
+    if (timerId === 'timer1') {
+        timer1Interval = interval;
+    } else if (timerId === 'timer2') {
+        timer2Interval = interval;
+    }
+}
+
+function resumeTimer() {
+    if (activeTimer === 'timer1') {
+        timer1Time = Math.max(timeToSeconds(document.getElementById("timer1").textContent), 0);
+        startTimer('timer2', timer2Time);
+    } else if (activeTimer === 'timer2') {
+        timer2Time = Math.max(timeToSeconds(document.getElementById("timer2").textContent), 0);
+        startTimer('timer1', timer1Time);
+    }
+}
+function timeToSeconds(timeStr) {
+    const parts = timeStr.split(':'); // Разделяем строку по двоеточию
+    const minutes = parseInt(parts[0], 10); // Получаем минуты
+    const seconds = parseInt(parts[1], 10); // Получаем секунды
+    return minutes * 60 + seconds; // Преобразуем в секунды
 }
 
 

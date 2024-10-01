@@ -57,14 +57,31 @@
     </div>
     <div id="chess-board"></div>
     <div id="move-box">
-        <div id="move-box-header">Bull_Digga</div>
-        <div id="move-box-window">
-            <div class="move-box-column" id="move-numbers"></div> <!-- Номера ходов -->
-            <div class="move-box-column" id="white-moves"></div> <!-- Ходы белых -->
-            <div class="move-box-column" id="black-moves"></div> <!-- Ходы черных -->
+        <div class="move-box-player">
+            <div class="mb-nickname">Bull_Digga</div>
+            <div class="mb-rank">1</div>
+            <div class="mb-timer" id="timer1">03:00</div>
+            <div class="mb-eaten-pieces" id="opponent"></div>
         </div>
-        <div id="move-box-footer">madi_nusha</div>
+        <div id="move-box-window">
+            <div class="move-box-column" id="move-numbers"></div>
+            <div class="move-box-column" id="white-moves"></div>
+            <div class="move-box-column" id="black-moves"></div>
+        </div>
+        <div id="move-box-btns">
+            <button title="Сдаться" id="white-flag"></button>
+            <button title="Предложить ничью" id="draw"></button>
+            <button title="Реванш" id="retry"></button>
+            <button title="Новый соперник" id="find-opponent"></button>
+        </div>
+        <div class="move-box-player">
+            <div class="mb-nickname">madi_nusha</div>
+            <div class="mb-rank">100</div>
+            <div class="mb-timer" id="timer2">03:00</div>
+            <div class="mb-eaten-pieces" id="me"></div>
+        </div>
     </div>
+
 
 </div>
 <footer>

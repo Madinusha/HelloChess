@@ -440,13 +440,52 @@ input[type="text"]:focus  {
                 0 6px 20px rgba(0, 0, 0, 0.2);
     position: relative;
 }
-#move-box-header {
-    height: 7vh;
-    display: flex;
-    justify-content: left;
+.move-box-player {
+    height: 8vh;
+    display: grid;
+    grid-template-columns: 70% 30%;
+    grid-template-rows: 50% 50%;
     align-items: center;
-    margin-left: 0.5em;
+    box-sizing: border-box;
+    overflow: hidden;
 }
+.mb-nickname {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: left;
+    padding-left: 0.3em;
+    padding-top: 0.2em;
+}
+.mb-rank {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+    padding-right: 0.3em;
+    color: gray;
+    font-size: 0.7em;
+}
+.mb-eaten-pieces {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: left;
+    padding-left: 0.3em;
+}
+.mb-timer {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: center;
+    border-top-left-radius: 7px;
+    box-shadow: 0px 0px 8px 0px rgba(34, 60, 80, 0.4);
+}
+.mb-nickname,
+.mb-rank,
+.mb-eaten-pieces,
+.mb-timer {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
 #move-box-window {
     flex: 1;
     display: flex;
@@ -471,7 +510,6 @@ input[type="text"]:focus  {
 }
 #white-moves, #black-moves {
     flex: 1;
-    /*cursor: pointer;*/
 }
 .move-box-row {
     border-bottom: 1px solid #957377;
@@ -486,10 +524,48 @@ input[type="text"]:focus  {
     color: white;
 }
 
-#move-box-footer {
-    height: 7vh;
+#move-box-btns {
+    background-color: black;
+    height: 2em;
     display: flex;
-    justify-content: left;
-    align-items: center;
-    margin-left: 0.5em;
+    justify-content: center;
+    gap: 0.5em;
+    background: transparent;
+    padding: 0.3em;
+}
+
+#retry, #find-opponent {
+    display: none;
+}
+
+#retry, #find-opponent, #white-flag, #draw {
+    width: 15%;
+    border: none;
+    cursor: pointer;
+}
+#retry:active, #find-opponent:active, #white-flag:active, #draw:active {
+    transform: scale(0.9);
+}
+#white-flag {
+    background: url("../images/white-flag.png") center/cover no-repeat;
+    filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
+    background-size: 70%;
+}
+#draw {
+    background: url("../images/draw.png") center/cover no-repeat;
+    filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
+    background-size: 70%;
+}
+#find-opponent {
+    background: url("../images/find-opponent.png") center/cover no-repeat;
+    filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(99%);
+    background-size: 65%;
+}
+#retry {
+    background: url("../images/retry.png") center/cover no-repeat;
+    filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
+    background-size: 80%;
+}
+#retry:hover, #find-opponent:hover, #white-flag:hover, #draw:hover{
+    filter: brightness(0) saturate(100%) invert(22%) sepia(24%) saturate(5857%) hue-rotate(336deg) brightness(109%) contrast(92%);
 }
