@@ -70,10 +70,10 @@ document.addEventListener("DOMContentLoaded", function() {
     resizeBoard();
     buttonsInit();
 
-    // Инициализация таймеров
-//     updateTimerDisplay('timer1', timer1Time);
-//     updateTimerDisplay('timer2', timer2Time);
-//     startTimer('timer2', timer2Time);
+//     Инициализация таймеров
+    updateTimerDisplay('timer1', timer1Time);
+    updateTimerDisplay('timer2', timer2Time);
+    startTimer('timer2', timer2Time);
 });
 
 
@@ -387,8 +387,34 @@ function addMoveToBox(fromPosition, toPosition) {
         blackMoveElement.classList.add('current', 'move-box-row');
         blackMoves.appendChild(blackMoveElement);
     }
-
     moveCount++;
+}
+
+function showGameResult(result) {
+    const resultElement = document.getElementById('result-container');
+    const scaleElement = document.getElementById('scale');
+    const resultTextElement = document.getElementById('result');
+    if (result == "draw") {
+        resultTextElement.textContent = "Ничья.";
+        scaleElement.textContent = "½ - ½";
+    } else if (result == "white"){
+        resultTextElement.textContent = "Победа белых.";
+        scaleElement.textContent = "1 - 0";
+    } else if (result == "black"){
+        resultTextElement.textContent = "Победа черных.";
+        scaleElement.textContent = "0 - 1";
+    }
+    resultElement.style.visibility = "visible";
+
+    const retry = document.getElementById('retry');
+    const findOpponent = document.getElementById('find-opponent');
+    const whiteFlag = document.getElementById('white-flag');
+    const draw = document.getElementById('draw');
+
+    retry.style.display = "flex";
+    findOpponent.style.display = "flex";
+    whiteFlag.style.display = "none";
+    draw.style.display = "none";
 }
 
 function resizeBoard() {
@@ -461,11 +487,13 @@ async function makeMove(fromPosition, toPosition) {
         movePiece(fromPosition, toPosition);
         updateChessboard(chessboard, fromPosition, toPosition);
         addMoveToBox(fromPosition, toPosition);
+        showGameResult("draw");
     } else if (result.victory) {
         console.log("winer is ");
         movePiece(fromPosition, toPosition);
         updateChessboard(chessboard, fromPosition, toPosition);
         addMoveToBox(fromPosition, toPosition);
+        showGameResult(result.victory.winner);
     } else if (result.promotePawn) {
         const promotionPosition = result.promotePawn.position;
         const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
@@ -537,7 +565,6 @@ function updateTimerDisplay(timerId, time) {
     const minutes = String(Math.floor(time / 60)).padStart(2, '0');
     const seconds = String(time % 60).padStart(2, '0');
     timer.textContent = `${minutes}:${seconds}`;
-
 }
 
 function startTimer(timerId, time) {
@@ -551,6 +578,11 @@ function startTimer(timerId, time) {
             updateTimerDisplay(timerId, time);
         } else {
             clearInterval(interval); // Остановить таймер, когда время истечет
+            if (timerId == "timer1") {
+                showGameResult(myColor);
+            } else if (timerId == "timer2") {
+                showGameResult(myColor == "white"? "black" : "white")
+            }
             activeTimer = null; // Сброс активного таймера
         }
     }, 1000);
