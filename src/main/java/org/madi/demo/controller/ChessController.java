@@ -37,6 +37,10 @@ public class ChessController {
 
 	@GetMapping("/chessboard")
 	public ResponseEntity<Chessboard> getChessboard() {
+		// Chessboard chessboard = chessService.getChessboard();
+		// return ResponseEntity.ok(chessboard);
+
+		chessService.startNewGame();
 		Chessboard chessboard = chessService.getChessboard();
 		return ResponseEntity.ok(chessboard);
 	}

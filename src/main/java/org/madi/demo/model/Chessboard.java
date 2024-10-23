@@ -240,40 +240,6 @@ public class Chessboard {
 		return false;
 	}
 
-//	public boolean isCheckmate(String kingColor, Map<Position, Piece> board) {
-//		// Проверяем, находится ли король нужного цвета под шахом
-//		if (isKingInCheck(kingColor, board)) {
-//			System.out.println("\t\t\t король " + kingColor + " под шахом ");
-//
-//			// Проходимся по всей доске и проверяем каждую фигуру
-//			for (Map.Entry<Position, Piece> entry : board.entrySet()) {
-//				Position currentPosition = entry.getKey();
-//				Piece currentFigure = entry.getValue();
-//
-//				if (currentFigure.getColor().equals(kingColor)) {
-//					Chessboard cb = new Chessboard();
-//					cb.board = board;
-//
-//					// Получаем список всех возможных ходов для текущей фигуры
-//					List<Position> possibleMoves = getPossibleMoves(currentPosition, cb);
-//
-//
-//					// Проходимся по каждому возможному ходу
-//					for (Position move : possibleMoves) {
-//						if (!cb.isMoveLeadsToCheck(currentPosition, move, currentFigure)){
-//							System.out.println(" ход ведет к шаху у фигуры " + cb.getFigureAt(currentPosition) + " " + move);
-//							return false;
-//						}
-//					}
-//				}
-//			}
-//			// Если не найдено ни одного хода, который бы предотвратил шах, то это мат
-//			return true;
-//		}
-//		// Если король не под шахом, то это не мат
-//		return false;
-//	}
-
 	public List<Position> getPossibleMoves(Position currentPosition, Chessboard board) {
 		List<Position> possibleMoves = new ArrayList<>();
 		Piece myfigure = board.getFigureAt(currentPosition);

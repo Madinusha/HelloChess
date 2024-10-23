@@ -63,10 +63,18 @@ function updateChessboard(chessboard, fromPosition, toPosition) {
 
 
 document.addEventListener("DOMContentLoaded", function() {
+//     fetchChessboard().then(newChessboard => {
+// //         chessboard = newChessboard;
+//         renderChessboard(newChessboard);
+//         console.log(chessboard);
+//     });
+
     fetchChessboard().then(newChessboard => {
-        renderChessboard(chessboard);
+        chessboard = newChessboard;
+        renderChessboard(newChessboard);
         console.log(chessboard);
     });
+
     resizeBoard();
     buttonsInit();
 
@@ -462,6 +470,67 @@ function resizeBoard() {
     resizeObserver.observe(board);
 }
 
+let timer1Interval;
+let timer2Interval;
+let timer1Time = 180; // 3 минуты в секундах
+let timer2Time = 180;
+let activeTimer = null;
+
+function updateTimerDisplay(timerId, time) {
+    const timer = document.getElementById(timerId);
+    if (time <= 10) {
+        timer.style.backgroundColor = "orange";
+    }
+    const minutes = String(Math.floor(time / 60)).padStart(2, '0');
+    const seconds = String(time % 60).padStart(2, '0');
+    timer.textContent = `${minutes}:${seconds}`;
+}
+
+function startTimer(timerId, time) {
+    clearInterval(timer1Interval);
+    clearInterval(timer2Interval);
+    activeTimer = timerId;
+
+    const interval = setInterval(() => {
+        if (time > 0) {
+            time--;
+            updateTimerDisplay(timerId, time);
+        } else {
+            clearInterval(interval); // Остановить таймер, когда время истечет
+            if (timerId == "timer1") {
+                showGameResult(myColor);
+            } else if (timerId == "timer2") {
+                showGameResult(myColor == "white"? "black" : "white")
+            }
+            activeTimer = null; // Сброс активного таймера
+        }
+    }, 1000);
+
+    if (timerId === 'timer1') {
+        timer1Interval = interval;
+    } else if (timerId === 'timer2') {
+        timer2Interval = interval;
+    }
+}
+
+function resumeTimer() {
+    if (activeTimer === 'timer1') {
+        timer1Time = Math.max(timeToSeconds(document.getElementById("timer1").textContent), 0);
+        startTimer('timer2', timer2Time);
+    } else if (activeTimer === 'timer2') {
+        timer2Time = Math.max(timeToSeconds(document.getElementById("timer2").textContent), 0);
+        startTimer('timer1', timer1Time);
+    }
+}
+function timeToSeconds(timeStr) {
+    const parts = timeStr.split(':'); // Разделяем строку по двоеточию
+    const minutes = parseInt(parts[0], 10); // Получаем минуты
+    const seconds = parseInt(parts[1], 10); // Получаем секунды
+    return minutes * 60 + seconds; // Преобразуем в секунды
+}
+
+
+
 // Функция для получения возможных ходов
 async function getPossibleMoves(position) {
     const response = await fetch(`/api/chess/possible-moves?position=${position}`);
@@ -549,65 +618,6 @@ async function fetchChessboard() {
     Object.assign(chessboard, newChessboard);
 
     return chessboard;
-}
-
-let timer1Interval;
-let timer2Interval;
-let timer1Time = 180; // 3 минуты в секундах
-let timer2Time = 180;
-let activeTimer = null;
-
-function updateTimerDisplay(timerId, time) {
-    const timer = document.getElementById(timerId);
-    if (time <= 10) {
-        timer.style.backgroundColor = "orange";
-    }
-    const minutes = String(Math.floor(time / 60)).padStart(2, '0');
-    const seconds = String(time % 60).padStart(2, '0');
-    timer.textContent = `${minutes}:${seconds}`;
-}
-
-function startTimer(timerId, time) {
-    clearInterval(timer1Interval);
-    clearInterval(timer2Interval);
-    activeTimer = timerId;
-
-    const interval = setInterval(() => {
-        if (time > 0) {
-            time--;
-            updateTimerDisplay(timerId, time);
-        } else {
-            clearInterval(interval); // Остановить таймер, когда время истечет
-            if (timerId == "timer1") {
-                showGameResult(myColor);
-            } else if (timerId == "timer2") {
-                showGameResult(myColor == "white"? "black" : "white")
-            }
-            activeTimer = null; // Сброс активного таймера
-        }
-    }, 1000);
-
-    if (timerId === 'timer1') {
-        timer1Interval = interval;
-    } else if (timerId === 'timer2') {
-        timer2Interval = interval;
-    }
-}
-
-function resumeTimer() {
-    if (activeTimer === 'timer1') {
-        timer1Time = Math.max(timeToSeconds(document.getElementById("timer1").textContent), 0);
-        startTimer('timer2', timer2Time);
-    } else if (activeTimer === 'timer2') {
-        timer2Time = Math.max(timeToSeconds(document.getElementById("timer2").textContent), 0);
-        startTimer('timer1', timer1Time);
-    }
-}
-function timeToSeconds(timeStr) {
-    const parts = timeStr.split(':'); // Разделяем строку по двоеточию
-    const minutes = parseInt(parts[0], 10); // Получаем минуты
-    const seconds = parseInt(parts[1], 10); // Получаем секунды
-    return minutes * 60 + seconds; // Преобразуем в секунды
 }
 
 
