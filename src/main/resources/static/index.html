@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +7,8 @@
     <title>HelloChess</title>
 </head>
 <body>
-<header class="header">
-    <a href="/" id="logo"> HelloChess</a>
+<header class="header" th:fragment="header">
+    <a href="/" id="logo">HelloChess</a>
     <nav class="navbar">
         <ul class="navbar-list">
             <li class="navbar-item"><a href="#game" class="navbar-link">ИГРА</a></li>
@@ -20,29 +20,31 @@
     <div id="fast-nav">
         <button id="versus-btn"></button>
     </div>
-    <div id="profile-box">
+    <button id="login" onclick="document.location.href='registration/registration.html';">SIGN IN</button>
+    <div id="profile-box" onclick="document.location.href='profile/profile.html';">
         <button id="profile-box-nickname">madi_nusha</button>
         <div id="profile-box-avatar"></div>
     </div>
     <div id="dropdown-navbar" class="hidden">
         <div class="dropdown-navbar-menu-item">
-            <img src="images/dropdown-navbar-exit.png">
+            <img th:src="@{/images/dropdown-navbar-exit.png}">
             <a href="#">Профиль</a>
         </div>
         <div class="dropdown-navbar-menu-item">
-            <img src="images/dropdown-navbar-settings.png">
-            <a href="#">Насройки</a>
+            <img th:src="@{/images/dropdown-navbar-settings.png}">
+            <a href="#">Настройки</a>
         </div>
         <div class="dropdown-navbar-menu-item">
-            <img src="images/dropdown-navbar-exit.png">
+            <img th:src="@{/images/dropdown-navbar-exit.png}">
             <a href="#">Выйти</a>
         </div>
         <hr>
     </div>
+</header>
+<!--<header th:replace="header/header :: header"></header>-->
+<div class="main">
     <audio id="moveSound" src="sounds/movePiece.wav"></audio>
     <audio id="eatSound" src="sounds/eatPiece.wav"></audio>
-</header>
-<div class="main">
     <div id="chat-box">
         <div id="chat-box-header">Чат с Bull_Digga
             <button id="toggle-button"></button>

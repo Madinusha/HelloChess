@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+<header class="header" th:fragment="header">
+    <a href="/" id="logo">HelloChess</a>
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a href="#game" class="navbar-link">ИГРА</a></li>
+            <li class="navbar-item"><a href="#study" class="navbar-link">ОБУЧЕНИЕ</a></li>
+            <li class="navbar-item"><a href="#tr" class="navbar-link">ЗАДАЧИ</a></li>
+            <li class="navbar-item"><a href="#about" class="navbar-link">О НАС</a></li>
+        </ul>
+    </nav>
+    <div id="fast-nav">
+        <button id="versus-btn"></button>
+    </div>
+    <button id="login" onclick="document.location.href='registration/registration.html';">SIGN IN</button>
+    <div id="profile-box" onclick="document.location.href='profile/profile.html';">
+        <button id="profile-box-nickname">madi_nusha</button>
+        <div id="profile-box-avatar"></div>
+    </div>
+    <div id="dropdown-navbar" class="hidden">
+        <div class="dropdown-navbar-menu-item">
+            <img th:src="@{/images/dropdown-navbar-exit.png}">
+            <a href="#">Профиль</a>
+        </div>
+        <div class="dropdown-navbar-menu-item">
+            <img th:src="@{/images/dropdown-navbar-settings.png}">
+            <a href="#">Настройки</a>
+        </div>
+        <div class="dropdown-navbar-menu-item">
+            <img th:src="@{/images/dropdown-navbar-exit.png}">
+            <a href="#">Выйти</a>
+        </div>
+        <hr>
+    </div>
+</header>
+
+
+<div class="container">
+    <span class="label" id="username">Username</span>
+    <div class="user-info">
+        <div class="info-item">
+            <span class="label">Email:</span>
+            <span class="value" id="email"></span>
+        </div>
+    </div>
+    <button class="return-button" onclick="goBack()">Играть!</button>
+</div>
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="profile.js"></script>
+</body>
+</html>
+
+
