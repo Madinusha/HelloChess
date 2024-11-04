@@ -11,7 +11,9 @@ signInButton.addEventListener('click', () => {
 });
 
 async function register() {
-    const username = document.getElementById("regUsername").value;
+    const nickname = document.getElementById("regUsername").value;
+    console.log("nickname: ", nickname);
+
     const email = document.getElementById("regEmail").value;
     const password = document.getElementById("regPassword").value;
     const role = "user";
@@ -21,7 +23,7 @@ async function register() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username, email, password, role })
+        body: JSON.stringify({ nickname, email, password, role })
     })
     .then(response => {
         if (response.ok) {
@@ -39,7 +41,7 @@ async function register() {
 
 
 async function login() {
-    const username = document.getElementById("authUsername").value;
+    const nickname = document.getElementById("authUsername").value;
     const password = document.getElementById("authPassword").value;
 
     const response = await fetch("/api/users/login", {
@@ -47,7 +49,7 @@ async function login() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ nickname, password })
     })
     .then(response => {
         alert("Login successful");

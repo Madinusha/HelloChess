@@ -19,12 +19,13 @@ public class UserController {
 	@PostMapping("/register")
 	public ResponseEntity<String> registerUser(@RequestBody User user) {
 		userService.saveUser(user);
+		System.out.println("nickname: " + user.getNickname());
 		return ResponseEntity.ok("User registered successfully");
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<String> loginUser(@RequestBody User user, HttpServletRequest request) {
-		User authenticatedUser = userService.findUserByUsername(user.getUsername());
+		User authenticatedUser = userService.findUserByNickname(user.getNickname());
 
 		if (authenticatedUser != null) {
 			// Создание сессии
@@ -48,10 +49,8 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 	}
 
-
-
-	@GetMapping("/{username}")
-	public User getUserByUsername(@PathVariable String username) {
-		return userService.findUserByUsername(username);
+	@GetMapping("/{nickname}")
+	public User getUserByNickname(@PathVariable String nickname) {
+		return userService.findUserByNickname(nickname);
 	}
 }

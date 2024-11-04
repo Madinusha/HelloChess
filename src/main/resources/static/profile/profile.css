@@ -178,6 +178,7 @@ button:focus  {
     width: 5em;
     height: 70%;
     cursor: pointer;
+    margin-right: 0.5em;
 }
 #login:hover{
     background: #c73136;

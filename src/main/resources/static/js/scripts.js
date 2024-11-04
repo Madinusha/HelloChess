@@ -643,12 +643,13 @@ async function checkUserProfile() {
     }
 }
 
+
 function displayUserProfileBtn(user) {
     // Пример отображения информации о пользователе
     const profileBox = document.getElementById("profile-box");
     const profileBoxNickname = document.getElementById("profile-box-nickname");
     const profileBoxAvatar = document.getElementById("profile-box-avatar");
-    profileBoxNickname.textContent = `${user.username}`; // Отображаем имя пользователя
+    profileBoxNickname.textContent = `${user.nickname}`; // Отображаем имя пользователя
     profileBox.style.display = "flex";
 
     const login = document.getElementById("login");

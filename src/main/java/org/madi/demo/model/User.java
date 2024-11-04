@@ -19,7 +19,7 @@ public class User {
 	private Long id;
 
 	@Column(nullable = false, unique = true)
-	private String username;
+	private String nickname;
 
 	@Column(nullable = false)
 	private String email;
@@ -30,8 +30,8 @@ public class User {
 	@Column(nullable = false)
 	private String role;
 
-	public User(String username, String email, String password, String role) {
-		this.username = username;
+	public User(String nickname, String email, String password, String role) {
+		this.nickname = nickname;
 		this.email = email;
 		this.password = password;
 		this.role = role;
