@@ -605,7 +605,6 @@ async function fetchChessboard() {
     return chessboard;
 }
 
-
 document.addEventListener("DOMContentLoaded", function() {
     const profileBox = document.getElementById('profile-box');
     const dropdownNavbar = document.getElementById('dropdown-navbar');
@@ -643,7 +642,6 @@ async function checkUserProfile() {
     }
 }
 
-
 function displayUserProfileBtn(user) {
     // Пример отображения информации о пользователе
     const profileBox = document.getElementById("profile-box");
@@ -655,6 +653,8 @@ function displayUserProfileBtn(user) {
     const login = document.getElementById("login");
     login.style.display = "none";
 }
+
+
 
 
 

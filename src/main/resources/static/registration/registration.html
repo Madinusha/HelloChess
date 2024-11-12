@@ -3,7 +3,7 @@
 <body>
 <div class="container" id="container">
   <div class="form-container sign-up-container">
-    <form action="#" id="registrationForm">
+    <form action="#" id="registrationForm" autocomplete="off" novalidate>
 <!--      <div class="rectangle"></div>-->
 <!--      <div class="rectangle"></div>-->
 <!--      <div class="rectangle"></div>-->
@@ -16,7 +16,7 @@
       <input type="text" id="regUsername" placeholder="Username" />
       <input type="email" id="regEmail" placeholder="Email" />
       <input type="password" id="regPassword" placeholder="Password" />
-      <button type="submit" onclick="register()">Зарегистрироваться</button>
+      <button type="button" onclick="register()">Зарегистрироваться</button>
     </form>
   </div>
   <div class="form-container sign-in-container">
@@ -25,7 +25,7 @@
       <input type="text" id="authUsername" placeholder="Username" />
       <input type="password" id="authPassword" placeholder="Password" />
       <a href="#">Забыли пароль?</a>
-      <button type="submit" onclick="login()">Войти</button>
+      <button type="button" onclick="login()">Войти</button>
     </form>
   </div>
   <div class="overlay-container">
