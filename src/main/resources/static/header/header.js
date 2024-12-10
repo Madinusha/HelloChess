@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     const profileBox = document.getElementById('profile-box');
     const dropdownNavbar = document.getElementById('dropdown-navbar');

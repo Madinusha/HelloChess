@@ -1,16 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <body>
 <div class="container" id="container">
   <div class="form-container sign-up-container">
     <form action="#" id="registrationForm" autocomplete="off" novalidate>
-<!--      <div class="rectangle"></div>-->
-<!--      <div class="rectangle"></div>-->
-<!--      <div class="rectangle"></div>-->
-<!--      <div class="rectangle"></div>-->
-<!--      <div class="rectangle"></div>-->
-
-      <link rel="stylesheet" href="registration.css">
+      <link rel="stylesheet" href="/registration/registration.css">
+      <script th:src="@{/registration/registration.js}" defer></script>
       <meta charset="UTF-8">
       <h1>Создайте аккаунт</h1>
       <input type="text" id="regUsername" placeholder="Username" />
@@ -48,6 +43,5 @@
 
 </footer>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="registration.js"></script>
 </body>
 </html>

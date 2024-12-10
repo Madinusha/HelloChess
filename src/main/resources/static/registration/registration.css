@@ -99,8 +99,6 @@ input::placeholder {
     border-color: transparent; /* Убираем выделение границы */
 }
 
-
-
 #registrationForm {
     border-radius: 10px;
 }
@@ -143,10 +141,6 @@ input::placeholder {
     width: 25%;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
-
-
-
-
 
 .container {
 	background-color: #fff;

@@ -64,7 +64,8 @@ async function login() {
         });
 
         if (response.ok) {
-            window.location.href = "../index.html";
+            window.location.href = "/game";
+//            window.history.back();
         } else if (response.status === 401) {
             showValidSymbolsFor(passwordContainer, "Неверное имя пользователя или пароль");
         } else {

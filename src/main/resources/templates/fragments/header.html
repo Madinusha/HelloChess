@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" th:href="@{header/header.css}">
+    <meta charset="UTF-8">
+    <title>Header</title>
 </head>
 <body>
 <header class="header" th:fragment="header">
@@ -17,8 +18,8 @@
     <div id="fast-nav">
         <button id="versus-btn"></button>
     </div>
-    <button id="login" onclick="document.location.href='registration/registration.html';">SIGN IN</button>
-    <div id="profile-box" onclick="document.location.href='profile/profile.html';">
+    <button id="login" th:onclick="|document.location.href='@{/registration}'|">SIGN IN</button>
+    <div id="profile-box" th:onclick="|document.location.href='@{templates/pages/profile.html}'|">
         <button id="profile-box-nickname">madi_nusha</button>
         <div id="profile-box-avatar"></div>
     </div>
@@ -38,7 +39,5 @@
         <hr>
     </div>
 </header>
-
-<script th:src="@{../static/header/header.js}"></script>
 </body>
 </html>

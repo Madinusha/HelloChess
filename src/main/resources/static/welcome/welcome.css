@@ -1,0 +1,18 @@
+body {
+    margin: 0;
+    color: #553A4C;  /* темно фиолетовый */
+    font-family: 'Spoof Trial', sans-serif;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+}
+
+.main {
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: top;
+    height: 100vh;
+    margin: 0;
+    gap: 1em;
+    overflow: auto;
+}

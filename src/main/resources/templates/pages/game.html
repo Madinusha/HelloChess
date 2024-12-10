@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<!--    <meta charset="UTF-8">-->
+    <link rel="stylesheet" th:href="@{/game/game.css}">
+    <link rel="stylesheet" href="/game/game.css">
+    <link rel="stylesheet" href="/header/header.css">
+    <script th:src="@{/header/header.js}" defer></script>
+    <script th:src="@{/game/game.js}" defer></script>
+    <title>HelloChess</title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="main">
+    <audio id="moveSound" th:src="@{/sounds/movePiece.wav}"></audio>
+    <audio id="eatSound" th:src="@{/sounds/eatPiece.wav}"></audio>
+    <div id="chat-box">
+        <div id="chat-box-header">Чат с Bull_Digga
+            <button id="toggle-button"></button>
+        </div>
+        <div id="chat-box-window">
+            <div id="chat-box-window-start-message">Добро пожаловать <br>в чат!</div>
+        </div>
+        <div id="chat-box-footer">
+            <input type="text" id="chat-box-input-text" placeholder="Напишите сообщение...">
+            <button id="chat-box-send-button"></button>
+        </div>
+    </div>
+    <div id="chess-board"></div>
+    <div id="move-box">
+        <div class="move-box-player">
+            <div class="mb-nickname">Bull_Digga</div>
+            <div class="mb-rank">1</div>
+            <div class="mb-timer" id="timer1">03:00</div>
+            <div class="mb-eaten-pieces" id="opponent"></div>
+        </div>
+        <div id="move-box-window">
+            <div class="move-box-column" id="move-numbers"></div>
+            <div class="move-box-column" id="white-moves"></div>
+            <div class="move-box-column" id="black-moves"></div>
+        </div>
+        <div id="result-container">
+            <div id="scale"></div>
+            <div id="result"></div>
+        </div>
+        <div id="move-box-btns">
+            <button title="Сдаться" id="white-flag"></button>
+            <button title="Предложить ничью" id="draw"></button>
+            <button title="Реванш" id="retry"></button>
+            <button title="Новый соперник" id="find-opponent"></button>
+        </div>
+        <div class="move-box-player">
+            <div class="mb-nickname">madi_nusha</div>
+            <div class="mb-rank">100</div>
+            <div class="mb-timer" id="timer2">03:00</div>
+            <div class="mb-eaten-pieces" id="me"></div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <!-- Здесь может быть ваш футер -->
+</footer>
+
+<!-- Подключение внешних библиотек и скриптов -->
+<script th:src="@{/js/jquery-3.6.0.min.js}"></script>
+<link rel="stylesheet" th:href="@{/css/mediaelementplayer.min.css}" />
+<script th:src="@{/js/sockjs.min.js}"></script>
+<script th:src="@{/js/stomp.min.js}"></script>
+<script th:src="@{/js/mediaelement-and-player.min.js}"></script>
+<!--<script th:src="@{/game/game.js}"></script>-->
+
+<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css" />-->
+<!--<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>-->
+</body>
+</html>
