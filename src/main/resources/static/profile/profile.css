@@ -42,20 +42,6 @@ body {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 header {
     display: flex;
     justify-content: space-between;
@@ -236,4 +222,77 @@ button:focus  {
     aspect-ratio: 1 / 1;
     filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
     margin-right: 0.4em;
+}
+
+
+#profile-info {
+    display: flex;
+    align-items: flex-start;
+    padding: 2%;
+    background-color: #f9f9f9;
+    box-shadow: 0px 0px 10px 0px rgba(34, 60, 80, 0.2);
+    border-radius: 0.5em;
+    max-width: 60vw;
+    min-height: 20vh;
+    max-height: 30vh;
+    margin-left: 0em;
+    margin-top: 0.1em;
+    height: 30vh;
+    gap: 2%;
+    margin: 1em;
+}
+
+ /* Изображение профиля */
+#main-info-image {
+     height: 100%;
+     aspect: 1/1;
+     object-fit: cover;
+     border-radius: 7px;
+     box-shadow: 0px 0px 50px 50px rgba(120, 120, 120, 0.16) inset;
+}
+
+ /* Детали профиля */
+#profile-info-details {
+     flex-grow: 1;
+     display: flex;
+     flex-direction: column;
+}
+
+ /* Никнейм */
+#profile-info-nickname {
+     font-size: 2em;
+}
+
+ /* Email */
+#profile-info-email {
+     font-size: 1em;
+}
+
+ /* Горизонтальный список друзей/подписчиков */
+.profile-info-items {
+    display: flex;
+    gap: 0.1rem;
+    justify-content: flex-start;
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
+    text-indent: 0;
+    margin-top: 0.5em;
+    margin-bottom: 0;
+}
+
+ /* Стили для каждого элемента списка */
+.profile-info-item {
+     text-align: center;
+     font-size: 1em;
+     width: 5rem;
+}
+
+.profile-info-item span {
+     display: block;
+     font-size: 0.9em;
+}
+
+.digits {
+    font-family: 'Manteka', sans-serif;
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет</title>
-    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="profile.css?v=<%= Date.now() %>">
 </head>
 <body>
 <header class="header" th:fragment="header">
@@ -43,10 +43,59 @@
 </header>
 
 <div class="main">
-    <div id="main-info">
-        <div id="main-info-nickname"></div>
-        <div id="main-info-email"></div>
+    <div id="profile-info">
+        <img id="main-info-image" src="../images/pawn_icon.png" alt="Profile Picture">
+        <div id="profile-info-details">
+            <div id="profile-info-nickname"></div>
+            <div id="profile-info-email"></div>
+
+            <ul id="statistics" class="profile-info-items">
+                <li class="profile-info-item">
+                    <a href="#" class="navbar-link">
+                        <span>Победы</span>
+                        <span class="digits" id="Победы">12</span>
+                    </a>
+                </li>
+                <li class="profile-info-item">
+                    <a href="#" class="navbar-link">
+                        <span>Поражения</span>
+                        <span class="digits" id="Поражения">30</span>
+                    </a>
+                </li>
+                <li class="profile-info-item">
+                    <a href="#" class="navbar-link">
+                        <span>Ничья</span>
+                        <span class="digits" id="Ничья">46</span>
+                    </a>
+                </li>
+            </ul>
+
+            <ul id="networking" class="profile-info-items">
+                <li class="profile-info-item">
+                    <a href="#" class="navbar-link">
+<!--                        <img src="../images/profile-box-avatar.png" alt="Друзья" class="icon">-->
+                        <span>Друзья</span>
+                        <span class="digits" id="friends">2</span>
+                    </a>
+                </li>
+                <li class="profile-info-item">
+                    <a href="#" class="navbar-link">
+<!--                        <img src="../images/profile-box-avatar.png" alt="Подписчики" class="icon">-->
+                        <span>Подписчики</span>
+                        <span class="digits" id="followers">6</span>
+                    </a>
+                </li>
+                <li class="profile-info-item">
+                    <a href="#" class="navbar-link">
+<!--                        <img src="../images/profile-box-avatar.png" alt="Подписки" class="icon">-->
+                        <span>Подписки</span>
+                        <span class="digits" id="following">103</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
+
     <div id="activities">
 
     </div>

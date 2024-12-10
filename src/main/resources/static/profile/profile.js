@@ -1,6 +1,6 @@
 const id = document.getElementById('id');
-const nickname = document.getElementById('main-info-nickname');
-const email = document.getElementById('main-info-email');
+const nickname = document.getElementById('profile-info-nickname');
+const email = document.getElementById('profile-info-email');
 
 document.addEventListener("DOMContentLoaded", function() {
     checkUserProfile();
