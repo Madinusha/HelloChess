@@ -414,46 +414,43 @@ function resizeBoard() {
     const board = document.getElementById('chess-board');
     const chatBox = document.getElementById('chat-box');
     const chatBoxHeader = document.getElementById('chat-box-header');
-    const chatBoxWindow = document.getElementById('chat-box-window');
-    const chatBoxFooter = document.getElementById('chat-box-footer');
     const moveBox = document.getElementById('move-box');
 
-    const squares = document.querySelectorAll('.square');
-    const boardWidth = board.offsetWidth;
-    const boardHeight = board.offsetHeight;
-    const boardSize = Math.min(boardWidth, boardHeight);
+    // Вычисляем размер доски
+    const boardSize = Math.min(board.offsetWidth, board.offsetHeight);
 
     // Устанавливаем размеры доски
     board.style.width = `${boardSize}px`;
     board.style.height = `${boardSize}px`;
 
+    // Устанавливаем размеры клеток через CSS-переменные
     const squareSize = boardSize / 8;
+    document.documentElement.style.setProperty('--square-size', `${squareSize}px`);
 
-    squares.forEach(square => {
-        square.style.width = `${squareSize}px`;
-        square.style.height = `${squareSize}px`;
-        square.style.fontSize = `${squareSize * 0.6}px`; // Пропорционально размеру клетки
-    });
-
+    // Устанавливаем высоту чата и окна ходов
     if (!chatBox.classList.contains('collapsed')) {
-        chatBox.style.height = `${boardSize}px`; // Высота равна высоте доски
-
+        chatBox.style.height = `${boardSize}px`;
     } else {
-        chatBox.style.height = chatBoxHeader.style.height;
+        chatBox.style.height = chatBoxHeader.offsetHeight + 'px';
     }
     moveBox.style.height = `${boardSize}px`;
-
-    const resizeObserver = new ResizeObserver(entries => {
-        for (let entry of entries) {
-            if (entry.target === board) {
-                resizeBoard();
-            }
-        }
-    });
-
-    window.addEventListener('resize', resizeBoard);
-    resizeObserver.observe(board);
 }
+
+// Инициализация ResizeObserver
+const resizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        if (entry.target === board) {
+            resizeBoard();
+        }
+    }
+});
+
+// Наблюдаем за изменениями размеров доски
+const board = document.getElementById('chess-board');
+resizeObserver.observe(board);
+// Реагируем на изменение размеров окна
+window.addEventListener('resize', resizeBoard);
+
 
 let timer1Interval;
 let timer2Interval;

@@ -10,14 +10,12 @@ signInButton.addEventListener('click', () => {
 	container.classList.remove("right-panel-active");
 });
 
-
 async function register() {
     event.preventDefault();
     const nickname = document.getElementById("regUsername").value;
     const email = document.getElementById("regEmail").value;
     const password = document.getElementById("regPassword").value;
     const passwordContainer = document.getElementById("regPassword");
-    const role = "user";
 
     if (!validateFields(nickname, email, password)) {
         console.log("неправильно заполнены поля")
@@ -32,11 +30,11 @@ async function register() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ nickname, email, password, role })
+            body: JSON.stringify({ nickname, email, password })
         });
 
         if (response.ok) {
-            showNotification("User registered successfully");
+            showNotification("Пользователь успешно зарегестрирован.");
             container.classList.remove("right-panel-active");
         } else {
             const errorMessage = await response.text(); // Получаем текст ошибки от сервера

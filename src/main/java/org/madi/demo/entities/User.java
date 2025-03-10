@@ -1,8 +1,7 @@
-package org.madi.demo.model;
+package org.madi.demo.entities;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

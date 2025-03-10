@@ -1,42 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="/registration/registration.css">
+    <script th:src="@{/registration/registration.js}" defer></script>
+</head>
 <body>
 <div class="container" id="container">
-  <div class="form-container sign-up-container">
-    <form action="#" id="registrationForm" autocomplete="off" novalidate>
-      <link rel="stylesheet" href="/registration/registration.css">
-      <script th:src="@{/registration/registration.js}" defer></script>
-      <meta charset="UTF-8">
-      <h1>Создайте аккаунт</h1>
-      <input type="text" id="regUsername" placeholder="Username" />
-      <input type="email" id="regEmail" placeholder="Email" />
-      <input type="password" id="regPassword" placeholder="Password" />
-      <button type="button" onclick="register()">Зарегистрироваться</button>
-    </form>
-  </div>
-  <div class="form-container sign-in-container">
-    <form action="#" id="authorizationForm">
-      <h1>Войти</h1>
-      <input type="text" id="authUsername" placeholder="Username" />
-      <input type="password" id="authPassword" placeholder="Password" />
-      <a href="#">Забыли пароль?</a>
-      <button type="button" onclick="login()">Войти</button>
-    </form>
-  </div>
-  <div class="overlay-container">
-    <div class="overlay">
-      <div class="overlay-panel overlay-left">
-        <h1>Рады видеть тебя снова!</h1>
-        <p>Войди в аккаунт, чтобы продолжить играть в шахматы.</p>
-        <button class="ghost" id="signIn">Войти</button>
-      </div>
-      <div class="overlay-panel overlay-right">
-        <h1>Привет, друг!</h1>
-        <p>Введи свои персональные данные и начни играть уже сейчас!</p>
-        <button class="ghost" id="signUp">Зарегистрироваться</button>
-      </div>
+    <div class="form-container sign-up-container">
+        <form action="#" id="registrationForm" autocomplete="off" novalidate>
+            <h1>Создайте аккаунт</h1>
+            <input type="text" id="regUsername" placeholder="Username" />
+            <input type="email" id="regEmail" placeholder="Email" />
+            <input type="password" id="regPassword" placeholder="Password" />
+            <button type="button" onclick="register()">Зарегистрироваться</button>
+        </form>
     </div>
-  </div>
+    <div class="form-container sign-in-container">
+        <form action="#" id="authorizationForm">
+            <h1>Войти</h1>
+            <input type="text" id="authUsername" placeholder="Username" />
+            <input type="password" id="authPassword" placeholder="Password" />
+            <a href="#">Забыли пароль?</a>
+            <button type="button" onclick="login()">Войти</button>
+        </form>
+    </div>
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-panel overlay-left">
+                <h1>Рады видеть тебя снова!</h1>
+                <p>Войди в аккаунт, чтобы продолжить играть в шахматы.</p>
+                <button class="ghost" id="signIn">Войти</button>
+            </div>
+            <div class="overlay-panel overlay-right">
+                <h1>Привет, друг!</h1>
+                <p>Введи свои персональные данные и начни играть уже сейчас!</p>
+                <button class="ghost" id="signUp">Зарегистрироваться</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <footer>

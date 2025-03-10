@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import lombok.Getter;
 import org.madi.demo.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class ChessService {
 
 	private final SimpMessagingTemplate messagingTemplate;
+	@Getter
 	private Chessboard chessboard = new Chessboard();
 
 	private static final Logger logger = LoggerFactory.getLogger(ChessService.class);
@@ -66,13 +68,6 @@ public class ChessService {
 				logger.info(String.valueOf(chessboard));
 			}
 		}
-		return chessboard;
-	}
-
-
-
-
-	public Chessboard getChessboard() {
 		return chessboard;
 	}
 }

@@ -19,6 +19,10 @@ body {
     overflow-x: hidden;
 }
 
+:root {
+    --square-size: 50px; /* Начальный размер клетки */
+}
+
 .main {
     background-color: #f5f5f5;
     display: flex;
@@ -46,7 +50,10 @@ body {
     min-height: 30vh;
     max-width: 90vh;
     max-height: 90vh;
-    height: 60vh;
+    /*height: 60vh;*/
+
+    width: calc(var(--square-size) * 8); /* Размер доски */
+    height: calc(var(--square-size) * 8);
 }
 .square {
     display: flex;
@@ -56,6 +63,10 @@ body {
     cursor: pointer;
     font-size: 32px;
     position: relative;
+
+    width: var(--square-size);
+    height: var(--square-size);
+    font-size: calc(var(--square-size) * 0.6);
 }
 .square.light {
     background-color: #f0d9b5;

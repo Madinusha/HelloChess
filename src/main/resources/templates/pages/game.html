@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<!--    <meta charset="UTF-8">-->
+    <meta charset="UTF-8">
     <link rel="stylesheet" th:href="@{/game/game.css}">
-    <link rel="stylesheet" href="/game/game.css">
-    <link rel="stylesheet" href="/header/header.css">
+    <link rel="stylesheet" th:href="@{/header/header.css}">
     <script th:src="@{/header/header.js}" defer></script>
     <script th:src="@{/game/game.js}" defer></script>
     <title>HelloChess</title>
@@ -60,21 +59,12 @@
 </div>
 
 <footer>
-    <!-- Здесь может быть ваш футер -->
 </footer>
 
-<!-- Подключение внешних библиотек и скриптов -->
-<script th:src="@{/js/jquery-3.6.0.min.js}"></script>
-<link rel="stylesheet" th:href="@{/css/mediaelementplayer.min.css}" />
-<script th:src="@{/js/sockjs.min.js}"></script>
-<script th:src="@{/js/stomp.min.js}"></script>
-<script th:src="@{/js/mediaelement-and-player.min.js}"></script>
-<!--<script th:src="@{/game/game.js}"></script>-->
-
-<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
-<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css" />-->
-<!--<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js"></script>-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js" defer></script>
 </body>
 </html>

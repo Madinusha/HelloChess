@@ -8,21 +8,21 @@ public class MainController {
 
 	@GetMapping("/")
 	public String index() {
-		return "index"; // Возвращает шаблон game.html
+		return "index";
 	}
 
 	@GetMapping("/game")
 	public String game() {
-		return "pages/game"; // Возвращает шаблон game.html
+		return "pages/game";
 	}
 
 	@GetMapping("/registration")
 	public String registration() {
-		return "pages/registration"; // Возвращает шаблон game.html
+		return "pages/registration";
 	}
 
-//	@GetMapping("/profile")
-//	public String profile() {
-//		return "pages/profile"; // Возвращает шаблон profile.html
-//	}
+	@GetMapping("/profile")
+	public String profile() {
+		return "pages/profile";
+	}
 }
