@@ -13,14 +13,19 @@
 
 body {
     margin: 0;
-    color: #553A4C;  /* темно фиолетовый */
+    color: var(--dark-purple);  /* темно фиолетовый */
     font-family: 'Spoof Trial', sans-serif;
     -webkit-user-select: none;
     overflow-x: hidden;
 }
 
 :root {
-    --square-size: 50px; /* Начальный размер клетки */
+    --square-size: 50px;
+    --dark-purple: #553A4C;
+    --light-purple: #957377;
+    --beige: #CBAC98;
+    --light-beige: #f2e6cf;
+    --carrot-red: #c73136;
 }
 
 .main {
@@ -40,39 +45,37 @@ body {
     grid-template-rows: repeat(8, 1fr);
     gap: 0;
     border-radius: 10px;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2),
                 0 6px 20px rgba(0, 0, 0, 0.19);
-    aspect-ratio: 1 / 1;
-    resize: both;
-
     min-width: 30vh;
     min-height: 30vh;
     max-width: 90vh;
     max-height: 90vh;
-    /*height: 60vh;*/
-
-    width: calc(var(--square-size) * 8); /* Размер доски */
+    width: calc(var(--square-size) * 8);
     height: calc(var(--square-size) * 8);
+    resize: both;
 }
 .square {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #eee;
     cursor: pointer;
-    font-size: 32px;
     position: relative;
 
-    width: var(--square-size);
-    height: var(--square-size);
-    font-size: calc(var(--square-size) * 0.6);
+    /*width: var(--square-size);
+    height: var(--square-size);*/
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+    font-size: 60%;
 }
 .square.light {
     background-color: #f0d9b5;
 }
 .square.dark {
-    background-color: #957377;
+    background-color: var(--light-purple);
 }
 .square.selected {
     position: relative;
@@ -156,7 +159,7 @@ body {
 
 }
 #chat-box-window{
-    background-color: #f2e6cf;
+    background-color: var(--light-beige);
     flex: 1;
     overflow-y: auto;
     display: flex;
@@ -335,7 +338,7 @@ input[type="text"]:focus  {
 #move-box-window {
     flex: 1;
     display: flex;
-    background-color: #f2e6cf;
+    background-color: var(--light-beige);
     overflow-y: auto;
     box-shadow: 0px 3px 8px -1px rgba(34, 60, 80, 0.2) inset;
 
@@ -358,15 +361,15 @@ input[type="text"]:focus  {
     flex: 1;
 }
 .move-box-row {
-    border-bottom: 1px solid #957377;
+    border-bottom: 1px solid var(--light-purple);
     padding: 0.2em;
 }
 .to-bord {
-    border-left: 1px solid #957377;
-    border-right: 1px solid #957377;
+    border-left: 1px solid var(--light-purple);
+    border-right: 1px solid var(--light-purple);
 }
 .current {
-    background-color: #c73136;
+    background-color: var(--carrot-red);
     color: white;
 }
 
@@ -422,11 +425,11 @@ input[type="text"]:focus  {
     height: 4em;
     display: flex;
     flex-direction: column;
-    background-color: #f2e6cf;
+    background-color: var(--light-beige);
     text-align: center;
     justify-content: center;
     gap: 0.2em;
-    color: #c73136;
+    color: var(--carrot-red);
 }
 #scale {
     font-family: 'Manteka', sans-serif;

@@ -63,12 +63,6 @@ function updateChessboard(chessboard, fromPosition, toPosition) {
 
 
 document.addEventListener("DOMContentLoaded", function() {
-//     fetchChessboard().then(newChessboard => {
-// //         chessboard = newChessboard;
-//         renderChessboard(newChessboard);
-//         console.log(chessboard);
-//     });
-
     fetchChessboard().then(newChessboard => {
 //        chessboard = newChessboard;
         renderChessboard(newChessboard);
@@ -78,10 +72,14 @@ document.addEventListener("DOMContentLoaded", function() {
     resizeBoard();
     buttonsInit();
 
-//     Инициализация таймеров
     updateTimerDisplay('timer1', timer1Time);
     updateTimerDisplay('timer2', timer2Time);
     startTimer('timer2', timer2Time);
+
+    const resizeObserver = new ResizeObserver(debounceResize);
+    const board = document.getElementById('chess-board');
+    resizeObserver.observe(board);
+    window.addEventListener('resize', debounceResize);
 });
 
 
@@ -410,46 +408,40 @@ function showGameResult(result) {
     draw.style.display = "none";
 }
 
-function resizeBoard() {
-    const board = document.getElementById('chess-board');
-    const chatBox = document.getElementById('chat-box');
-    const chatBoxHeader = document.getElementById('chat-box-header');
-    const moveBox = document.getElementById('move-box');
+let resizeTimeout;
 
-    // Вычисляем размер доски
-    const boardSize = Math.min(board.offsetWidth, board.offsetHeight);
-
-    // Устанавливаем размеры доски
-    board.style.width = `${boardSize}px`;
-    board.style.height = `${boardSize}px`;
-
-    // Устанавливаем размеры клеток через CSS-переменные
-    const squareSize = boardSize / 8;
-    document.documentElement.style.setProperty('--square-size', `${squareSize}px`);
-
-    // Устанавливаем высоту чата и окна ходов
-    if (!chatBox.classList.contains('collapsed')) {
-        chatBox.style.height = `${boardSize}px`;
-    } else {
-        chatBox.style.height = chatBoxHeader.offsetHeight + 'px';
-    }
-    moveBox.style.height = `${boardSize}px`;
+function debounceResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(resizeBoard, 100); // Вызов resizeBoard через 100 мс после последнего изменения размера
 }
 
-// Инициализация ResizeObserver
-const resizeObserver = new ResizeObserver(entries => {
-    for (let entry of entries) {
-        if (entry.target === board) {
-            resizeBoard();
-        }
-    }
-});
+function resizeBoard() {
+    requestAnimationFrame(() => {
+        const board = document.getElementById('chess-board');
+        const chatBox = document.getElementById('chat-box');
+        const chatBoxHeader = document.getElementById('chat-box-header');
+        const moveBox = document.getElementById('move-box');
 
-// Наблюдаем за изменениями размеров доски
-const board = document.getElementById('chess-board');
-resizeObserver.observe(board);
-// Реагируем на изменение размеров окна
-window.addEventListener('resize', resizeBoard);
+        // Вычисляем размер доски
+        const boardSize = Math.min(board.offsetWidth, board.offsetHeight);
+
+        // Устанавливаем размеры доски
+        board.style.width = `${boardSize}px`;
+        board.style.height = `${boardSize}px`;
+
+        // Устанавливаем размеры клеток через CSS-переменные
+        const squareSize = boardSize / 8;
+        document.documentElement.style.setProperty('--square-size', `${squareSize}px`);
+
+        // Устанавливаем высоту чата и окна ходов
+        if (!chatBox.classList.contains('collapsed')) {
+            chatBox.style.height = `${boardSize}px`;
+        } else {
+            chatBox.style.height = `${chatBoxHeader.offsetHeight}px`;
+        }
+        moveBox.style.height = `${boardSize}px`;
+    });
+}
 
 
 let timer1Interval;

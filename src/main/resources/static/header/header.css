@@ -1,3 +1,11 @@
+:root {
+    --dark-purple: #553A4C;
+    --light-purple: #957377;
+    --beige: #CBAC98;
+    --light-beige: #f2e6cf;
+    --carrot-red: #c73136;
+}
+
 header {
     display: flex;
     justify-content: space-between;
@@ -18,7 +26,7 @@ button:focus  {
     margin-right: 1.3em;
     margin-left: 1em;
     text-decoration: none;
-    background: linear-gradient(90deg, #553A4C, #c73136);
+    background: linear-gradient(90deg, var(--dark-purple), var(--carrot-red));
     -webkit-background-clip: text;
     color: transparent;
 }
@@ -39,16 +47,16 @@ button:focus  {
 }
 .navbar-link:focus  {
     outline: none;
-    color: #c73136;
+    color: var(--carrot-red);
 }
 .navbar-link {
     text-decoration: none;
     -webkit-background-clip: text;
     font-size: 1em;
-    color: #553A4C;  /* темно фиолетовый */
+    color: var(--dark-purple);  /* темно фиолетовый */
 }
 .navbar-link:hover {
-    color: #c73136;
+    color: var(--carrot-red);
 }
 
 #fast-nav {
@@ -84,7 +92,7 @@ button:focus  {
     font-size: 1.2em;
     -webkit-background-clip: border-box;
     background-color: transparent;
-    color: #553A4C;
+    color: var(--dark-purple);
     border: none;
     font-family: 'Spoof Trial', sans-serif;
     cursor: pointer;
@@ -100,20 +108,20 @@ button:focus  {
     border-radius: 50%;
 }
 #profile-box:hover #profile-box-nickname {
-    color: #c73136;
+    color: var(--carrot-red);
 }
 #profile-box:hover #profile-box-avatar {
     filter: brightness(0) saturate(100%) invert(22%) sepia(24%) saturate(5857%) hue-rotate(336deg) brightness(109%) contrast(92%);
 }
 #profile-box:active #profile-box-nickname {
-    color: #553A4C;
+    color: var(--dark-purple);
 }
 #profile-box:active #profile-box-avatar {
     filter: brightness(0) saturate(100%) invert(21%) sepia(5%) saturate(3189%) hue-rotate(267deg) brightness(100%) contrast(84%);
 }
 
 #login{
-    background: linear-gradient(100deg, #553A4C, #c73136);
+    background: linear-gradient(100deg, var(--dark-purple), var(--carrot-red));
     border-radius: 7px;
     border: none;
     color: white;
@@ -123,7 +131,7 @@ button:focus  {
     margin-right: 0.5em;
 }
 #login:hover{
-    background: #c73136;
+    background: var(--carrot-red);
 }
 #login:active {
     transform: scale(0.97);
@@ -159,18 +167,18 @@ button:focus  {
     padding: 0.5em;
 }
 .dropdown-navbar-menu-item:hover {
-    background-color: #f2e6cf;
+    background-color: var(--light-beige);
     cursor: pointer;
 }
 .dropdown-navbar-menu-item:hover a{
-    color: #c73136;
+    color: var(--carrot-red);
 }
 .dropdown-navbar-menu-item:hover img{
     filter: brightness(0) saturate(100%) invert(22%) sepia(24%) saturate(5857%) hue-rotate(336deg) brightness(109%) contrast(92%);
 }
 .dropdown-navbar-menu-item a {
     text-decoration: none;
-    color: #553A4C;
+    color: var(--dark-purple);
     font-family: 'Spoof Trial', sans-serif;
 }
 .dropdown-navbar-menu-item img {

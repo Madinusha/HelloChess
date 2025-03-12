@@ -2,10 +2,10 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/game/game.css}">
-    <link rel="stylesheet" th:href="@{/header/header.css}">
-    <script th:src="@{/header/header.js}" defer></script>
-    <script th:src="@{/game/game.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <link rel="stylesheet" th:href="@{/game/game.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/game/game.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
     <title>HelloChess</title>
 </head>
 <body>
