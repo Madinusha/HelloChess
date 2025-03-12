@@ -18,12 +18,8 @@ async function register() {
     const passwordContainer = document.getElementById("regPassword");
 
     if (!validateFields(nickname, email, password)) {
-        console.log("неправильно заполнены поля")
         return;
-    } else {
-        console.log("правильно заполнены поля")
     }
-
     try {
         const response = await fetch("/api/users/register", {
             method: "POST",
@@ -42,7 +38,7 @@ async function register() {
         }
     } catch (error) {
         console.error("Ошибка fetch:", error);
-        showNotification("Произошла ошибка при регистрации");
+        showNotification("Произошла ошибка при регистрации.");
     }
 }
 
@@ -65,10 +61,10 @@ async function login() {
             window.location.href = "/game";
 //            window.history.back();
         } else if (response.status === 401) {
-            showValidSymbolsFor(passwordContainer, "Неверное имя пользователя или пароль");
+            showValidSymbolsFor(passwordContainer, "Неверное имя пользователя или пароль.");
         } else {
             const errorMessage = await response.text();
-            showNotification(errorMessage || "Ошибка входа");
+            showNotification(errorMessage || "Ошибка входа.");
         }
     } catch (error) {
         console.error("Ошибка при запросе:", error);
@@ -206,9 +202,3 @@ function showValidSymbolsFor(container, message) {
     // Вставляем сообщение непосредственно под контейнером
     container.insertAdjacentElement("afterend", messageElement);
 }
-
-
-
-
-
-

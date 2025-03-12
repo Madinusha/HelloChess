@@ -20,6 +20,10 @@ public class MainController {
 	public String registration() {
 		return "pages/registration";
 	}
+	@GetMapping("/login")
+	public String login() {
+		return "pages/registration";
+	}
 
 	@GetMapping("/profile")
 	public String profile() {

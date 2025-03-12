@@ -1,22 +1,18 @@
 package org.madi.demo.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Email;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
-public class UserRegistrationDTO {
+public class UserLoginDTO {
 	@NotNull
 	@Size(min = 3, max = 20)
 	private String nickname;
 
 	@NotNull
-	@Size(min = 8)
+	@Size(min = 5)
 	private String password;
-
-	@Email
-	private String email;
 }

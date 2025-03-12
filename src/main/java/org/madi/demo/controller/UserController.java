@@ -2,6 +2,8 @@ package org.madi.demo.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.madi.demo.dto.UserLoginDTO;
 import org.madi.demo.dto.UserProfileDTO;
 import org.madi.demo.dto.UserRegistrationDTO;
 import org.madi.demo.entities.User;
@@ -22,30 +24,22 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping("/register")
-	public ResponseEntity<String> registerUser(@RequestBody UserRegistrationDTO userDTO) {
-		try {
-			User user = new User();
-			user.setNickname(userDTO.getNickname());
-			user.setPassword(userDTO.getPassword());
-			user.setEmail(userDTO.getEmail());
-			user.setRole("user");
-			userService.saveUser(user);
-			return ResponseEntity.ok("Пользователь успешно зарегистрирован");
-		} catch (DataIntegrityViolationException e) {
-			String errorMessage = "Этот ник уже занят. Пожалуйста, выберите другой.";
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
-		} catch (Exception e) {
-			String errorMessage = "Произошла ошибка при регистрации. Попробуйте еще раз.";
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
-		}
+	public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistrationDTO userDTO) {
+		User user = new User();
+		user.setNickname(userDTO.getNickname());
+		user.setPassword(userDTO.getPassword());
+		user.setEmail(userDTO.getEmail());
+		user.setRole("user");
+		userService.saveUser(user);
+		return ResponseEntity.ok("Пользователь успешно зарегистрирован");
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<String> loginUser(@RequestBody User user, HttpServletRequest request) {
+	public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDTO userDTO, HttpServletRequest request) {
 		try {
-			User authenticatedUser = userService.findUserByNickname(user.getNickname());
+			User authenticatedUser = userService.findUserByNickname(userDTO.getNickname());
 
-			if (authenticatedUser != null && authenticatedUser.getPassword().equals(user.getPassword())) {
+			if (authenticatedUser != null && authenticatedUser.getPassword().equals(userDTO.getPassword())) {
 				// Создание сессии
 				HttpSession session = request.getSession();
 				session.setAttribute("user", authenticatedUser);
@@ -54,12 +48,11 @@ public class UserController {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
 			}
 		} catch (DataAccessException e) {
-			// Ошибки доступа к данным, например, проблемы с подключением к базе данных
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Ошибка при доступе к базе данных. Попробуйте позже.");
+				.body("Ошибка при доступе к базе данных. Попробуйте позже.");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.");
+				.body("Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.");
 		}
 	}
 

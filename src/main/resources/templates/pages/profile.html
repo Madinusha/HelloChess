@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет</title>
-    <link rel="stylesheet" href="/header/header.css">
-    <link rel="stylesheet" href="/profile/profile.css">
+    <link rel="stylesheet" th:href="@{/header/header.css}">
+    <link rel="stylesheet" th:href="@{/profile/profile.css}">
     <script th:src="@{/header/header.js}" defer></script>
     <script th:src="@{/profile/profile.js}" defer></script>
 </head>
@@ -14,7 +14,7 @@
 
 <div class="main">
     <div id="profile-info">
-        <img id="main-info-image" src="../../static/images/pawn_icon.png" alt="Profile Picture">
+        <img id="main-info-image" th:src="@{/images/pawn_icon.png}" alt="Profile Picture">
         <div id="profile-info-details">
             <div id="profile-info-nickname"></div>
             <div id="profile-info-email"></div>
@@ -89,7 +89,7 @@
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script src="../../static/profile/profile.js"></script>
+
 
 </body>
 </html>
