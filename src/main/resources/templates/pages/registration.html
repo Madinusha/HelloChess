@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация</title>
-    <link rel="stylesheet" href="/registration/registration.css">
-    <script th:src="@{/registration/registration.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/registration/registration.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/registration/registration.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
 <body>
 <div class="container" id="container">

@@ -16,15 +16,18 @@ async function register() {
     const email = document.getElementById("regEmail").value;
     const password = document.getElementById("regPassword").value;
     const passwordContainer = document.getElementById("regPassword");
+    const csrfToken = document.querySelector("meta[name='_csrf']").content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
     if (!validateFields(nickname, email, password)) {
         return;
     }
     try {
-        const response = await fetch("/api/users/register", {
+        fetch("/api/users/register", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify({ nickname, email, password })
         });
@@ -48,11 +51,15 @@ async function login() {
     const password = document.getElementById("authPassword").value;
     const passwordContainer = document.getElementById("authPassword");
 
+    const csrfToken = document.querySelector("meta[name='_csrf']").content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
+
     try {
         const response = await fetch("/api/users/login", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                [csrfHeader]: csrfToken
             },
             body: JSON.stringify({ nickname, password })
         });

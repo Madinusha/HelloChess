@@ -48,6 +48,8 @@ const chessSymbols = {
     "Knight": { "white": "♘", "black": "♞" },
     "Pawn": { "white": "♙", "black": "♟" }
 };
+const csrfToken = document.querySelector("meta[name='_csrf']").content;
+const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
 function updateChessboard(chessboard, fromPosition, toPosition) {
     const piece = chessboard.board[fromPosition];
@@ -66,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchChessboard().then(newChessboard => {
 //        chessboard = newChessboard;
         renderChessboard(newChessboard);
-        console.log(chessboard);
+//        console.log(chessboard);
     });
 
     resizeBoard();
@@ -92,7 +94,7 @@ function renderChessboard(chessboard) {
         for (let col = 'a'; col <= 'h'; col = String.fromCharCode(col.charCodeAt(0) + 1)) {
             const position = col + row;
             const piece = chessboard.board[position];
-            console.log("piece: ", piece);
+//            console.log("piece: ", piece);
 
             // Создание элемента для клетки
             const square = document.createElement('div');
@@ -517,7 +519,8 @@ async function makeMove(fromPosition, toPosition) {
     const response = await fetch('/api/chess/make-move', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
         },
         body: JSON.stringify({
             from: fromPosition,
@@ -567,7 +570,8 @@ async function sendPromotionChoice(position, selectedPieceType) {
     const response = await fetch('/api/chess/promotion', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
         },
         body: JSON.stringify({
             position: position,
@@ -592,43 +596,6 @@ async function fetchChessboard() {
     Object.assign(chessboard, newChessboard);
 
     return chessboard;
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    const profileBox = document.getElementById('profile-box');
-    const dropdownNavbar = document.getElementById('dropdown-navbar');
-
-    profileBox.addEventListener('click', () => {
-        dropdownNavbar.classList.toggle('show');
-        profileBox.classList.toggle('active');
-    });
-
-    // Закрытие навбара при клике вне его области
-    document.addEventListener('click', (event) => {
-        if (!profileBox.contains(event.target) && !dropdownNavbar.contains(event.target)) {
-            dropdownNavbar.classList.remove('show');
-        }
-    });
-    checkUserProfile();
-});
-
-
-async function checkUserProfile() {
-    const response = await fetch("/api/users/profile", {
-        method: "GET",
-        credentials: "include" // Включает куки в запрос, если используется сессия
-    });
-
-    if (response.ok) {
-        const user = await response.json(); // Предполагаем, что ваш API возвращает объект пользователя
-        displayUserProfileBtn(user); // Функция, чтобы показать информацию о пользователе
-    } else {
-        const login = document.getElementById("login");
-        login.style.display = "block";
-
-        const profileBox = document.getElementById("profile-box");
-        profileBox.style.display = "none";
-    }
 }
 
 function displayUserProfileBtn(user) {

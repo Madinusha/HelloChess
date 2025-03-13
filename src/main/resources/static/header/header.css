@@ -18,6 +18,9 @@ header {
 button:focus  {
     outline: none;
 }
+.hidden-header, .hidden-header * {
+    display: none !important;
+}
 
 #logo {
     font-family: 'Manteka', sans-serif;

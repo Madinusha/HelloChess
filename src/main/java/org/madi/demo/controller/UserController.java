@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -23,38 +24,32 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	@PostMapping("/register")
 	public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistrationDTO userDTO) {
 		User user = new User();
 		user.setNickname(userDTO.getNickname());
-		user.setPassword(userDTO.getPassword());
+		user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Кодируем пароль
 		user.setEmail(userDTO.getEmail());
 		user.setRole("user");
+
 		userService.saveUser(user);
 		return ResponseEntity.ok("Пользователь успешно зарегистрирован");
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDTO userDTO, HttpServletRequest request) {
-		try {
-			User authenticatedUser = userService.findUserByNickname(userDTO.getNickname());
-
-			if (authenticatedUser != null && authenticatedUser.getPassword().equals(userDTO.getPassword())) {
-				// Создание сессии
-				HttpSession session = request.getSession();
-				session.setAttribute("user", authenticatedUser);
-				return ResponseEntity.ok("Login successful");
-			} else {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
-			}
-		} catch (DataAccessException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body("Ошибка при доступе к базе данных. Попробуйте позже.");
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-				.body("Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.");
+		User user = userService.findUserByNickname(userDTO.getNickname());
+		if (user != null && passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+			HttpSession session = request.getSession();
+			session.setAttribute("user", user);
+			return ResponseEntity.ok("Вход выполнен успешно");
 		}
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
 	}
+
 
 	@GetMapping("/profile")
 	public ResponseEntity<UserProfileDTO> getProfile(HttpServletRequest request) {

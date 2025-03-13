@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет</title>
-    <link rel="stylesheet" th:href="@{/header/header.css}">
-    <link rel="stylesheet" th:href="@{/profile/profile.css}">
-    <script th:src="@{/header/header.js}" defer></script>
-    <script th:src="@{/profile/profile.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <link rel="stylesheet" th:href="@{/profile/profile.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/profile/profile.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
 </head>
 <body>
 <header th:replace="~{fragments/header :: header}"></header>

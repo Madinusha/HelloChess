@@ -6,6 +6,8 @@
 </head>
 <body>
 <header class="header" th:fragment="header">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <a href="/" id="logo">HelloChess</a>
     <nav class="navbar">
         <ul class="navbar-list">
