@@ -50,7 +50,6 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
 	}
 
-
 	@GetMapping("/profile")
 	public ResponseEntity<UserProfileDTO> getProfile(HttpServletRequest request) {
 		HttpSession session = request.getSession(false); // false: не создавать новую сессию

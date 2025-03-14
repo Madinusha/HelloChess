@@ -19,11 +19,11 @@ async function register() {
     const csrfToken = document.querySelector("meta[name='_csrf']").content;
     const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
-    if (!validateFields(nickname, email, password)) {
+    if (!validateRegistrationFields(nickname, email, password)) {
         return;
     }
     try {
-        fetch("/api/users/register", {
+        const response = await fetch("/api/users/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -35,21 +35,29 @@ async function register() {
         if (response.ok) {
             showNotification("Пользователь успешно зарегестрирован.");
             container.classList.remove("right-panel-active");
+        } else if (response.status === 400) {
+            const errorMessage = await response.text();
+            showValidSymbolsFor(passwordContainer, "Никнейм должен содержать 3-20 символов.\nПароль должен содержать >= 7 символов.");
         } else {
-            const errorMessage = await response.text(); // Получаем текст ошибки от сервера
+            const errorMessage = await response.text();
             showValidSymbolsFor(passwordContainer, errorMessage);
         }
     } catch (error) {
-        console.error("Ошибка fetch:", error);
+        console.error("Ошибка:", error);
         showNotification("Произошла ошибка при регистрации.");
     }
 }
 
 async function login() {
     event.preventDefault();
-    const nickname = document.getElementById("authUsername").value;
-    const password = document.getElementById("authPassword").value;
     const passwordContainer = document.getElementById("authPassword");
+    const nicknameContainer = document.getElementById("authUsername");
+    const nickname = nicknameContainer.value;
+    const password = passwordContainer.value;
+
+    if (!validateLoginFields(nickname, password)) {
+        return;
+    }
 
     const csrfToken = document.querySelector("meta[name='_csrf']").content;
     const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
@@ -66,7 +74,10 @@ async function login() {
 
         if (response.ok) {
             window.location.href = "/game";
-//            window.history.back();
+        } else if (response.status === 400) {
+            const errorMessage = await response.text();
+//            showNotification("Ошибка валидации: " + errorMessage);
+            showValidSymbolsFor(passwordContainer, "Никнейм содержит 3-20 символов.\nПароль содержит >= 7 символов.");
         } else if (response.status === 401) {
             showValidSymbolsFor(passwordContainer, "Неверное имя пользователя или пароль.");
         } else {
@@ -78,6 +89,7 @@ async function login() {
         showNotification("Произошла ошибка сети. Попробуйте позже.");
     }
 }
+
 
 function showNotification(message) {
     const notification = document.createElement("div");
@@ -135,7 +147,35 @@ function validateNicknameHasLetter(nickname) {
     return hasLetter;
 }
 
-function validateFields(nickname, email, password) {
+function validateLoginFields(nickname, password) {
+    const passwordContainer = document.getElementById("authPassword");
+    const nicknameContainer = document.getElementById("authUsername");
+
+    const containers = [
+        nicknameContainer,
+        passwordContainer
+    ];
+
+    containers.forEach(container => {
+        const existingMessage = container.nextElementSibling;
+        if (existingMessage && existingMessage.classList.contains("validation-message")) {
+            existingMessage.remove();
+        }
+    });
+
+    if (!nickname) {
+        showValidSymbolsFor(nicknameContainer, "Поле не должно быть пустым");
+        return false;
+    }
+    if (!password) {
+        showValidSymbolsFor(passwordContainer, "Поле не должно быть пустым");
+        return false;
+    }
+    return true;
+
+}
+
+function validateRegistrationFields(nickname, email, password) {
     const nicknameContainer = document.getElementById("regUsername");
     const emailContainer = document.getElementById("regEmail");
     const passwordContainer = document.getElementById("regPassword");
@@ -167,24 +207,18 @@ function validateFields(nickname, email, password) {
         return false;
     }
 
-    // Проверка на правильность ввода данных
-    if (!validateNickname(nickname) || !validateEmail(email) || !validatePassword(password)) {
-        if (!validateNickname(nickname)) {
-            if (!validateNicknameHasLetter(nickname)) {
-                showValidSymbolsFor(nicknameContainer, "Имя пользователя должно содержать хотя бы одну букву");
-            } else {
-                showValidSymbolsFor(nicknameContainer, "Имя пользователя может содержать только латиницу, цифры и символы '_'");
-            }
-        }
-        if (!validateEmail(email)) {
-            showValidSymbolsFor(emailContainer, "Введите корректный email");
-        }
-        if (!validatePassword(password)) {
-            showValidSymbolsFor(passwordContainer, "Пароль должен содержать латиницу, заглавные буквы, цифры и символы _ ! . % ? &");
-        }
+    if (!validateNickname(nickname)) {
+        showValidSymbolsFor(nicknameContainer, "Имя пользователя может содержать только латиницу, цифры и символы '_'");
         return false;
     }
-
+    if (!validateEmail(email)) {
+        showValidSymbolsFor(emailContainer, "Введите корректный email");
+        return false;
+    }
+    if (!validatePassword(password)) {
+        showValidSymbolsFor(passwordContainer, "Пароль должен содержать латиницу, заглавные буквы, цифры и символы _ ! . % ? &");
+        return false;
+    }
     return true;
 }
 

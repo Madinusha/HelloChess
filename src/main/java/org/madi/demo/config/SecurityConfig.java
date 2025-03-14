@@ -26,7 +26,6 @@ public class SecurityConfig {
 			.passwordEncoder(passwordEncoder);
 
 		http
-//				.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
 					.requestMatchers("/registration", "/login", "/api/users/profile", "/api/users/register", "/api/users/login", "/**").permitAll()
 					.anyRequest().authenticated()

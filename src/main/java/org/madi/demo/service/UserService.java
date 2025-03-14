@@ -22,9 +22,10 @@ public class UserService {
 
 	@Transactional
 	public void saveUser(User user) {
-		if (userRepository.findByNickname(user.getNickname()) != null) {
-			throw new DataIntegrityViolationException("Этот ник уже занят. Пожалуйста, выберите другой.");
+		try {
+			userRepository.save(user);
+		} catch (DataIntegrityViolationException e) {
+			throw e;
 		}
-		userRepository.save(user);
 	}
 }

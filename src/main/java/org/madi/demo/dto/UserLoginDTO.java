@@ -13,6 +13,6 @@ public class UserLoginDTO {
 	private String nickname;
 
 	@NotNull
-	@Size(min = 5)
+	@Size(min = 8)
 	private String password;
 }
