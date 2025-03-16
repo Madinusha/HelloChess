@@ -114,7 +114,7 @@ function renderChessboard(chessboard) {
                 const pieceElement = document.createElement('img');
                 square.appendChild(pieceElement);
                 pieceElement.classList.add('piece');
-                pieceElement.src = `images/${piece.color}/${piece.fileName}.png`;
+                pieceElement.src = `/static/images/${piece.color}/${piece.fileName}.png`;
             }
 
             // Добавление клетки на доску
@@ -267,7 +267,7 @@ function showPromotionMenu(fromPosition, targetPosition) {
             const pieceElement = document.createElement('img');
             button.appendChild(pieceElement);
             pieceElement.classList.add('piece');
-            pieceElement.src = `images/${playerColor}/${piece.fileName}.png`;
+            pieceElement.src = `/static/images/${playerColor}/${piece.fileName}.png`;
             square.appendChild(button);
 
             // Добавляем обработчик нажатия кнопки

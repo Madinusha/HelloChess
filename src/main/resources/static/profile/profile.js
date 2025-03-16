@@ -3,10 +3,10 @@ const nickname = document.getElementById('profile-info-nickname');
 const email = document.getElementById('profile-info-email');
 
 document.addEventListener("DOMContentLoaded", function() {
-    checkUserProfile();
+    getUserProfile();
 });
 
-async function checkUserProfile() {
+async function getUserProfile() {
     try {
         const response = await fetch("/api/users/profile", {
             method: "GET",
@@ -17,7 +17,7 @@ async function checkUserProfile() {
             const user = await response.json();
             displayUserProfile(user);
         } else {
-            console.log("Failed to fetch profile");
+            console.log("Ошибка получения данных пользователя.");
         }
     } catch (error) {
         console.error("Request failed:", error);
@@ -42,4 +42,5 @@ function displayUserProfileBtn(user) {
 
     const login = document.getElementById("login");
     login.style.display = "none";
+
 }

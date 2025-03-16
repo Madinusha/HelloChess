@@ -3,6 +3,7 @@ package org.madi.demo.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,11 +39,7 @@ public class GlobalExceptionHandler {
 		}
 		return ResponseEntity.badRequest().body(errorMessage);
 	}
-
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<String> handleGeneralException(Exception ex) {
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла ошибка. Попробуйте позже.");
-	}
+	
 
 	// Обработка ошибок валидации
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -55,5 +52,9 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
 	}
 
-	// TODO добавить больше вариантов ошибок
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<String> handleAuthException() {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+	}
+
 }

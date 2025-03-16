@@ -12,6 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,30 +45,62 @@ public class UserController {
 		return ResponseEntity.ok("Пользователь успешно зарегистрирован");
 	}
 
+//	@PostMapping("/login")
+//	public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDTO userDTO, HttpServletRequest request) {
+//		User user = userService.findUserByNickname(userDTO.getNickname());
+//		if (user != null && passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+//			HttpSession session = request.getSession(); // Создает сессию, если её нет
+//			session.setAttribute("user", user);
+//			session.setMaxInactiveInterval(1800); // 30 минут
+//			System.out.println("Сессия создана: " + session.getId()); // Логируйте ID сессии
+//			return ResponseEntity.ok("Вход выполнен успешно");
+//		}
+//		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
+//	}
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
 	@PostMapping("/login")
-	public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDTO userDTO, HttpServletRequest request) {
-		User user = userService.findUserByNickname(userDTO.getNickname());
-		if (user != null && passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+	public ResponseEntity<String> loginUser(
+			@Valid @RequestBody UserLoginDTO userDTO,
+			HttpServletRequest request
+	) {
+		try {
+			// Аутентификация через Spring Security
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(
+							userDTO.getNickname(),
+							userDTO.getPassword()
+					)
+			);
+			// Установка контекста безопасности
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+
+			// Сохранение контекста в сессии
 			HttpSession session = request.getSession();
-			session.setAttribute("user", user);
+			session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+			session.setAttribute("user", authentication.getPrincipal());
+
 			return ResponseEntity.ok("Вход выполнен успешно");
+		} catch (BadCredentialsException e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
 		}
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
 	}
 
 	@GetMapping("/profile")
-	public ResponseEntity<UserProfileDTO> getProfile(HttpServletRequest request) {
-		HttpSession session = request.getSession(false); // false: не создавать новую сессию
-		if (session != null) {
-			User user = (User) session.getAttribute("user");
-			if (user != null) {
-				UserProfileDTO profileDTO = new UserProfileDTO();
-				profileDTO.setNickname(user.getNickname());
-				profileDTO.setEmail(user.getEmail());
-				return ResponseEntity.ok(profileDTO);
-			}
+	public ResponseEntity<UserProfileDTO> getProfile() {
+		// Получаем аутентификацию из контекста
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		// Проверяем аутентификацию
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+
+		User user = (User) authentication.getPrincipal();
+		return ResponseEntity.ok(
+				new UserProfileDTO(user.getNickname(), user.getEmail())
+		);
 	}
 
 	@GetMapping("/{nickname}")

@@ -2,18 +2,18 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
-    <link rel="stylesheet" th:href="@{/game/game.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
-    <script th:src="@{/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
-    <script th:src="@{/game/game.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <link rel="stylesheet" th:href="@{/static/game/game.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/game/game.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
     <title>HelloChess</title>
 </head>
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 
 <div class="main">
-    <audio id="moveSound" th:src="@{/sounds/movePiece.wav}"></audio>
-    <audio id="eatSound" th:src="@{/sounds/eatPiece.wav}"></audio>
+    <audio id="moveSound" th:src="@{/static/sounds/movePiece.wav}"></audio>
+    <audio id="eatSound" th:src="@{/static/sounds/eatPiece.wav}"></audio>
     <div id="chat-box">
         <div id="chat-box-header">Чат с Bull_Digga
             <button id="toggle-button"></button>

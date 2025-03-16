@@ -16,38 +16,37 @@ document.addEventListener("DOMContentLoaded", function() {
     checkUserProfile();
 });
 
-async function checkUserProfile() {
-    const csrfToken = document.querySelector("meta[name='_csrf']").content;
-    const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
+async function checkUserProfile() {
+    const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
     try {
+
         const response = await fetch("/api/users/profile", {
             method: "GET",
-            credentials: "include",
             headers: {
-                [csrfHeader]: csrfToken
-            }
+                [csrfHeader]: csrfToken,
+                "Accept": "application/json"
+            },
+            credentials: "include"
         });
 
         if (response.ok) {
             const user = await response.json();
             displayUserProfileBtn(user);
         } else if (response.status === 401) {
-            // Пользователь не авторизован
             const login = document.getElementById("login");
             login.style.display = "block";
 
             const profileBox = document.getElementById("profile-box");
             profileBox.style.display = "none";
         } else {
-            console.error("Ошибка при получении профиля:", await response.text());
+            console.error("Ошибка:", await response.text());
         }
     } catch (error) {
-        console.error("Произошла ошибка при проверке профиля:", error);
+        console.error("Ошибка сети:", error);
     }
 }
-
-
 
 function displayUserProfileBtn(user) {
     // Пример отображения информации о пользователе
