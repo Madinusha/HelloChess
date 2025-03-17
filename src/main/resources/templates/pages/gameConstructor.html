@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <link rel="stylesheet" th:href="@{/static/gameConstructor/gameConstructor.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/gameConstructor/gameConstructor.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="main">
+    <div id="initiator">
+        <div id="fast-start">
+            <div id="classical" class="fast-start-variant">
+                <h2>30 + 0</h2>
+                <h3>Classical</h3>
+            </div>
+            <div id="blitz" class="fast-start-variant">
+                <h2>3 + 2</h2>
+                <h3>Blitz</h3>
+            </div>
+            <div id="rapid" class="fast-start-variant">
+                <h2>10 + 5</h2>
+                <h3>Rapid</h3>
+            </div>
+        </div>
+        <div id="game-constructor">
+            <h1>Конструктор игры</h1>
+            <div id="time-inputs">
+                <input type="number" class="time-input" placeholder="min" min="0">
+                <span class="time-separator">+</span>
+                <input type="number" class="time-input" placeholder="sec" min="0">
+            </div>
+            <div id="choose-opponent">
+                <label for="friend-search" class="visually-hidden">Поиск соперника</label>
+                <input
+                        type="search"
+                        id="friend-search"
+                        name="friend-search"
+                        placeholder="Найти соперника..."
+                        aria-label="Поиск по нику друга"
+                        class="search-input"
+                >
+
+            </div>
+            <div id="choose-color">
+                <img id="black" th:src="@{/static/images/black/King.png}">
+                    <img id="chance" th:src="@{/static/images/white/King.png}">
+                <img id="white" th:src="@{/static/images/white/King.png}">
+            </div>
+            <button id="create-game">Создать игру</button>
+        </div>
+    </div>
+    <div id="waiting-room">
+        <h1>Комната ожидания</h1>
+        <div class="players-list">
+            <div class="table-header">
+                <div class="column nickname">Имя</div>
+                <div class="column rating">Рейтинг</div>
+                <div class="column time-control">Время</div>
+            </div>
+
+            <div class="table-body">
+                <div class="player-row">
+                    <div class="column nickname">User123</div>
+                    <div class="column rating">1500</div>
+                    <div class="column time-control">5 + 3</div>
+                </div>
+
+                <div class="player-row">
+                    <div class="column nickname">ChessMaster</div>
+                    <div class="column rating">1800</div>
+                    <div class="column time-control">10 + 5</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+

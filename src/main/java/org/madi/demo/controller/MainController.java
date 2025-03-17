@@ -29,4 +29,11 @@ public class MainController {
 	public String profile() {
 		return "pages/profile";
 	}
+
+	@GetMapping("/gameConstructor")
+	public String gameConstructor() {
+		return "pages/gameConstructor";
+	}
+
+
 }

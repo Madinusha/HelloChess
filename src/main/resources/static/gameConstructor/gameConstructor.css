@@ -1,0 +1,346 @@
+@import url('https://fonts.cdnfonts.com/css/manteka');
+@import url('https://fonts.cdnfonts.com/css/spoof-trial');
+
+/* Regular */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'TeXGyreHeros Condensed';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHerosCondensed-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--white-gray);
+    color: var(--dark-purple);
+    overflow-x: hidden;
+    font-family: 'TeXGyreHeros', sans-serif;
+}
+
+:root {
+    --square-size: 50px;
+    --dark-purple: #553A4C;
+    --light-purple: #957377;
+    --beige: #CBAC98;
+    --light-beige: #f2e6cf;
+    --carrot-red: #c73136;
+    --light-carrot: #d6585c;
+    --white-gray: #f5f5f5;
+    --dark-purple-rgb: 85, 58, 76;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+    padding: 1em;
+    padding-top: 0.3em;
+    width: 80vw;
+    max-width: 70%;
+    height: 90vh;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+#initiator {
+    display: grid;
+    grid-template-rows: 1fr 3fr;
+}
+
+#fast-start {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.7em;
+    margin-bottom: 1em;
+}
+
+.fast-start-variant {
+    background: white;
+    padding: 1em;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+#initiator h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+#initiator h3 {
+    margin: 0;
+    font-size: 1em;
+    font-weight: normal;
+    color: gray;
+    opacity: 50%;
+}
+
+.fast-start-variant:hover {
+     background: var(--light-purple);
+     transform: translateY(-2px);
+     color: white !important;
+}
+
+#game-constructor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4em;
+    background: white;
+    padding: 1em;
+    padding-top: 0.7em;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#game-constructor h1 {
+    margin: 0.1em;
+    font-size: 1.2em;
+}
+
+#time-inputs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.time-input {
+    width: 4em;
+    height: 2em;
+    padding: 0.3em;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1em;
+    -moz-appearance: textfield;
+    background: var(--white-gray);
+    transition: all 0.1s ease;
+}
+
+.time-input:focus {
+    outline: none;
+    border-color: var(--dark-purple);
+    box-shadow: 0 0 0 2px rgba(85, 58, 76, 0.2);
+}
+
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.time-separator {
+    font-size: 1.2em;
+    color: var(--dark-purple);
+}
+
+#time-inputs, #choose-color, #choose-opponent {
+    min-height: 2em;
+    border-radius: 5px;
+}
+
+.search-container {
+    position: relative;
+    max-width: 300px;
+    margin: 1rem 0;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    padding-right: 2.5rem; /* Место для иконки */
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.1s ease;
+    background: var(--white-gray);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--dark-purple);
+    box-shadow: 0 0 0 2px rgba(85, 58, 76, 0.2);
+}
+
+.search-container::after {
+    content: "🔍";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+#choose-color {
+    padding: 0.5em;
+    border-radius: 8px;
+    max-height: 15vh;
+    max-width: 40vw;
+}
+
+#choose-color img {
+    height: 60%;
+    background: var(--white-gray);
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    object-fit: contain;
+}
+
+#choose-color img:hover {
+    background: var(--light-purple);
+    transform: translateY(-2px);
+}
+
+#choose-color img:nth-child(2) {
+    height: 90%;
+}
+
+#create-game {
+    background: var(--dark-purple);
+    border-radius: 7px;
+    border: none;
+    color: white;
+    width: 100%;
+    cursor: pointer;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    margin-top: auto;
+}
+
+#create-game:hover {
+    background: var(--carrot-red);
+}
+
+#waiting-room {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#waiting-room h1 {
+    margin: 0.7em;
+    margin-bottom: 0.5em;
+    font-size: 1.2em;
+}
+
+.players-list {
+    margin-top: 1em;
+}
+
+.table-header {
+    display: flex;
+    padding: 0.6em 0.8em;
+    background: var(--white-gray);
+    border-radius: 8px 8px 0 0;
+    font-size: 1em;
+    font-weight: bold;
+    border-bottom: 2px solid var(--light-purple);
+    margin-top: 0;
+}
+
+.table-body {
+    border-radius: 0 0 6px 6px;
+    font-size: 0.8em;
+}
+
+.player-row {
+    display: flex;
+    padding: 0.8em 1em;
+    border-bottom: 1px solid var(--white-gray);
+    transition: background 0.2s ease;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.player-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 6px 6px;
+}
+
+.player-row:hover {
+    background: var(--light-beige);
+}
+
+.player-row:nth-child(even) {
+    background: var(--white-gray); /* Цвет для чётных строк */
+}
+
+.player-row:hover {
+    background: var(--carrot-red) !important;
+    color: white !important;
+    opacity: 0.9;
+}
+
+.column {
+    flex: 1;
+    padding: 0 0.5em;
+}
+
+.nickname {
+    flex-basis: 40%;
+    text-align: left;
+}
+
+.rating {
+    flex-basis: 30%;
+    text-align: center;
+}
+
+.time-control {
+    flex-basis: 30%;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .table-header, .player-row {
+        font-size: 0.9em;
+        padding: 0.6em;
+    }
+
+    .nickname { flex-basis: 50%; }
+    .rating { flex-basis: 30%; }
+    .time-control { flex-basis: 20%; }
+}
+
+@media (max-width: 768px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+}
