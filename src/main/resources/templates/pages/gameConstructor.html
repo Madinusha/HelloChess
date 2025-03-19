@@ -34,24 +34,44 @@
                 <input type="number" class="time-input" placeholder="min" min="0">
                 <span class="time-separator">+</span>
                 <input type="number" class="time-input" placeholder="sec" min="0">
-            </div>
-            <div id="choose-opponent">
-                <label for="friend-search" class="visually-hidden">Поиск соперника</label>
-                <input
-                        type="search"
-                        id="friend-search"
-                        name="friend-search"
-                        placeholder="Найти соперника..."
-                        aria-label="Поиск по нику друга"
-                        class="search-input"
-                >
 
+                <div class="time-numpad">
+                    <div class="numpad-grid">
+                        <button class="numpad-btn">1</button>
+                        <button class="numpad-btn">2</button>
+                        <button class="numpad-btn">3</button>
+                        <button class="numpad-btn">4</button>
+                        <button class="numpad-btn">5</button>
+                        <button class="numpad-btn">6</button>
+                        <button class="numpad-btn">7</button>
+                        <button class="numpad-btn">8</button>
+                        <button class="numpad-btn">9</button>
+                        <button class="numpad-btn">0</button>
+                        <button id="fake-btn" class="numpad-btn"></button>
+                        <button id="numpad-close" class="numpad-btn">×</button>
+                    </div>
+                </div>
             </div>
-            <div id="choose-color">
-                <img id="black" th:src="@{/static/images/black/King.png}">
-                    <img id="chance" th:src="@{/static/images/white/King.png}">
-                <img id="white" th:src="@{/static/images/white/King.png}">
-            </div>
+                <div id="choose-opponent">
+                    <label for="friend-search" class="visually-hidden">Поиск соперника</label>
+                    <div class="search-container">
+                        <span class="at-symbol">@</span>
+                        <input
+                                type="search"
+                                id="friend-search"
+                                name="friend-search"
+                                placeholder="Найти соперника..."
+                                aria-label="Поиск по нику друга"
+                                class="search-input"
+                        >
+                        <button class="clear-btn" aria-label="Очистить поле">×</button>
+                    </div>
+                </div>
+                <div id="choose-color">
+                    <img id="black" th:src="@{/static/images/black/King.png}" alt="Чёрные фигуры">
+                    <img id="chance" th:src="@{/static/images/chance.png}" alt="Случайный выбор">
+                    <img id="white" th:src="@{/static/images/white/King.png}" alt="Белые фигуры">
+                </div>
             <button id="create-game">Создать игру</button>
         </div>
     </div>

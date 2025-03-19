@@ -26,7 +26,6 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
     background: var(--white-gray);
     color: var(--dark-purple);
     overflow-x: hidden;
@@ -100,7 +99,11 @@ body {
 .fast-start-variant:hover {
      background: var(--light-purple);
      transform: translateY(-2px);
-     color: white !important;
+}
+
+.fast-start-variant:hover h2,
+.fast-start-variant:hover h3 {
+    color: white !important;
 }
 
 #game-constructor {
@@ -125,6 +128,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 0.5em;
+    position: relative;
 }
 
 .time-input {
@@ -162,16 +166,89 @@ body {
     border-radius: 5px;
 }
 
+.time-input,
+.search-input {
+    color: var(--dark-purple);
+}
+
+.time-numpad {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 1rem;
+    z-index: 100;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.time-numpad[style*="display: block"] {
+    animation: slideIn 0.3s ease;
+}
+
+.time-input:focus ~ .time-numpad {
+    display: block;
+}
+
+.numpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.2rem;
+}
+
+.numpad-btn {
+    padding: 0.3rem;
+    aspect-ratio: 1 / 1;
+    border: 1px solid var(--white-gray);
+    border-radius: 8px;
+    background: var(--white-gray);
+    color: var(--dark-purple);
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.numpad-btn:hover {
+    background: var(--light-purple);
+    color: white;
+}
+
+.numpad-btn:active {
+    background: var(--carrot-red);
+    transform: scale(0.95);
+}
+
+#numpad-close {
+    font-size: 1.5em;
+}
+
+#fake-btn {
+    opacity: 0;
+}
+
 .search-container {
     position: relative;
+    display: inline-block;
     max-width: 300px;
     margin: 1rem 0;
 }
 
+.at-symbol {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-55%);
+    color: var(--dark-purple);
+    z-index: 2;
+    pointer-events: none;
+}
+
 .search-input {
+    padding-left: 1.75rem !important;
     width: 100%;
     padding: 0.8rem 1.2rem;
-    padding-right: 2.5rem; /* Место для иконки */
+    padding-right: 2rem;
     border: 1px solid #ddd;
     border-radius: 10px;
     font-size: 1rem;
@@ -185,16 +262,6 @@ body {
     box-shadow: 0 0 0 2px rgba(85, 58, 76, 0.2);
 }
 
-.search-container::after {
-    content: "🔍";
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    opacity: 0.6;
-}
-
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -204,6 +271,31 @@ body {
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     border: 0;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--dark-purple);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2em;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.search-input:not(:placeholder-shown) ~ .clear-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.search-input::-webkit-search-cancel-button {
+    display: none;
 }
 
 #choose-color {
@@ -232,6 +324,32 @@ body {
     height: 90%;
 }
 
+#choose-color img.selected {
+    background: var(--light-purple) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(var(--dark-purple-rgb), 0.3);
+}
+
+#choose-color img:hover:not(.selected) {
+    background: var(--light-purple);
+    transform: translateY(-2px);
+}
+
+#choose-color,
+#choose-opponent {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#choose-color.hidden,
+#choose-opponent.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(+10px);
+    height: auto;
+    overflow: hidden;
+    margin: 0;
+}
+
 #create-game {
     background: var(--dark-purple);
     border-radius: 7px;
@@ -252,6 +370,8 @@ body {
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 #waiting-room h1 {
@@ -261,7 +381,10 @@ body {
 }
 
 .players-list {
-    margin-top: 1em;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .table-header {
@@ -273,11 +396,41 @@ body {
     font-weight: bold;
     border-bottom: 2px solid var(--light-purple);
     margin-top: 0;
+    position: sticky;
+    z-index: 2;
 }
 
 .table-body {
     border-radius: 0 0 6px 6px;
     font-size: 0.8em;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin; /* Для Firefox */
+    scrollbar-color: var(--dark-purple) var(--white-gray);
+}
+
+/* Стили для WebKit-браузеров (Chrome, Safari) */
+.table-body::-webkit-scrollbar {
+    width: 10px; /* Немного шире для лучшей видимости */
+    background-color: var(--white-gray);
+}
+
+.table-body::-webkit-scrollbar-track {
+    background: var(--light-beige);
+    border-radius: 8px; /* Увеличено для плавного скругления */
+    margin: 4px 0; /* Отступ сверху и снизу */
+}
+
+.table-body::-webkit-scrollbar-thumb {
+    background: var(--dark-purple);
+    border-radius: 8px; /* Полное скругление */
+    border: 3px solid transparent; /* Прозрачная граница */
+    background-clip: content-box; /* Важно для правильного отображения */
+}
+
+.table-body::-webkit-scrollbar-thumb:hover {
+    background: var(--carrot-red);
+    border-radius: 8px;
 }
 
 .player-row {
@@ -292,10 +445,6 @@ body {
 .player-row:last-child {
     border-bottom: none;
     border-radius: 0 0 6px 6px;
-}
-
-.player-row:hover {
-    background: var(--light-beige);
 }
 
 .player-row:nth-child(even) {
