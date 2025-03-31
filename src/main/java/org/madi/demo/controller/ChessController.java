@@ -3,13 +3,21 @@ package org.madi.demo.controller;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.madi.demo.dto.CreateGameRequest;
+import org.madi.demo.entities.User;
 import org.madi.demo.model.*;
 import org.madi.demo.model.Position;
 import org.madi.demo.service.ChessService;
+import org.madi.demo.service.GameSessionService;
+import org.madi.demo.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 
@@ -23,23 +31,32 @@ public class ChessController {
 		this.chessService = chessService;
 	}
 
+	@Autowired
+	private GameSessionService sessionManager;
+
+	@Autowired
+	private UserService userService;
+
 	@GetMapping("/possible-moves")
-	public ResponseEntity<List<Position>> getPossibleMoves(@RequestParam Position position) {
-		List<Position> possibleMoves = chessService.getPossibleMoves(position);
+	public ResponseEntity<List<Position>> getPossibleMoves(
+			@RequestParam String sessionId,
+			@RequestParam Position position
+	) {
+		List<Position> possibleMoves = chessService.getPossibleMoves(sessionId, position);
 		return ResponseEntity.ok(possibleMoves);
 	}
 
 	@PostMapping("/make-move")
-	public ResponseEntity<Map<String, Object>> makeMove(@RequestBody MoveRequest moveRequest) {
-		Map<String, Object> result = chessService.makeMove(moveRequest.from, moveRequest.to);
+	public ResponseEntity<Map<String, Object>> makeMove(
+			@RequestBody MoveRequest moveRequest,
+			@RequestParam String sessionId
+	) {
+		Map<String, Object> result = chessService.makeMove(sessionId, moveRequest.from, moveRequest.to);
 		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/chessboard")
 	public ResponseEntity<Chessboard> getChessboard() {
-		// Chessboard chessboard = chessService.getChessboard();
-		// return ResponseEntity.ok(chessboard);
-
 		chessService.startNewGame();
 		Chessboard chessboard = chessService.getChessboard();
 		return ResponseEntity.ok(chessboard);

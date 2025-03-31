@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.madi.demo.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -14,7 +15,11 @@ import java.util.Map;
 @Service
 public class ChessService {
 
+	@Autowired
+	private GameSessionService sessionManager;
+
 	private final SimpMessagingTemplate messagingTemplate;
+
 	@Getter
 	private Chessboard chessboard = new Chessboard();
 
@@ -26,7 +31,6 @@ public class ChessService {
 	}
 
 	private void initiatePromotion(Position position) {
-		// Отправляем сообщение клиенту с позицией для промоушена
 		messagingTemplate.convertAndSend("/topic/promotion", position);
 	}
 
@@ -34,14 +38,14 @@ public class ChessService {
 		chessboard = new Chessboard();
 	}
 
-	public List<Position> getPossibleMoves(Position position) {
-		return chessboard.getValidMoves(position);
+	public List<Position> getPossibleMoves(String sessionId, Position position) {
+		GameSession session = sessionManager.getSession(sessionId);
+		return session.getChessboard().getValidMoves(position);
 	}
 
-	public Map<String, Object> makeMove(Position fromPosition, Position toPosition) {
-		// Выполняем ход и получаем результат
-		Map<String, Object> result = chessboard.moveFigure(fromPosition, toPosition, chessboard);
-		return result;
+	public Map<String, Object> makeMove(String sessionId, Position from, Position to) {
+		GameSession session = sessionManager.getSession(sessionId);
+		return session.getChessboard().moveFigure(from, to);
 	}
 
 	public Chessboard promotePawn(Position position, String newPieceType) {

@@ -24,7 +24,6 @@ public class Rook extends Piece { // Ладья
 	public boolean isValidMove(Position from, Position to, Chessboard board) {
 		// Реализация валидации хода для ладьи
 		int rowDifference = Math.abs(to.getRow() - from.getRow());
-
 		int colDifference = Math.abs(to.getCol() - from.getCol());
 
 		// Ход допустим, если ладья двигается по горизонтали или вертикали
@@ -33,6 +32,7 @@ public class Rook extends Piece { // Ладья
 		}
 		return false;
 	}
+
 	@Override
 	public String toString()
 	{

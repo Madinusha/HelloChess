@@ -6,7 +6,12 @@
     <title>Личный кабинет</title>
     <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <link rel="stylesheet" th:href="@{/static/gameConstructor/gameConstructor.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.min.js"></script>
     <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+
+    <script th:src="@{/static/webSocketManager.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/utils.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
     <script th:src="@{/static/gameConstructor/gameConstructor.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
 </head>
 <body>
@@ -69,7 +74,7 @@
                 </div>
                 <div id="choose-color">
                     <img id="black" th:src="@{/static/images/black/King.png}" alt="Чёрные фигуры">
-                    <img id="chance" th:src="@{/static/images/chance.png}" alt="Случайный выбор">
+                    <img id="random" th:src="@{/static/images/chance.png}" alt="Случайный выбор">
                     <img id="white" th:src="@{/static/images/white/King.png}" alt="Белые фигуры">
                 </div>
             <button id="create-game">Создать игру</button>
@@ -85,17 +90,7 @@
             </div>
 
             <div class="table-body">
-                <div class="player-row">
-                    <div class="column nickname">User123</div>
-                    <div class="column rating">1500</div>
-                    <div class="column time-control">5 + 3</div>
-                </div>
 
-                <div class="player-row">
-                    <div class="column nickname">ChessMaster</div>
-                    <div class="column rating">1800</div>
-                    <div class="column time-control">10 + 5</div>
-                </div>
             </div>
         </div>
     </div>

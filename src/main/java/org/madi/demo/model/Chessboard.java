@@ -9,12 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Getter
 public class Chessboard {
 	private Map<Position, Piece> board;
 	private List<MutablePair<Integer, Piece>> eatenFigures;
 	private List<MutablePair<Position, Position>> motionList;
-	private String currentPlayer;  // "white" или "black"
+	private String currentPlayerColor;  // "WHITE" или "BLACK"
 	private String status; // "IN_PROGRESS", "CHECKMATE", "STALEMATE", "DRAW", etc.
 
 	public Chessboard(Map<Position, Piece> board) {
@@ -106,12 +107,8 @@ public class Chessboard {
 		return null;
 	}
 
-	public List<MutablePair<Position, Position>> getMotionList() {
-		return motionList;
-	}
-
-	public List<MutablePair<Integer, Piece>> getEatenFigures() {
-		return eatenFigures;
+	public void switchPlayer() {
+		currentPlayerColor = currentPlayerColor.equals("WHITE") ? "BLACK" : "WHITE";
 	}
 
 	public void addEatenFigures(Piece eatenFigure) {
@@ -121,7 +118,9 @@ public class Chessboard {
 	public void placeFigure(Piece Piece, Position position) {
 		board.put(position, Piece);
 	}
-	public void deleteFigureAt(Position position) { board.remove(position); }
+	public void deleteFigureAt(Position position) {
+		board.remove(position);
+	}
 
 	private void placeInitialPieces(String color) {
 		int pawnRow = (color.equals("white")) ? 2 : 7;
@@ -281,7 +280,6 @@ public class Chessboard {
 		return false;
 	}
 
-
 	public Position findKingPosition(String kingColor, Map<Position, Piece> board) {
 		//System.out.println("Ищем короля ");
 		Chessboard cb = new Chessboard();
@@ -291,9 +289,8 @@ public class Chessboard {
 			Piece Piece = cb.getFigureAt(position);
 			if (Piece instanceof King){
 				if (Piece.getColor().equals(kingColor)) {
-					//System.out.println("КОРОЛЬ "  +  position.toString() + "\n");
 					return position;
-				} //else System.out.println("Король не того цвета " +  position.toString());
+				}
 			}
 		}
 		return null;
@@ -364,7 +361,6 @@ public class Chessboard {
 	{
 		figureCapture(getFigureAt(to));
 		deleteFigureAt(to);
-//		controller.eatFigure(from, to);
 	}
 
 	public boolean isEdible(Position from, Position to)
@@ -441,6 +437,7 @@ public class Chessboard {
 			}
 
 		}
+		switchPlayer();
 		return result;
 	}
 
@@ -509,6 +506,7 @@ public class Chessboard {
 	public Piece getFigureAt(Position position) {
 		return board.get(position);
 	}
+
 	public boolean areFiguresBetween(Position from, Position to) {
 		// Проверка наличия фигур на горизонтальном пути
 		if (from.getRow() == to.getRow()) {

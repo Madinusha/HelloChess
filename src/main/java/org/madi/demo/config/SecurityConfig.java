@@ -32,7 +32,6 @@ public class SecurityConfig {
 		return config.getAuthenticationManager();
 	}
 
-	// Настройка UserDetailsService и PasswordEncoder
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth
@@ -63,7 +62,7 @@ public class SecurityConfig {
 			)
 			.formLogin(form -> form
 					.loginPage("/registration")
-					.defaultSuccessUrl("/game")
+					.defaultSuccessUrl("/gameConstructor")
 					.permitAll()
 			)
 			.logout(logout -> logout
@@ -72,6 +71,7 @@ public class SecurityConfig {
 			)
 			.csrf(csrf -> csrf
 					.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+					.ignoringRequestMatchers("/ws/**") // Разрешить WebSocket без CSRF
 			)
 			.exceptionHandling(ex -> ex
 					.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));

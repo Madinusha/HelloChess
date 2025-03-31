@@ -73,9 +73,7 @@ async function login() {
         });
 
         if (response.ok) {
-            console.log("Я тут вот хочу загрузить");
             window.location.href = "/gameConstructor";
-            console.log("а теперь тут");
         } else if (response.status === 400) {
             const errorMessage = await response.text();
             showValidSymbolsFor(passwordContainer, "Никнейм содержит 3-20 символов.\nПароль содержит >= 7 символов.");

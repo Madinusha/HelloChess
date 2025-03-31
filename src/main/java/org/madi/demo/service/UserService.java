@@ -28,4 +28,8 @@ public class UserService {
 			throw e;
 		}
 	}
+
+//	public void updateUserStats(User user, GameResult result) {
+//		// Обновление рейтинга/статистики
+//	}
 }

@@ -45,18 +45,6 @@ public class UserController {
 		return ResponseEntity.ok("Пользователь успешно зарегистрирован");
 	}
 
-//	@PostMapping("/login")
-//	public ResponseEntity<String> loginUser(@Valid @RequestBody UserLoginDTO userDTO, HttpServletRequest request) {
-//		User user = userService.findUserByNickname(userDTO.getNickname());
-//		if (user != null && passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
-//			HttpSession session = request.getSession(); // Создает сессию, если её нет
-//			session.setAttribute("user", user);
-//			session.setMaxInactiveInterval(1800); // 30 минут
-//			System.out.println("Сессия создана: " + session.getId()); // Логируйте ID сессии
-//			return ResponseEntity.ok("Вход выполнен успешно");
-//		}
-//		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
-//	}
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
@@ -87,17 +75,62 @@ public class UserController {
 		}
 	}
 
+//	@PostMapping("/login")
+//	public ResponseEntity<String> loginUser(
+//			@Valid @RequestBody UserLoginDTO userDTO,
+//			HttpServletRequest request
+//	) {
+//		try {
+//			Authentication authentication = authenticationManager.authenticate(
+//					new UsernamePasswordAuthenticationToken(
+//							userDTO.getNickname(),
+//							userDTO.getPassword()
+//					)
+//			);
+//			SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//			// Получаем полный объект User из базы данных
+//			User user = userService.findUserByNickname(authentication.getName());
+//
+//			HttpSession session = request.getSession();
+//			session.setAttribute("user", user); // Сохраняем объект User
+//
+//			return ResponseEntity.ok("Вход выполнен успешно");
+//		} catch (BadCredentialsException e) {
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
+//		}
+//	}
+
+
+
+
+//	@GetMapping("/profile")
+//	public ResponseEntity<UserProfileDTO> getProfile() {
+//		// Получаем аутентификацию из контекста
+//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//		// Проверяем аутентификацию
+//		if (authentication == null || !authentication.isAuthenticated()) {
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//		}
+//
+//		User user = (User) authentication.getPrincipal();
+//		return ResponseEntity.ok(
+//				new UserProfileDTO(user.getNickname(), user.getEmail())
+//		);
+//	}
+
 	@GetMapping("/profile")
 	public ResponseEntity<UserProfileDTO> getProfile() {
-		// Получаем аутентификацию из контекста
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		// Проверяем аутентификацию
 		if (authentication == null || !authentication.isAuthenticated()) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		User user = (User) authentication.getPrincipal();
+		// Получаем пользователя из базы данных
+		User user = userService.findUserByNickname(authentication.getName());
+
 		return ResponseEntity.ok(
 				new UserProfileDTO(user.getNickname(), user.getEmail())
 		);

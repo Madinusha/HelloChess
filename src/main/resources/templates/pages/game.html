@@ -5,7 +5,13 @@
     <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <link rel="stylesheet" th:href="@{/static/game/game.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+
+    <script th:src="@{/static/webSocketManager.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/utils.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
     <script th:src="@{/static/game/game.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <title>HelloChess</title>
 </head>
 <body>

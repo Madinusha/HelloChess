@@ -1,3 +1,6 @@
+window.WebSocketManager = WebSocketManager;
+window.joinGame = joinGame;
+
 // Пример использования
 const chessboard = {
       "a1": { "fileName": "Rook", "color": "white", "hasMoved": false },
@@ -51,37 +54,80 @@ const chessSymbols = {
 const csrfToken = document.querySelector("meta[name='_csrf']").content;
 const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
-function updateChessboard(chessboard, fromPosition, toPosition) {
-    const piece = chessboard.board[fromPosition];
-    if (!piece) {
-        console.error(`Нет фигуры на позиции ${fromPosition}`);
-        return;
-    }
-    // Удаляем фигуру с исходной позиции
-    delete chessboard.board[fromPosition];
-    chessboard.board[toPosition] = piece;
+function updateChessboard(chessboardData) {
+    // Полная перерисовка доски из полученных данных
+    renderChessboard(chessboardData);
 
+    // Анимация последнего хода
+    if (chessboardData.lastMove) {
+        animateMove(
+            chessboardData.lastMove.from,
+            chessboardData.lastMove.to
+        );
+    }
 }
 
+function initGamePage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('sessionId');
+
+    const wsManager = new WebSocketManager();
+    wsManager.connect(sessionId);
+
+    wsManager.stompClient.subscribe(`/topic/game/${sessionId}`, (message) => {
+        const update = JSON.parse(message.body);
+        handleGameUpdate(update);
+    });
+}
+
+stompClient.subscribe('/user/queue/player-color', (message) => {
+    const data = JSON.parse(message.body);
+    myColor = data.color.toLowerCase();
+    updateUIWithPlayerColor(myColor);
+});
+
+stompClient.subscribe(`/topic/game/${sessionId}`, (message) => {
+    const update = JSON.parse(message.body);
+    if (update.currentPlayerColor) {
+        highlightCurrentPlayer(update.currentPlayerColor);
+    }
+    if (update.status === "ACTIVE") {
+        initializeGame();
+    }
+});
+
+
+//document.addEventListener("DOMContentLoaded", function() {
+//    fetchChessboard().then(newChessboard => {
+////        chessboard = newChessboard;
+//        renderChessboard(newChessboard);
+////        console.log(chessboard);
+//    });
+//
+//    resizeBoard();
+//    buttonsInit();
+//
+//    updateTimerDisplay('timer1', timer1Time);
+//    updateTimerDisplay('timer2', timer2Time);
+//    startTimer('timer2', timer2Time);
+//
+//    const resizeObserver = new ResizeObserver(debounceResize);
+//    const board = document.getElementById('chess-board');
+//    resizeObserver.observe(board);
+//    window.addEventListener('resize', debounceResize);
+//});
 
 document.addEventListener("DOMContentLoaded", function() {
-    fetchChessboard().then(newChessboard => {
-//        chessboard = newChessboard;
-        renderChessboard(newChessboard);
-//        console.log(chessboard);
-    });
+    initWebSocket();
 
-    resizeBoard();
-    buttonsInit();
+    stompClient.onConnect = () => {
+        resizeBoard();
+        buttonsInit();
+        initTimers();
 
-    updateTimerDisplay('timer1', timer1Time);
-    updateTimerDisplay('timer2', timer2Time);
-    startTimer('timer2', timer2Time);
-
-    const resizeObserver = new ResizeObserver(debounceResize);
-    const board = document.getElementById('chess-board');
-    resizeObserver.observe(board);
-    window.addEventListener('resize', debounceResize);
+        // Запрос начального состояния
+        stompClient.send(`/app/game/${sessionId}/connect`, {}, JSON.stringify({}));
+    };
 });
 
 
@@ -123,23 +169,37 @@ function renderChessboard(chessboard) {
     }
 }
 
+//function handleSquareClick(position) {
+//    const square = document.getElementById(position);
+//    const selectedSquare = document.querySelector('.selected');
+//    if (selectedSquare == square) {
+//        hideValidMove();
+//        return;
+//    }
+//    if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
+//       hideValidMove();
+//       makeMove(selectedSquare.id, square.id);
+//    } else {
+//        if (!square.querySelector('.piece')) {
+//            hideValidMove();
+//            console.log("нет фигуры");
+//            return;
+//        }
+//        showValidMovesFrom(position);
+//    }
+//}
+
 function handleSquareClick(position) {
     const square = document.getElementById(position);
     const selectedSquare = document.querySelector('.selected');
-    if (selectedSquare == square) {
+    if (selectedSquare) {
+        // Отправляем ход через WebSocket
+        makeMove(selectedSquare.id, position);
         hideValidMove();
-        return;
-    }
-    if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
-       hideValidMove();
-       makeMove(selectedSquare.id, square.id);
-    } else {
-        if (!square.querySelector('.piece')) {
-            hideValidMove();
-            console.log("нет фигуры");
-            return;
-        }
-        showValidMovesFrom(position);
+    } else if (square.querySelector('.piece')) {
+        // Запрашиваем возможные ходы
+        getPossibleMoves(position);
+        showValidMoves(position);
     }
 }
 
@@ -507,96 +567,93 @@ function timeToSeconds(timeStr) {
 
 
 
-// Функция для получения возможных ходов
-async function getPossibleMoves(position) {
-    const response = await fetch(`/api/chess/possible-moves?position=${position}`);
-    const possibleMoves = await response.json();
-    return possibleMoves;
-}
+//async function getPossibleMoves(position) {
+//    const response = await fetch(`/api/chess/possible-moves?position=${position}`);
+//    const possibleMoves = await response.json();
+//    return possibleMoves;
+//}
 
-// Функция для выполнения хода
-async function makeMove(fromPosition, toPosition) {
-    const response = await fetch('/api/chess/make-move', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-        },
-        body: JSON.stringify({
-            from: fromPosition,
-            to: toPosition
-        })
-    });
-    const result = await response.json();
-    if (result.draw) {
-        console.log("draw");
-        movePiece(fromPosition, toPosition);
-        updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
-        showGameResult("draw");
-    } else if (result.victory) {
-        console.log("winer is ");
-        movePiece(fromPosition, toPosition);
-        updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
-        showGameResult(result.victory.winner);
-    } else if (result.promotePawn) {
-        const promotionPosition = result.promotePawn.position;
-        const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
-        console.log("Выбрана фигура для промоушена: ", promotedPiece);
-        updateChessboard(chessboard, fromPosition, toPosition);
-        chessboard.board[toPosition] = promotedPiece;
-        addMoveToBox(fromPosition, toPosition);
-    } else if (result.castling) {
-        console.log("рокировка!");
-        const { from: rookFrom, to: rookTo } = result.castling;
-        console.log(rookFrom, rookTo);
-        movePiece(fromPosition, toPosition);
-        movePiece(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
-        updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
-        updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
-    } else {
-        movePiece(fromPosition, toPosition);
-        updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
-    }
-    resumeTimer();
+//// Функция для выполнения хода
+//async function makeMove(fromPosition, toPosition) {
+//    const response = await fetch('/api/chess/make-move', {
+//        method: 'POST',
+//        headers: {
+//            'Content-Type': 'application/json',
+//            [csrfHeader]: csrfToken
+//        },
+//        body: JSON.stringify({
+//            from: fromPosition,
+//            to: toPosition
+//        })
+//    });
+//    const result = await response.json();
+//    if (result.draw) {
+//        console.log("draw");
+//        movePiece(fromPosition, toPosition);
+//        updateChessboard(chessboard, fromPosition, toPosition);
+//        addMoveToBox(fromPosition, toPosition);
+//        showGameResult("draw");
+//    } else if (result.victory) {
+//        console.log("winer is ");
+//        movePiece(fromPosition, toPosition);
+//        updateChessboard(chessboard, fromPosition, toPosition);
+//        addMoveToBox(fromPosition, toPosition);
+//        showGameResult(result.victory.winner);
+//    } else if (result.promotePawn) {
+//        const promotionPosition = result.promotePawn.position;
+//        const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
+//        console.log("Выбрана фигура для промоушена: ", promotedPiece);
+//        updateChessboard(chessboard, fromPosition, toPosition);
+//        chessboard.board[toPosition] = promotedPiece;
+//        addMoveToBox(fromPosition, toPosition);
+//    } else if (result.castling) {
+//        console.log("рокировка!");
+//        const { from: rookFrom, to: rookTo } = result.castling;
+//        console.log(rookFrom, rookTo);
+//        movePiece(fromPosition, toPosition);
+//        movePiece(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
+//        updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
+//        updateChessboard(chessboard, fromPosition, toPosition);
+//        addMoveToBox(fromPosition, toPosition);
+//    } else {
+//        movePiece(fromPosition, toPosition);
+//        updateChessboard(chessboard, fromPosition, toPosition);
+//        addMoveToBox(fromPosition, toPosition);
+//    }
+//    resumeTimer();
+//
+//    return chessboard;
+//}
 
-    return chessboard;
-}
+//async function sendPromotionChoice(position, selectedPieceType) {
+//    const response = await fetch('/api/chess/promotion', {
+//        method: 'POST',
+//        headers: {
+//            'Content-Type': 'application/json',
+//            [csrfHeader]: csrfToken
+//        },
+//        body: JSON.stringify({
+//            position: position,
+//            newPieceType: selectedPieceType
+//        })
+//    }).catch(error => {
+//        console.error('Ошибка при отправке запроса на промоушен:', error.message);
+//    });
+//    const result = await response.json();
+//}
 
-async function sendPromotionChoice(position, selectedPieceType) {
-    const response = await fetch('/api/chess/promotion', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            [csrfHeader]: csrfToken
-        },
-        body: JSON.stringify({
-            position: position,
-            newPieceType: selectedPieceType
-        })
-    }).catch(error => {
-        console.error('Ошибка при отправке запроса на промоушен:', error.message);
-    });
-    const result = await response.json();
-
-
-}
-
-async function fetchChessboard() {
-    const response = await fetch('/api/chess/chessboard');
-    const newChessboard = await response.json();
-
-    // Очистили текущее содержимое объекта
-    Object.keys(chessboard).forEach(key => delete chessboard[key]);
-
-    // Обновили содержимое объекта новыми данными
-    Object.assign(chessboard, newChessboard);
-
-    return chessboard;
-}
+//async function fetchChessboard() {
+//    const response = await fetch('/api/chess/chessboard');
+//    const newChessboard = await response.json();
+//
+//    // Очистили текущее содержимое объекта
+//    Object.keys(chessboard).forEach(key => delete chessboard[key]);
+//
+//    // Обновили содержимое объекта новыми данными
+//    Object.assign(chessboard, newChessboard);
+//
+//    return chessboard;
+//}
 
 function displayUserProfileBtn(user) {
     // Пример отображения информации о пользователе
@@ -610,6 +667,117 @@ function displayUserProfileBtn(user) {
     login.style.display = "none";
 }
 
+let stompClient = null;
+let sessionId = null;
+
+function initWebSocket() {
+    // Получаем sessionId из URL
+    sessionId = new URLSearchParams(window.location.search).get('sessionId');
+
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        // Подписка на обновления игры
+        stompClient.subscribe(`/topic/game/${sessionId}`, (message) => {
+            const gameState = JSON.parse(message.body);
+            handleGameUpdate(gameState);
+        });
+
+        // Подписка на персональные ошибки
+        stompClient.subscribe(`/user/queue/errors`, (message) => {
+            console.error('Ошибка:', message.body);
+        });
+    });
+}
+
+function handleGameUpdate(gameState) {
+    // Общая часть: обновление доски и интерфейса
+    updateChessboard(gameState.chessboard);
+    updateMoveHistory(gameState.moveHistory);
+    updateTimers(gameState.timers);
+
+    // Обработка специальных случаев
+    if (gameState.promotionRequired) {
+        handlePromotion(gameState.promotionPosition);
+    }
+
+    if (gameState.gameResult) {
+        handleGameResult(gameState.gameResult);
+    }
+
+    if (gameState.castling) {
+        handleCastling(gameState.castling);
+    }
+}
+
+function handlePromotion(promotionData) {
+    showPromotionMenu(promotionData.from, promotionData.to)
+        .then(selectedPiece => {
+            stompClient.send(`/app/game/${sessionId}/promotion`, {},
+                JSON.stringify({
+                    position: promotionData.position,
+                    pieceType: selectedPiece
+                })
+            );
+        });
+}
+
+function handleCastling(castlingData) {
+    movePiece(castlingData.king.from, castlingData.king.to);
+    movePiece(castlingData.rook.from, castlingData.rook.to);
+    addMoveToBox(castlingData.king.from, castlingData.king.to);
+}
+
+function handleGameResult(result) {
+    showGameResult(result.winner);
+    if (result.reason === 'checkmate') {
+        highlightKing(result.kingPosition);
+    }
+}
+
+function getPossibleMoves(position) {
+    stompClient.send(`/app/game/${sessionId}/possible-moves`, {},
+        JSON.stringify({ position: position }));
+}
+
+function makeMove(from, to) {
+    // Показываем предварительную анимацию
+    animateMove(from, to);
+
+    // Отправляем ход на сервер
+    stompClient.send(`/app/game/${sessionId}/move`, {},
+        JSON.stringify({
+            from: from,
+            to: to,
+            // Доп параметры для сложных случаев
+            promotionType: pendingPromotion?.pieceType
+        })
+    );
+
+    // Сбрасываем состояние промоута
+    pendingPromotion = null;
+}
+
+function sendPromotionChoice(position, pieceType) {
+    stompClient.send(`/app/game/${sessionId}/promotion`, {},
+        JSON.stringify({ position: position, pieceType: pieceType }));
+}
+
+function createNewGame() {
+    stompClient.send(`/app/game/create`, {}, JSON.stringify({}));
+}
+
+function updateTimers(timers) {
+    updateTimerDisplay('timer1', timers.whiteTime);
+    updateTimerDisplay('timer2', timers.blackTime);
+
+    if (timers.currentPlayer === 'white') {
+        startTimer('timer1', timers.whiteTime);
+    } else {
+        startTimer('timer2', timers.blackTime);
+    }
+}
 
 
 

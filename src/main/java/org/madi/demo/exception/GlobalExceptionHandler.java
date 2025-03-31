@@ -4,6 +4,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -39,7 +40,7 @@ public class GlobalExceptionHandler {
 		}
 		return ResponseEntity.badRequest().body(errorMessage);
 	}
-	
+
 
 	// Обработка ошибок валидации
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -50,6 +51,11 @@ public class GlobalExceptionHandler {
 				.map(error -> error.getField() + ": " + error.getDefaultMessage())
 				.collect(Collectors.joining(", "));
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+	}
+
+	@ExceptionHandler(UsernameNotFoundException.class)
+	public ResponseEntity<String> handleUsernameNotFound(UsernameNotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 
 	@ExceptionHandler(AuthenticationException.class)
