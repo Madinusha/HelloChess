@@ -1,5 +1,5 @@
 window.WebSocketManager = WebSocketManager;
-window.joinGame = joinGame;
+//window.joinGame = joinGame;
 
 let wsManager = null;
 
@@ -49,8 +49,18 @@ document.getElementById('create-game').addEventListener('click', async () => {
     };
     const color = document.querySelector('#choose-color img.selected')?.id.toUpperCase() || 'RANDOM';
 
+    wsManager.stompClient.subscribe('/user/queue/game-created', (message) => {
+        const { sessionId } = JSON.parse(message.body);
+        console.log(`Successfully created game with session ID: ${sessionId}`);
+    });
 
-    // Отправка через STOMP
+    // При подключении:
+    wsManager.stompClient.subscribe('/user/queue/game-start', (message) => {
+        console.log('Game start message received:', message.body);
+        const { sessionId } = JSON.parse(message.body);
+        window.location.href = `/game?sessionId=${sessionId}`;
+    });
+
     wsManager.stompClient.send(
         "/app/game/create",
         {},
@@ -60,13 +70,11 @@ document.getElementById('create-game').addEventListener('click', async () => {
         })
     );
 
-    wsManager.stompClient.subscribe('/user/queue/game-created', (message) => {
-        const { sessionId } = JSON.parse(message.body);
-        window.location.href = `/game?sessionId=${sessionId}`;
-    });
+
 });
 
 function joinGame(sessionId) {
+    wsManager.joinGame(sessionId);
     window.location.href = `/game?sessionId=${sessionId}`;
 }
 
@@ -211,3 +219,15 @@ document.querySelectorAll('.time-input').forEach(input => {
         }
     });
 });
+
+function displayUserProfileBtn(user) {
+    // Пример отображения информации о пользователе
+    const profileBox = document.getElementById("profile-box");
+    const profileBoxNickname = document.getElementById("profile-box-nickname");
+    const profileBoxAvatar = document.getElementById("profile-box-avatar");
+    profileBoxNickname.textContent = `${user.nickname}`; // Отображаем имя пользователя
+    profileBox.style.display = "flex";
+
+    const login = document.getElementById("login");
+    login.style.display = "none";
+}

@@ -1,5 +1,25 @@
-@import url('https://fonts.cdnfonts.com/css/manteka');
-@import url('https://fonts.cdnfonts.com/css/spoof-trial');
+/* Regular */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'TeXGyreHeros Condensed';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHerosCondensed-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
 
 /*
 #553A4C - темно фиолетовый
@@ -14,7 +34,7 @@
 body {
     margin: 0;
     color: var(--dark-purple);  /* темно фиолетовый */
-    font-family: 'Spoof Trial', sans-serif;
+    font-family: 'TeXGyreHeros', sans-serif;
     -webkit-user-select: none;
     overflow-x: hidden;
 }
@@ -26,6 +46,8 @@ body {
     --beige: #CBAC98;
     --light-beige: #f2e6cf;
     --carrot-red: #c73136;
+    --square-light: #f0d9b5;
+    --square-dark: #957377; /* тот же light-pirple*/
 }
 
 .main {
@@ -72,10 +94,10 @@ body {
     font-size: 60%;
 }
 .square.light {
-    background-color: #f0d9b5;
+    background-color: var(--square-light);
 }
 .square.dark {
-    background-color: var(--light-purple);
+    background-color: var(--square-dark);
 }
 .square.selected {
     position: relative;
@@ -110,8 +132,29 @@ body {
 }
 .square.last-move {
     background-color: rgba(199, 49, 54);
-
 }
+.coordinate {
+    position: absolute;
+    font-size: 1em;
+    font-family: Arial;
+    pointer-events: none;
+    user-select: none;
+}
+.row-label {
+    right: 0.2em;
+    top: 0.2em;
+}
+.col-label {
+    left: 0.2em;
+    bottom: 0.2em;
+}
+.light-label {
+    color: var(--square-dark);
+}
+.dark-label {
+    color: var(--square-light);
+}
+
 
 .piece {
     width: 80%;
@@ -432,7 +475,7 @@ input[type="text"]:focus  {
     color: var(--carrot-red);
 }
 #scale {
-    font-family: 'Manteka', sans-serif;
+    font-family: 'TeXGyreHeros', sans-serif;
     font-weight: bold;
 }
 #result {

@@ -15,7 +15,7 @@ public class Chessboard {
 	private Map<Position, Piece> board;
 	private List<MutablePair<Integer, Piece>> eatenFigures;
 	private List<MutablePair<Position, Position>> motionList;
-	private String currentPlayerColor;  // "WHITE" или "BLACK"
+	private String currentPlayerColor = "WHITE";  // "WHITE" или "BLACK"
 	private String status; // "IN_PROGRESS", "CHECKMATE", "STALEMATE", "DRAW", etc.
 
 	public Chessboard(Map<Position, Piece> board) {

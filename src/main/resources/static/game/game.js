@@ -1,48 +1,20 @@
 window.WebSocketManager = WebSocketManager;
-window.joinGame = joinGame;
+
+let wsManager = null;
+let timer1Interval;
+let timer2Interval;
+let activeTimer = null;
 
 // Пример использования
-const chessboard = {
-      "a1": { "fileName": "Rook", "color": "white", "hasMoved": false },
-      "a2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "a7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "a8": { "fileName": "Rook", "color": "black", "hasMoved": false },
-      "b1": { "fileName": "Knight", "color": "white" },
-      "b2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "b7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "b8": { "fileName": "Knight", "color": "black" },
-      "c1": { "fileName": "Bishop", "color": "white" },
-      "c2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "c7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "c8": { "fileName": "Bishop", "color": "black" },
-      "d1": { "fileName": "Queen", "color": "white" },
-      "d2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "d7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "d8": { "fileName": "Queen", "color": "black" },
-      "e1": { "fileName": "King", "color": "white", "hasMoved": false, "hasChecked": false },
-      "e2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "e7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "e8": { "fileName": "King", "color": "black", "hasMoved": false, "hasChecked": false },
-      "f1": { "fileName": "Bishop", "color": "white" },
-      "f2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "f7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "f8": { "fileName": "Bishop", "color": "black" },
-      "g1": { "fileName": "Knight", "color": "white" },
-      "g2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "g7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "g8": { "fileName": "Knight", "color": "black" },
-      "h1": { "fileName": "Rook", "color": "white", "hasMoved": false },
-      "h2": { "fileName": "Pawn", "color": "white", "hasMoved": false },
-      "h7": { "fileName": "Pawn", "color": "black", "hasMoved": false },
-      "h8": { "fileName": "Rook", "color": "black", "hasMoved": false }
-};
+let chessboard;
 const promoteMenuPieces = {
     "1": { "fileName": "Queen"},
     "2": { "fileName": "Bishop", "hasMoved": false },
     "3": { "fileName": "Rook", "hasMoved": false },
     "4": { "fileName": "Knight"}
 }
-const myColor = "white";
+let myColor = "WHITE";
+let currentPlayerColor = "WHITE";
 const chessSymbols = {
     "King": { "white": "♔", "black": "♚" },
     "Queen": { "white": "♕", "black": "♛" },
@@ -54,176 +26,241 @@ const chessSymbols = {
 const csrfToken = document.querySelector("meta[name='_csrf']").content;
 const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 
-function updateChessboard(chessboardData) {
-    // Полная перерисовка доски из полученных данных
-    renderChessboard(chessboardData);
-
-    // Анимация последнего хода
-    if (chessboardData.lastMove) {
-        animateMove(
-            chessboardData.lastMove.from,
-            chessboardData.lastMove.to
-        );
-    }
-}
-
-function initGamePage() {
+document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('sessionId');
 
-    const wsManager = new WebSocketManager();
-    wsManager.connect(sessionId);
+    if (!sessionId) {
+        console.error('Session ID not found!');
+        return;
+    }
 
-    wsManager.stompClient.subscribe(`/topic/game/${sessionId}`, (message) => {
-        const update = JSON.parse(message.body);
-        handleGameUpdate(update);
-    });
+    try {
+        wsManager = new WebSocketManager();
+        await wsManager.connectWithSession(sessionId);
+        console.log(`WebSocket connected for session: ${sessionId}`);
+
+        fetch(`/api/game/${sessionId}/status`, {
+            method: 'GET',
+            headers: {
+                [csrfHeader]: csrfToken
+            }
+        })
+           .then(response => {
+               if (!response.ok) {
+                   throw new Error(`Failed to fetch game status: ${response.status}`);
+               }
+               return response.json();
+           })
+           .then(gameStatus => {
+               if (!gameStatus) {
+                   console.error('Invalid game status response:', gameStatus);
+                   alert("Ошибка при загрузке состояния игры!");
+                   return;
+               }
+               initializeGameUI(gameStatus);
+           })
+           .catch(error => {
+               console.error('Failed to fetch game status:', error.message);
+               if (error.message.includes("404")) {
+                   alert("Игра не найдена или недоступна!");
+               } else {
+                   alert("Произошла ошибка при загрузке игры!");
+               }
+           });
+    } catch (error) {
+        console.error('Failed to connect to WebSocket:', error);
+    }
+});
+
+function initializeGameUI(gameStatus) {
+    if (!gameStatus) {
+        console.error('Invalid game status response!');
+        return;
+    }
+    console.log("gameStatus: ", gameStatus);
+
+    chessboard = gameStatus.chessboard.board;
+    currentPlayerColor = gameStatus.currentPlayerColor;
+    const moveHistory = gameStatus.moveHistory;
+    const whiteTime = gameStatus.whiteTime;
+    const blackTime = gameStatus.blackTime;
+    const gameResult = gameStatus.gameResult;
+
+    fillPageValues(gameStatus);
+
+    // Рендерим доску
+    console.log("myColor: ", myColor);
+    renderChessboard(chessboard, myColor === "BLACK");
+//    resizeBoard();
+    buttonsInit();
+
+    // Обновляем таймеры
+    updateTimers(whiteTime, blackTime);
+
+    // Проверяем результат игры
+    if (gameResult) {
+        handleGameResult(gameResult);
+    }
+
+    // Если требуется промоушен
+    if (gameStatus.promotionRequired) {
+        showPromotionMenu(gameStatus.promotionPosition.col + gameStatus.promotionPosition.row);
+    }
+
+    // Если возможна рокировка
+    if (gameStatus.castlingPossible) {
+        highlightCastlingOptions(gameStatus.castlingData);
+    }
+
+    // Отображаем историю ходов
+    moveHistory.forEach(move => addMoveToBox(move.from, move.to));
 }
 
-stompClient.subscribe('/user/queue/player-color', (message) => {
-    const data = JSON.parse(message.body);
-    myColor = data.color.toLowerCase();
-    updateUIWithPlayerColor(myColor);
-});
+function fillPageValues(gameStatus){
+    const currentUser = document.getElementById('profile-box-nickname').innerText;
+    const whitePlayer = gameStatus.whitePlayerUsername;
+    const blackPlayer = gameStatus.blackPlayerUsername;
 
-stompClient.subscribe(`/topic/game/${sessionId}`, (message) => {
-    const update = JSON.parse(message.body);
-    if (update.currentPlayerColor) {
-        highlightCurrentPlayer(update.currentPlayerColor);
+    let userNickname, opponentNickname;
+    console.log("currentUser: ", currentUser);
+    if (currentUser === whitePlayer) {
+        userNickname = whitePlayer;
+        myColor = "WHITE";
+        opponentNickname = blackPlayer;
+    } else {
+        userNickname = blackPlayer;
+        myColor = "BLACK";
+        opponentNickname = whitePlayer;
     }
-    if (update.status === "ACTIVE") {
-        initializeGame();
+
+    console.log("userNickname ", userNickname)
+    console.log("opponentNickname ", opponentNickname)
+
+    // Обновляем интерфейс
+    const nicknameElements = document.querySelectorAll('.mb-nickname');
+    nicknameElements[0].textContent = opponentNickname; // Оппонент (верхний блок)
+    nicknameElements[1].textContent = userNickname;     // Пользователь (нижний блок)
+
+    // Обновляем заголовок чата
+    const chatHeader = document.getElementById('chat-box-header');
+    chatHeader.innerHTML = `Чат с ${opponentNickname}<button id="toggle-button"></button>`;
+
+}
+
+function handleGameUpdate(data) {
+    if (data.type === 'move') {
+        handleMove(data);
+    } else if (data.type === 'timer') {
+        updateTimers(data.whiteTime, data.blackTime);
+    } else if (data.type === 'gameResult') {
+        handleGameResult(data.result);
+    } else if (data.type === 'possible-moves') {
+        showValidMovesFor(data.position, data.possibleMoves);
     }
-});
+}
 
+function updateChessboard(chessboard, fromPosition, toPosition) {
+    const piece = chessboard[fromPosition];
+    if (!piece) {
+        console.error(`Нет фигуры на позиции ${fromPosition}`);
+        return;
+    }
+    // Удаляем фигуру с исходной позиции
+    delete chessboard[fromPosition];
+    chessboard[toPosition] = piece;
 
-//document.addEventListener("DOMContentLoaded", function() {
-//    fetchChessboard().then(newChessboard => {
-////        chessboard = newChessboard;
-//        renderChessboard(newChessboard);
-////        console.log(chessboard);
-//    });
-//
-//    resizeBoard();
-//    buttonsInit();
-//
-//    updateTimerDisplay('timer1', timer1Time);
-//    updateTimerDisplay('timer2', timer2Time);
-//    startTimer('timer2', timer2Time);
-//
-//    const resizeObserver = new ResizeObserver(debounceResize);
-//    const board = document.getElementById('chess-board');
-//    resizeObserver.observe(board);
-//    window.addEventListener('resize', debounceResize);
-//});
+}
 
-document.addEventListener("DOMContentLoaded", function() {
-    initWebSocket();
-
-    stompClient.onConnect = () => {
-        resizeBoard();
-        buttonsInit();
-        initTimers();
-
-        // Запрос начального состояния
-        stompClient.send(`/app/game/${sessionId}/connect`, {}, JSON.stringify({}));
-    };
-});
-
-
-function renderChessboard(chessboard) {
+function renderChessboard(chessboard, isFlipped = false) {
     const board = document.getElementById('chess-board');
-    // Очистка доски перед новым рендерингом
     board.innerHTML = '';
 
-    for (let row = 8; row >= 1; row--) {
-        for (let col = 'a'; col <= 'h'; col = String.fromCharCode(col.charCodeAt(0) + 1)) {
+    const rows = isFlipped
+        ? [1, 2, 3, 4, 5, 6, 7, 8]
+        : [8, 7, 6, 5, 4, 3, 2, 1];
+
+    const cols = isFlipped
+        ? ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
+        : ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    for (const row of rows) {
+        for (const col of cols) {
             const position = col + row;
-            const piece = chessboard.board[position];
-//            console.log("piece: ", piece);
+            const piece = chessboard[position];
+            const isLight = (row + col.charCodeAt(0)) % 2 !== 0;
 
-            // Создание элемента для клетки
             const square = document.createElement('div');
-            square.classList.add('square');
-            square.id = `${col}${row}`;
-            square.addEventListener('click', () => handleSquareClick(square.id));
+            square.className = `square ${isLight ? 'light' : 'dark'}`;
+            square.id = position;
 
-            const isLight = (row + col.charCodeAt(0)) % 2 === 0;
-            if (isLight) {
-                square.classList.add('light');
-            } else {
-                square.classList.add('dark');
+            // Добавляем номер строки
+            if (col === cols[7]) {
+                const rowLabel = document.createElement('div');
+                rowLabel.className = `coordinate row-label ${isLight ? 'light-label' : 'dark-label'}`;
+                rowLabel.textContent = row;
+                square.appendChild(rowLabel);
             }
 
-            // Если фигура есть, создаем элемент для изображения
+            // Добавляем букву столбца
+            if (row === rows[rows.length - 1]) {
+                const colLabel = document.createElement('div');
+                colLabel.className = `coordinate col-label ${isLight ? 'light-label' : 'dark-label'}`;
+                colLabel.textContent = col;
+                square.appendChild(colLabel);
+            }
+
             if (piece) {
-                const pieceElement = document.createElement('img');
-                square.appendChild(pieceElement);
-                pieceElement.classList.add('piece');
-                pieceElement.src = `/static/images/${piece.color}/${piece.fileName}.png`;
+                const img = document.createElement('img');
+                img.className = 'piece';
+                img.src = `/static/images/${piece.color}/${piece.fileName}.png`;
+                square.appendChild(img);
             }
 
-            // Добавление клетки на доску
+            square.addEventListener('click', () => handleCellClick(position));
             board.appendChild(square);
         }
     }
 }
 
-//function handleSquareClick(position) {
-//    const square = document.getElementById(position);
-//    const selectedSquare = document.querySelector('.selected');
-//    if (selectedSquare == square) {
-//        hideValidMove();
-//        return;
-//    }
-//    if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
-//       hideValidMove();
-//       makeMove(selectedSquare.id, square.id);
-//    } else {
-//        if (!square.querySelector('.piece')) {
-//            hideValidMove();
-//            console.log("нет фигуры");
-//            return;
-//        }
-//        showValidMovesFrom(position);
-//    }
-//}
-
-function handleSquareClick(position) {
+function handleCellClick(position) {
     const square = document.getElementById(position);
     const selectedSquare = document.querySelector('.selected');
-    if (selectedSquare) {
-        // Отправляем ход через WebSocket
-        makeMove(selectedSquare.id, position);
+    if (selectedSquare == square) {
         hideValidMove();
-    } else if (square.querySelector('.piece')) {
-        // Запрашиваем возможные ходы
-        getPossibleMoves(position);
-        showValidMoves(position);
+        return;
+    }
+    if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
+       hideValidMove();
+       wsManager.makeMove(selectedSquare.id, square.id);
+    } else {
+        if (!square.querySelector('.piece')) {
+            hideValidMove();
+            console.log("нет фигуры");
+            return;
+        }
+        wsManager.getPossibleMoves(position);
     }
 }
 
 function getPieceAt(position) {
-    return chessboard.board[position] || null;
+    return chessboard[position] || null;
 }
 
-function showValidMovesFrom(position) {
+function showValidMovesFor(position, possibleMoves) {
+    console.log("position in showValidMovesFor: ", position);
     console.log(`Clicked on position: ${position}`);
     hideValidMove();
-    square = document.getElementById(position);
+    square = document.getElementById(`${position.col}${position.row}`);
     square.classList.add('selected');
 
-    // Отправляем запрос на сервер для получения возможных ходов
-    getPossibleMoves(position).then(possibleMoves => {
-        console.log('Possible moves:', possibleMoves);
-        possibleMoves.forEach(targetPosition => {
-            const targetSquare = document.getElementById(`${targetPosition.col}${targetPosition.row}`);
-            if (targetSquare) {
-                if (chessboard.board[targetSquare.id]) {
-                    targetSquare.classList.add('possible-move-on-piece');
-                } else targetSquare.classList.add('possible-move');
-            }
-        });
+    possibleMoves.forEach(targetPosition => {
+        const targetSquare = document.getElementById(`${targetPosition.col}${targetPosition.row}`);
+        if (targetSquare) {
+            if (chessboard[targetSquare.id]) {
+                targetSquare.classList.add('possible-move-on-piece');
+            } else targetSquare.classList.add('possible-move');
+        }
     });
 }
 
@@ -240,7 +277,9 @@ function hideValidMove() {
     }
 }
 
-function movePiece(positionFrom, positionTo) {
+function animateMove(positionFrom, positionTo) {
+    console.log("positionFrom ", positionFrom);
+    console.log("positionTo ", positionTo);
     const selectedSquare = document.getElementById(positionFrom);
     const targetSquare = document.getElementById(positionTo);
 
@@ -249,7 +288,6 @@ function movePiece(positionFrom, positionTo) {
     document.querySelectorAll('.last-move').forEach(square => {
         square.classList.remove('last-move');
     });
-
 
     // Получаем координаты начального и конечного квадрата
     const startPos = selectedSquare.getBoundingClientRect();
@@ -284,7 +322,7 @@ function movePiece(positionFrom, positionTo) {
             const pieceName = (targetPiece.src).substring(lastSlashIndex + 1, pngIndex);
             const pieceSymbol = chessSymbols[pieceName][color];
 
-            if (color == myColor) {
+            if (color == myColor.toLowerCase()) {
                 document.getElementById("opponent").textContent  += pieceSymbol;
             } else {
                 document.getElementById("me").textContent  += pieceSymbol;
@@ -478,20 +516,21 @@ function debounceResize() {
 }
 
 function resizeBoard() {
+    const board = document.getElementById('chess-board');
+    const chatBox = document.getElementById('chat-box');
+    const chatBoxHeader = document.getElementById('chat-box-header');
+    const moveBox = document.getElementById('move-box');
+
+    // Замеряем размеры вне RAF для актуальных значений
+    const boardSize = Math.min(
+        board.parentElement.offsetWidth,
+        board.parentElement.offsetHeight
+    );
+
     requestAnimationFrame(() => {
-        const board = document.getElementById('chess-board');
-        const chatBox = document.getElementById('chat-box');
-        const chatBoxHeader = document.getElementById('chat-box-header');
-        const moveBox = document.getElementById('move-box');
-
-        // Вычисляем размер доски
-        const boardSize = Math.min(board.offsetWidth, board.offsetHeight);
-
-        // Устанавливаем размеры доски
         board.style.width = `${boardSize}px`;
         board.style.height = `${boardSize}px`;
 
-        // Устанавливаем размеры клеток через CSS-переменные
         const squareSize = boardSize / 8;
         document.documentElement.style.setProperty('--square-size', `${squareSize}px`);
 
@@ -503,25 +542,46 @@ function resizeBoard() {
         }
         moveBox.style.height = `${boardSize}px`;
     });
+    const resizeObserver = new ResizeObserver(entries => {
+        // Дебаунсим вызовы
+        let timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(resizeBoard, 100);
+    });
+
+    window.addEventListener('resize', () => {
+        requestAnimationFrame(resizeBoard);
+    });
+//    const board = document.getElementById('chess-board');
+    resizeObserver.observe(board.parentElement);
 }
 
 
-let timer1Interval;
-let timer2Interval;
-let timer1Time = 180; // 3 минуты в секундах
-let timer2Time = 180;
-let activeTimer = null;
 
+
+// Обновление отображения таймера
 function updateTimerDisplay(timerId, time) {
     const timer = document.getElementById(timerId);
-    if (time <= 10) {
-        timer.style.backgroundColor = "orange";
+    let minutes = Math.floor(time / 60000); // Минуты
+    let seconds = Math.floor((time % 60000) / 1000); // Секунды
+    let tenths = Math.floor((time % 1000) / 100); // Десятые доли секунды
+
+    // Отображаем десятые доли только если время <= 5 секунд
+    if (time <= 5000) {
+        timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`;
+    } else {
+        timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
-    const minutes = String(Math.floor(time / 60)).padStart(2, '0');
-    const seconds = String(time % 60).padStart(2, '0');
-    timer.textContent = `${minutes}:${seconds}`;
+
+    // Изменяем цвет фона при критическом времени
+    if (time <= 5000) {
+        timer.style.backgroundColor = "orange";
+    } else {
+        timer.style.backgroundColor = "";
+    }
 }
 
+// Запуск таймера
 function startTimer(timerId, time) {
     clearInterval(timer1Interval);
     clearInterval(timer2Interval);
@@ -529,18 +589,18 @@ function startTimer(timerId, time) {
 
     const interval = setInterval(() => {
         if (time > 0) {
-            time--;
+            time -= 10; // Уменьшаем время на 10 мс (1/100 секунды)
             updateTimerDisplay(timerId, time);
         } else {
             clearInterval(interval); // Остановить таймер, когда время истечет
             if (timerId == "timer1") {
-                showGameResult(myColor);
+                showGameResult("black"); // Белые проиграли по времени
             } else if (timerId == "timer2") {
-                showGameResult(myColor == "white"? "black" : "white")
+                showGameResult("white"); // Черные проиграли по времени
             }
             activeTimer = null; // Сброс активного таймера
         }
-    }, 1000);
+    }, 10);
 
     if (timerId === 'timer1') {
         timer1Interval = interval;
@@ -549,81 +609,77 @@ function startTimer(timerId, time) {
     }
 }
 
-function resumeTimer() {
-    if (activeTimer === 'timer1') {
-        timer1Time = Math.max(timeToSeconds(document.getElementById("timer1").textContent), 0);
-        startTimer('timer2', timer2Time);
-    } else if (activeTimer === 'timer2') {
-        timer2Time = Math.max(timeToSeconds(document.getElementById("timer2").textContent), 0);
-        startTimer('timer1', timer1Time);
+// Обновление таймеров на основе данных с сервера
+function updateTimers(whiteTime, blackTime) {
+    const whiteTimer = document.getElementById("timer1");
+    const blackTimer = document.getElementById("timer2");
+
+    // Конвертируем время из строкового формата в миллисекунды
+    function parseTime(timeStr) {
+        const parts = timeStr.split(':');
+        const minutes = parseInt(parts[0], 10);
+        const seconds = parseInt(parts[1], 10);
+        const tenths = parts[2] ? parseInt(parts[2], 10) : 0;
+        return (minutes * 60 + seconds) * 1000 + tenths * 100;
+    }
+
+    const parsedWhiteTime = parseTime(whiteTime);
+    const parsedBlackTime = parseTime(blackTime);
+
+    // Обновляем отображение таймеров
+    updateTimerDisplay("timer1", parsedWhiteTime);
+    updateTimerDisplay("timer2", parsedBlackTime);
+
+    if (currentPlayerColor === "WHITE" && activeTimer !== "timer1") {
+        startTimer("timer1", parsedWhiteTime);
+    } else if (currentPlayerColor === "BLACK" && activeTimer !== "timer2") {
+        startTimer("timer2", parsedBlackTime);
     }
 }
-function timeToSeconds(timeStr) {
-    const parts = timeStr.split(':'); // Разделяем строку по двоеточию
-    const minutes = parseInt(parts[0], 10); // Получаем минуты
-    const seconds = parseInt(parts[1], 10); // Получаем секунды
-    return minutes * 60 + seconds; // Преобразуем в секунды
-}
 
-
-
-//async function getPossibleMoves(position) {
-//    const response = await fetch(`/api/chess/possible-moves?position=${position}`);
-//    const possibleMoves = await response.json();
-//    return possibleMoves;
-//}
-
-//// Функция для выполнения хода
-//async function makeMove(fromPosition, toPosition) {
-//    const response = await fetch('/api/chess/make-move', {
-//        method: 'POST',
-//        headers: {
-//            'Content-Type': 'application/json',
-//            [csrfHeader]: csrfToken
-//        },
-//        body: JSON.stringify({
-//            from: fromPosition,
-//            to: toPosition
-//        })
-//    });
-//    const result = await response.json();
-//    if (result.draw) {
-//        console.log("draw");
-//        movePiece(fromPosition, toPosition);
-//        updateChessboard(chessboard, fromPosition, toPosition);
-//        addMoveToBox(fromPosition, toPosition);
-//        showGameResult("draw");
-//    } else if (result.victory) {
-//        console.log("winer is ");
-//        movePiece(fromPosition, toPosition);
-//        updateChessboard(chessboard, fromPosition, toPosition);
-//        addMoveToBox(fromPosition, toPosition);
-//        showGameResult(result.victory.winner);
-//    } else if (result.promotePawn) {
+// Функция для выполнения хода
+function handleMove(move) {
+    console.log("move: ", move);
+    const result = move.moveResult;
+    const fromPosition = `${move.move.from.col}${move.move.from.row}`;
+    const toPosition = `${move.move.to.col}${move.move.to.row}`;
+    if (result.draw) {
+        console.log("draw");
+        animateMove(fromPosition, toPosition);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
+        showGameResult("draw");
+    } else if (result.victory) {
+        console.log("winer is ");
+        animateMove(fromPosition, toPosition);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
+        showGameResult(result.victory.winner);
+    } else if (result.promotePawn) {
 //        const promotionPosition = result.promotePawn.position;
 //        const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
 //        console.log("Выбрана фигура для промоушена: ", promotedPiece);
 //        updateChessboard(chessboard, fromPosition, toPosition);
-//        chessboard.board[toPosition] = promotedPiece;
+//        chessboard[toPosition] = promotedPiece;
 //        addMoveToBox(fromPosition, toPosition);
-//    } else if (result.castling) {
-//        console.log("рокировка!");
-//        const { from: rookFrom, to: rookTo } = result.castling;
-//        console.log(rookFrom, rookTo);
-//        movePiece(fromPosition, toPosition);
-//        movePiece(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
-//        updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
-//        updateChessboard(chessboard, fromPosition, toPosition);
-//        addMoveToBox(fromPosition, toPosition);
-//    } else {
-//        movePiece(fromPosition, toPosition);
-//        updateChessboard(chessboard, fromPosition, toPosition);
-//        addMoveToBox(fromPosition, toPosition);
-//    }
+    } else if (result.castling) {
+        console.log("рокировка!");
+        const { from: rookFrom, to: rookTo } = result.castling;
+        console.log(rookFrom, rookTo);
+        animateMove(fromPosition, toPosition);
+        animateMove(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
+        updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
+    } else {
+        animateMove(fromPosition, toPosition);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition);
+    }
 //    resumeTimer();
-//
-//    return chessboard;
-//}
+
+    return chessboard;
+}
 
 //async function sendPromotionChoice(position, selectedPieceType) {
 //    const response = await fetch('/api/chess/promotion', {
@@ -642,19 +698,6 @@ function timeToSeconds(timeStr) {
 //    const result = await response.json();
 //}
 
-//async function fetchChessboard() {
-//    const response = await fetch('/api/chess/chessboard');
-//    const newChessboard = await response.json();
-//
-//    // Очистили текущее содержимое объекта
-//    Object.keys(chessboard).forEach(key => delete chessboard[key]);
-//
-//    // Обновили содержимое объекта новыми данными
-//    Object.assign(chessboard, newChessboard);
-//
-//    return chessboard;
-//}
-
 function displayUserProfileBtn(user) {
     // Пример отображения информации о пользователе
     const profileBox = document.getElementById("profile-box");
@@ -670,45 +713,25 @@ function displayUserProfileBtn(user) {
 let stompClient = null;
 let sessionId = null;
 
-function initWebSocket() {
-    // Получаем sessionId из URL
-    sessionId = new URLSearchParams(window.location.search).get('sessionId');
+function updateMoveHistory(moveHistory) {
+    const whiteMoves = document.getElementById('white-moves');
+    const blackMoves = document.getElementById('black-moves');
+    const moveNumbers = document.getElementById('move-numbers');
 
-    const socket = new SockJS('/ws');
-    stompClient = Stomp.over(socket);
+    // Очищаем текущую историю
+    whiteMoves.innerHTML = '';
+    blackMoves.innerHTML = '';
+    moveNumbers.innerHTML = '';
 
-    stompClient.connect({}, () => {
-        // Подписка на обновления игры
-        stompClient.subscribe(`/topic/game/${sessionId}`, (message) => {
-            const gameState = JSON.parse(message.body);
-            handleGameUpdate(gameState);
-        });
-
-        // Подписка на персональные ошибки
-        stompClient.subscribe(`/user/queue/errors`, (message) => {
-            console.error('Ошибка:', message.body);
-        });
+    // Перерисовываем историю
+    moveHistory.forEach((move, index) => {
+        const moveNumber = Math.floor(index / 2) + 1;
+        if (index % 2 === 0) {
+            addMoveToBox(move.from, move.to, 'white');
+        } else {
+            addMoveToBox(move.from, move.to, 'black');
+        }
     });
-}
-
-function handleGameUpdate(gameState) {
-    // Общая часть: обновление доски и интерфейса
-    updateChessboard(gameState.chessboard);
-    updateMoveHistory(gameState.moveHistory);
-    updateTimers(gameState.timers);
-
-    // Обработка специальных случаев
-    if (gameState.promotionRequired) {
-        handlePromotion(gameState.promotionPosition);
-    }
-
-    if (gameState.gameResult) {
-        handleGameResult(gameState.gameResult);
-    }
-
-    if (gameState.castling) {
-        handleCastling(gameState.castling);
-    }
 }
 
 function handlePromotion(promotionData) {
@@ -724,63 +747,25 @@ function handlePromotion(promotionData) {
 }
 
 function handleCastling(castlingData) {
-    movePiece(castlingData.king.from, castlingData.king.to);
-    movePiece(castlingData.rook.from, castlingData.rook.to);
+    animateMove(castlingData.king.from, castlingData.king.to);
+    animateMove(castlingData.rook.from, castlingData.rook.to);
     addMoveToBox(castlingData.king.from, castlingData.king.to);
 }
 
 function handleGameResult(result) {
-    showGameResult(result.winner);
-    if (result.reason === 'checkmate') {
-        highlightKing(result.kingPosition);
+    if (result.draw) {
+        showGameResult('draw');
+    } else if (result.winner === 'white') {
+        showGameResult('white');
+    } else if (result.winner === 'black') {
+        showGameResult('black');
     }
-}
-
-function getPossibleMoves(position) {
-    stompClient.send(`/app/game/${sessionId}/possible-moves`, {},
-        JSON.stringify({ position: position }));
-}
-
-function makeMove(from, to) {
-    // Показываем предварительную анимацию
-    animateMove(from, to);
-
-    // Отправляем ход на сервер
-    stompClient.send(`/app/game/${sessionId}/move`, {},
-        JSON.stringify({
-            from: from,
-            to: to,
-            // Доп параметры для сложных случаев
-            promotionType: pendingPromotion?.pieceType
-        })
-    );
-
-    // Сбрасываем состояние промоута
-    pendingPromotion = null;
 }
 
 function sendPromotionChoice(position, pieceType) {
     stompClient.send(`/app/game/${sessionId}/promotion`, {},
         JSON.stringify({ position: position, pieceType: pieceType }));
 }
-
-function createNewGame() {
-    stompClient.send(`/app/game/create`, {}, JSON.stringify({}));
-}
-
-function updateTimers(timers) {
-    updateTimerDisplay('timer1', timers.whiteTime);
-    updateTimerDisplay('timer2', timers.blackTime);
-
-    if (timers.currentPlayer === 'white') {
-        startTimer('timer1', timers.whiteTime);
-    } else {
-        startTimer('timer2', timers.blackTime);
-    }
-}
-
-
-
 
 
 

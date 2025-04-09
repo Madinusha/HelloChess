@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class GameUpdateDTO {
 	private Map<String, Object> moveResult;
-	private Chessboard chessboard;
+//	private Chessboard chessboard;
 	private ChessController.MoveRequest lastMove;       // Последний ход (например, "e2-e4")
 	private String currentPlayer = "WHITE"; 	// Текущий игрок ("WHITE" или "BLACK")
 }

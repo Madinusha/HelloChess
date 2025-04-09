@@ -28,6 +28,7 @@ public class GameSessionService {
 				timer
 		);
 		sessions.put(sessionId, session);
+		System.out.println("Вот такой искомый sessionId - " + sessionId);
 		return session;
 	}
 
@@ -36,6 +37,7 @@ public class GameSessionService {
 	}
 
 	public void removeSession(String sessionId) {
+		System.out.println("Удаляется сессия по id");
 		sessions.remove(sessionId);
 	}
 

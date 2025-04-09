@@ -75,35 +75,10 @@ public class UserController {
 		}
 	}
 
-//	@PostMapping("/login")
-//	public ResponseEntity<String> loginUser(
-//			@Valid @RequestBody UserLoginDTO userDTO,
-//			HttpServletRequest request
-//	) {
-//		try {
-//			Authentication authentication = authenticationManager.authenticate(
-//					new UsernamePasswordAuthenticationToken(
-//							userDTO.getNickname(),
-//							userDTO.getPassword()
-//					)
-//			);
-//			SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
 //
-//			// Получаем полный объект User из базы данных
-//			User user = userService.findUserByNickname(authentication.getName());
 //
-//			HttpSession session = request.getSession();
-//			session.setAttribute("user", user); // Сохраняем объект User
-//
-//			return ResponseEntity.ok("Вход выполнен успешно");
-//		} catch (BadCredentialsException e) {
-//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
-//		}
-//	}
-
-
-
-
 //	@GetMapping("/profile")
 //	public ResponseEntity<UserProfileDTO> getProfile() {
 //		// Получаем аутентификацию из контекста
@@ -130,6 +105,11 @@ public class UserController {
 
 		// Получаем пользователя из базы данных
 		User user = userService.findUserByNickname(authentication.getName());
+
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+//		System.out.println(user.getNickname() + " " + user.getEmail());
 
 		return ResponseEntity.ok(
 				new UserProfileDTO(user.getNickname(), user.getEmail())

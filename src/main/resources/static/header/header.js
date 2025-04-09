@@ -21,7 +21,6 @@ async function checkUserProfile() {
     const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
     const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
     try {
-
         const response = await fetch("/api/users/profile", {
             method: "GET",
             headers: {
@@ -48,14 +47,14 @@ async function checkUserProfile() {
     }
 }
 
-function displayUserProfileBtn(user) {
-    // Пример отображения информации о пользователе
-    const profileBox = document.getElementById("profile-box");
-    const profileBoxNickname = document.getElementById("profile-box-nickname");
-    const profileBoxAvatar = document.getElementById("profile-box-avatar");
-    profileBoxNickname.textContent = `${user.username}`; // Отображаем имя пользователя
-    profileBox.style.display = "flex";
-
-    const login = document.getElementById("login");
-    login.style.display = "none";
-}
+//function displayUserProfileBtn(user) {
+//    // Пример отображения информации о пользователе
+//    const profileBox = document.getElementById("profile-box");
+//    const profileBoxNickname = document.getElementById("profile-box-nickname");
+//    const profileBoxAvatar = document.getElementById("profile-box-avatar");
+//    profileBoxNickname.textContent = `${user.username}`; // Отображаем имя пользователя
+//    profileBox.style.display = "flex";
+//
+//    const login = document.getElementById("login");
+//    login.style.display = "none";
+//}

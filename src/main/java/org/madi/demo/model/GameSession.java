@@ -77,11 +77,11 @@ public class GameSession {
 	}
 
 	public int getTimeControlMinutes() {
-		return timer.getWhiteTime() ;
+		return timer.getInitialTimeMinutes();
 	}
 
 	public int getTimeControlIncrement() {
-		return timer.getIncrement();
+		return timer.getIncrementSeconds();
 	}
 
 	public enum GameStatus {

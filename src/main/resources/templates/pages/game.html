@@ -2,16 +2,18 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="current-user" th:if="${#authentication != null}"
+          th:content="${#authentication.principal.nickname}">
+    <meta name="current-user" th:unless="${#authentication != null}"
+          content="Guest">
     <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <link rel="stylesheet" th:href="@{/static/game/game.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.min.js"></script>
     <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
-
     <script th:src="@{/static/webSocketManager.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
-    <script th:src="@{/static/utils.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
     <script th:src="@{/static/game/game.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <title>HelloChess</title>
 </head>
 <body>
@@ -21,7 +23,8 @@
     <audio id="moveSound" th:src="@{/static/sounds/movePiece.wav}"></audio>
     <audio id="eatSound" th:src="@{/static/sounds/eatPiece.wav}"></audio>
     <div id="chat-box">
-        <div id="chat-box-header">Чат с Bull_Digga
+        <div id="chat-box-header">
+            Чат с <span id="opponent-name"></span>
             <button id="toggle-button"></button>
         </div>
         <div id="chat-box-window">
@@ -35,7 +38,7 @@
     <div id="chess-board"></div>
     <div id="move-box">
         <div class="move-box-player">
-            <div class="mb-nickname">Bull_Digga</div>
+            <div class="mb-nickname"></div>
             <div class="mb-rank">1</div>
             <div class="mb-timer" id="timer1">03:00</div>
             <div class="mb-eaten-pieces" id="opponent"></div>
@@ -56,7 +59,7 @@
             <button title="Новый соперник" id="find-opponent"></button>
         </div>
         <div class="move-box-player">
-            <div class="mb-nickname">madi_nusha</div>
+            <div class="mb-nickname"></div>
             <div class="mb-rank">100</div>
             <div class="mb-timer" id="timer2">03:00</div>
             <div class="mb-eaten-pieces" id="me"></div>
@@ -69,8 +72,6 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelementplayer.min.css" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mediaelement/4.2.16/mediaelement-and-player.min.js" defer></script>
 </body>
 </html>

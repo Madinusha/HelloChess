@@ -1,7 +1,6 @@
 package org.madi.demo.controller;
 
 import org.madi.demo.dto.CreateGameRequest;
-import org.madi.demo.dto.GameUpdateDTO;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.GameSession;
 import org.madi.demo.model.GameTimer;
@@ -16,7 +15,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +28,7 @@ import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 
 @RestController
 @RequestMapping("/api")
-public class GameWebSocketController {
+public class GameConstructorController {
 	@Autowired
 	private GameSessionService sessionService;
 
@@ -56,11 +54,9 @@ public class GameWebSocketController {
 				sessionId,
 				creator,
 				request.getPlayerColor(),
-				new GameTimer(
-						request.getTimeControl().getMinutes() * 60,
-						request.getTimeControl().getIncrement()
-				)
+				new GameTimer(request.getTimeControl().getMinutes(), request.getTimeControl().getIncrement())
 		);
+		System.out.println(request.getTimeControl().getMinutes());
 
 		// Отправляем ответ создателю
 		messagingTemplate.convertAndSendToUser(
@@ -91,25 +87,22 @@ public class GameWebSocketController {
 	) {
 		GameSession session = sessionService.getSession(sessionId);
 		User joiningUser = userService.findUserByNickname(principal.getName());
-
 		if (session.getStatus() == WAITING) {
 			try {
 				session.joinPlayer(joiningUser);
-
-				sendPlayerColors(session, joiningUser);
-
-				// Рассылаем общее обновление
+				User creator = session.getCreator();
+				// Уведомление для создателя
+				messagingTemplate.convertAndSendToUser(
+						creator.getNickname(),
+						"/queue/game-start",
+						Map.of("sessionId", sessionId)
+				);
+				System.out.println("Типа отправил создателю");
+				// Общее уведомление для всех участников
 				messagingTemplate.convertAndSend(
 						"/topic/game/" + sessionId,
-						new GameUpdateDTO(
-								Map.of("status", "ACTIVE"),
-								session.getChessboard(),
-								null,
-								session.getCurrentPlayerColor()
-						)
+						Map.of("status", "ACTIVE")
 				);
-				endGame(sessionId);
-
 			} catch (IllegalStateException e) {
 				messagingTemplate.convertAndSendToUser(
 						principal.getName(),
@@ -127,7 +120,6 @@ public class GameWebSocketController {
 
 	public void endGame(String sessionId) {
 		sessionService.removeSession(sessionId);
-
 		messagingTemplate.convertAndSend(
 				"/topic/games/closed",
 				Map.of("sessionId", sessionId)
@@ -135,7 +127,6 @@ public class GameWebSocketController {
 	}
 
 	private void sendPlayerColors(GameSession session, User joiningUser) {
-		// Проверяем, что создатель существует
 		if (session.getPlayerWhite() == null || session.getPlayerBlack() == null) {
 			throw new IllegalStateException("Игроки не найдены");
 		}
@@ -148,7 +139,7 @@ public class GameWebSocketController {
 		);
 
 		messagingTemplate.convertAndSendToUser(
-				joiningUser.getNickname(),
+				session.getPlayerBlack().getNickname(),
 				"/queue/player-color",
 				Map.of("color", "BLACK")
 		);
@@ -160,45 +151,6 @@ public class GameWebSocketController {
 				principal.getName(),
 				"/queue/errors",
 				Map.of("error", ex.getMessage())
-		);
-	}
-
-	@MessageMapping("/game/{sessionId}/move")
-	public void handleMove(
-			@DestinationVariable String sessionId,
-			@Payload ChessController.MoveRequest move,
-			SimpMessageHeaderAccessor headerAccessor
-	) {
-		// 1. Проверка прав
-		GameSession session = sessionService.getSession(sessionId);
-		if (!session.isPlayersTurn(headerAccessor.getUser().getName())) {
-			throw new AccessDeniedException("Сейчас не ваш ход!");
-		}
-
-		// 2. Обработка хода
-		Map<String, Object> result = chessService.makeMove(
-				sessionId,
-				move.getFrom(),
-				move.getTo()
-		);
-
-		// 3. Рассылка обновления
-		messagingTemplate.convertAndSend(
-				"/topic/game/" + sessionId,
-				new GameUpdateDTO(
-						result,
-						session.getChessboard(),
-						move, // История ходов
-						session.getChessboard().getCurrentPlayerColor() // Текущий игрок
-				)
-		);
-		GameTimer timer = session.getTimer();
-		messagingTemplate.convertAndSend(
-				"/topic/game/" + sessionId,
-				Map.of(
-						"whiteTime", timer.getFormattedWhiteTime(),
-						"blackTime", timer.getFormattedBlackTime()
-				)
 		);
 	}
 }
