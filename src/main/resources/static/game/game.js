@@ -119,19 +119,23 @@ function initializeGameUI(gameStatus) {
 
 function fillPageValues(gameStatus){
     const currentUser = document.getElementById('profile-box-nickname').innerText;
-    const whitePlayer = gameStatus.whitePlayerUsername;
-    const blackPlayer = gameStatus.blackPlayerUsername;
+    const whitePlayer = gameStatus.whitePlayerDTO;
+    const blackPlayer = gameStatus.blackPlayerDTO;
+    const chat = gameStatus.chatDTO;
+    showChat(chat);
 
     let userNickname, opponentNickname;
+    let userRating, opponentRating;
     console.log("currentUser: ", currentUser);
-    if (currentUser === whitePlayer) {
-        userNickname = whitePlayer;
-        myColor = "WHITE";
-        opponentNickname = blackPlayer;
-    } else {
-        userNickname = blackPlayer;
+
+    userNickname = whitePlayer.nickname;
+    userRating = whitePlayer.rating;
+    opponentNickname = blackPlayer.nickname;
+    opponentRating = blackPlayer.rating;
+    if (currentUser === blackPlayer.nickname) {
         myColor = "BLACK";
-        opponentNickname = whitePlayer;
+        [userNickname, opponentNickname] = [opponentNickname, userNickname];
+        [userRating, opponentRating] = [opponentRating, userRating];
     }
 
     console.log("userNickname ", userNickname)
@@ -141,6 +145,10 @@ function fillPageValues(gameStatus){
     const nicknameElements = document.querySelectorAll('.mb-nickname');
     nicknameElements[0].textContent = opponentNickname; // Оппонент (верхний блок)
     nicknameElements[1].textContent = userNickname;     // Пользователь (нижний блок)
+
+    const ratingElements = document.querySelectorAll('.mb-rating');
+    ratingElements[0].textContent = opponentRating; // Оппонент (верхний блок)
+    ratingElements[1].textContent = userRating;     // Пользователь (нижний блок)
 
     // Обновляем заголовок чата
     const chatHeader = document.getElementById('chat-box-header');
@@ -221,7 +229,54 @@ function renderChessboard(chessboard, isFlipped = false) {
             board.appendChild(square);
         }
     }
+    const resizeHandle = document.createElement('div');
+    resizeHandle.id = 'resize-handle';
+    board.appendChild(resizeHandle);
+
+    let isResizing = false;
+    let startX, startY, startWidth, startHeight;
+
+    resizeHandle.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = board.offsetWidth;
+        startHeight = board.offsetHeight;
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function resize(e) {
+        if (!isResizing) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        const computedStyle = getComputedStyle(board);
+
+        let newWidth = startWidth + deltaX;
+        newWidth = Math.max(
+            parseFloat(computedStyle.minWidth),
+            Math.min(newWidth, parseFloat(computedStyle.maxWidth))
+        );
+
+        board.style.width = `${newWidth}px`;
+        board.style.height = `${newWidth}px`; // Сохраняем пропорции
+        const boardSize = board.offsetWidth;
+
+        const chatBox = document.getElementById('chat-box');
+        const chatBoxHeader = document.getElementById('chat-box-header');
+        const moveBox = document.getElementById('move-box');
+        // Устанавливаем высоту чата и окна ходов
+        if (!chatBox.classList.contains('collapsed')) {
+            chatBox.style.height = `${boardSize}px`;
+        } else {
+            chatBox.style.height = chatBoxHeader.offsetHeight + 'px';
+        }
+        moveBox.style.height = `${boardSize}px`;
+    });
+
+    document.addEventListener('mouseup', () => isResizing = false);
 }
+
 
 function handleCellClick(position) {
     const square = document.getElementById(position);
@@ -232,7 +287,7 @@ function handleCellClick(position) {
     }
     if (square.classList.contains('possible-move') || square.classList.contains('possible-move-on-piece')) {
        hideValidMove();
-       wsManager.makeMove(selectedSquare.id, square.id);
+       makeMove(selectedSquare.id, square.id);
     } else {
         if (!square.querySelector('.piece')) {
             hideValidMove();
@@ -241,6 +296,35 @@ function handleCellClick(position) {
         }
         wsManager.getPossibleMoves(position);
     }
+}
+
+function makeMove(positionFrom, positionTo) {
+    const piece = getPieceAt(positionFrom);
+    console.log("Фигура для хода: ", piece);
+    if (piece.fileName === "Pawn") {
+        const targetRank = positionTo[1]; // Получаем номер строки (например "8" или "1")
+        const isPromotionRequired =
+            (piece.color === "white" && targetRank === "8") ||
+            (piece.color === "black" && targetRank === "1");
+        console.log("isPromotionRequired: ", isPromotionRequired);
+        if (isPromotionRequired) {
+            console.log("Требуется превращение пешки");
+            showPromotionMenu(positionFrom, positionTo)
+                .then(selectedPiece => {
+                    if (selectedPiece) {
+                        wsManager.makeMove(positionFrom, positionTo, selectedPiece);
+                    } else {
+                        console.log("Пользователь отменил выбор превращения");
+                    }
+                    console.log("selectedPiece: ", selectedPiece);
+                })
+                .catch(error => {
+                    console.error("Ошибка при выборе превращения:", error);
+                });
+            return;
+        }
+    }
+    wsManager.makeMove(positionFrom, positionTo);
 }
 
 function getPieceAt(position) {
@@ -278,68 +362,123 @@ function hideValidMove() {
 }
 
 function animateMove(positionFrom, positionTo) {
-    console.log("positionFrom ", positionFrom);
-    console.log("positionTo ", positionTo);
-    const selectedSquare = document.getElementById(positionFrom);
-    const targetSquare = document.getElementById(positionTo);
+    return new Promise((resolve) => {
+        console.log("positionFrom ", positionFrom);
+        console.log("positionTo ", positionTo);
+        const selectedSquare = document.getElementById(positionFrom);
+        const targetSquare = document.getElementById(positionTo);
 
-    // Получаем изображение фигуры
-    const piece = selectedSquare.querySelector('.piece');
-    document.querySelectorAll('.last-move').forEach(square => {
-        square.classList.remove('last-move');
-    });
+        // Получаем изображение фигуры
+        const piece = selectedSquare.querySelector('.piece');
+        document.querySelectorAll('.last-move').forEach(square => {
+            square.classList.remove('last-move');
+        });
 
-    // Получаем координаты начального и конечного квадрата
-    const startPos = selectedSquare.getBoundingClientRect();
-    const endPos = targetSquare.getBoundingClientRect();
+        // Получаем координаты начального и конечного квадрата
+        const startPos = selectedSquare.getBoundingClientRect();
+        const endPos = targetSquare.getBoundingClientRect();
 
-    // Вычисляем смещение
-    const deltaX = endPos.left - startPos.left;
-    const deltaY = endPos.top - startPos.top;
+        // Вычисляем смещение
+        const deltaX = endPos.left - startPos.left;
+        const deltaY = endPos.top - startPos.top;
 
-    // Добавляем анимацию
-    requestAnimationFrame(() => {
-        piece.style.zIndex = 1000;
-        piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    });
-    const moveSound = document.getElementById('moveSound');
-    const eatSound = document.getElementById('eatSound');
+        // Добавляем анимацию
+        requestAnimationFrame(() => {
+            piece.style.zIndex = 1000;
+            piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        });
+        const moveSound = document.getElementById('moveSound');
+        const eatSound = document.getElementById('eatSound');
 
-    piece.addEventListener('transitionend', () => {
+        piece.addEventListener('transitionend', () => {
 
-        selectedSquare.classList.add('last-move');
-        targetSquare.classList.add('last-move');
+            selectedSquare.classList.add('last-move');
+            targetSquare.classList.add('last-move');
 
-        const targetPiece = targetSquare.querySelector('.piece');
-        if (targetPiece) {
-            targetPiece.remove();
-            eatSound.play();
+            const targetPiece = targetSquare.querySelector('.piece');
+            if (targetPiece) {
+                targetPiece.remove();
+                eatSound.play();
 
-            const color = (targetPiece.src).includes("/white/") ? "white" : "black";
-            const lastSlashIndex = (targetPiece.src).lastIndexOf('/');
-            const pngIndex = (targetPiece.src).lastIndexOf('.png');
-            // Извлекаем строку между ними
-            const pieceName = (targetPiece.src).substring(lastSlashIndex + 1, pngIndex);
-            const pieceSymbol = chessSymbols[pieceName][color];
+                const color = (targetPiece.src).includes("/white/") ? "white" : "black";
+                const lastSlashIndex = (targetPiece.src).lastIndexOf('/');
+                const pngIndex = (targetPiece.src).lastIndexOf('.png');
+                // Извлекаем строку между ними
+                const pieceName = (targetPiece.src).substring(lastSlashIndex + 1, pngIndex);
+                const pieceSymbol = chessSymbols[pieceName][color];
 
-            if (color == myColor.toLowerCase()) {
-                document.getElementById("opponent").textContent  += pieceSymbol;
-            } else {
-                document.getElementById("me").textContent  += pieceSymbol;
-            }
+                if (color == myColor.toLowerCase()) {
+                    document.getElementById("opponent").textContent  += pieceSymbol;
+                } else {
+                    document.getElementById("me").textContent  += pieceSymbol;
+                }
 
-        } else moveSound.play();
+            } else moveSound.play();
 
-        const pieceElement = document.createElement('img');
-        targetSquare.appendChild(pieceElement);
-        pieceElement.src = piece.src;
-        pieceElement.classList.add('piece');
-        piece.remove();
-
+            const pieceElement = document.createElement('img');
+            targetSquare.appendChild(pieceElement);
+            pieceElement.src = piece.src;
+            pieceElement.classList.add('piece');
+            piece.remove();
+            resolve();
+        });
     });
 }
 
-function showPromotionMenu(fromPosition, targetPosition) {
+function showPromotionMenu(positionFrom, positionTo) {
+    const playerColor = getPieceAt(positionFrom).color;
+    const dir = positionTo.row === 1 ? 1 : -1;
+
+    return new Promise((resolve) => {
+        document.querySelectorAll('.square').forEach(square => {
+            square.classList.add('no-click');
+        });
+
+        for (let i = 0; i < 4; i++) {
+            const squareId = positionTo[0] + ((parseInt(positionTo[1]) + i * dir));
+            const square = document.getElementById(squareId);
+
+            const button = document.createElement('button');
+            button.classList.add('promote-button');
+
+            const piece = promoteMenuPieces[(i + 1).toString()];
+            piece.color = playerColor;
+            const pieceElement = document.createElement('img');
+            button.appendChild(pieceElement);
+            pieceElement.classList.add('piece');
+            pieceElement.src = `/static/images/${playerColor}/${piece.fileName}.png`;
+            square.appendChild(button);
+
+            // Добавляем обработчик нажатия кнопки
+            button.addEventListener('click', () => {
+                // Убираем все кнопки после выбора
+                document.querySelectorAll('.promote-button').forEach(button => {
+                    button.remove();
+                });
+                document.querySelectorAll('.square').forEach(square => {
+                    square.classList.remove('no-click');
+                });
+                resolve(piece.fileName);
+            });
+        }
+    });
+}
+
+async function finishPromotion(positionFrom, positionTo, newPiece) {
+    console.log("newPiece: ", newPiece);
+    await animateMove(positionFrom, positionTo);
+    const targetCell = document.getElementById(positionTo);
+    const targetPawnPiece = targetCell.querySelector('img');
+    console.log("Щас удаляю ", targetPawnPiece.src);
+    targetPawnPiece.remove();
+    const pieceElement = document.createElement('img');
+    pieceElement.classList.add('piece');
+    pieceElement.src = `/static/images/${newPiece.color}/${newPiece.fileName}.png`;
+    targetCell.appendChild(pieceElement);
+}
+
+
+function showPromotionMenu_OLD(fromPosition, targetPosition) {
 //     from - переменная типа стринг
 //     targetPosition - переменная типа Position
 
@@ -416,23 +555,20 @@ function buttonsInit() {
             chatBox.classList.add('collapsed');
         }
         toggleButton.classList.toggle('rotate');
-        resizeBoard(); // Обновляем размеры после изменения состояния
+//        resizeBoard(); // Обновляем размеры после изменения состояния
     });
 
     const sendButton = document.getElementById('chat-box-send-button');
     const inputText = document.getElementById('chat-box-input-text');
 
-    function addMessage(message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('my-message');
-        messageDiv.textContent = message;
-        chatBoxWindow.appendChild(messageDiv);
-        chatBoxWindow.scrollTop = chatBoxWindow.scrollHeight; // Прокручиваем окно вниз
+    function sendMessage(message) {
+        wsManager.sendMessage(message);
+        addMessage(message, false);
     }
     sendButton.addEventListener('click', () => {
         const message = inputText.value.trim();
         if (message !== "") {
-            addMessage(message);
+            sendMessage(message);
             inputText.value = ""; // Очистить поле ввода
         }
     });
@@ -441,6 +577,23 @@ function buttonsInit() {
         if (event.key === 'Enter') {
             sendButton.click();
         }
+    });
+}
+
+function addMessage(message, isOpponent) {
+    const messageDiv = document.createElement('div');
+    const chatBoxWindow = document.getElementById('chat-box-window');
+    messageDiv.classList.add(isOpponent ? 'your-message' : 'my-message');
+    message = message.replace(/^"(.*)"$/, '$1');
+    messageDiv.textContent = message;
+    chatBoxWindow.appendChild(messageDiv);
+    chatBoxWindow.scrollTop = chatBoxWindow.scrollHeight;
+}
+
+function showChat(chat) {
+    const currentUser = document.getElementById('profile-box-nickname').innerText;
+    chat.forEach(msg => {
+        addMessage(msg.message, currentUser !== msg.senderNickname);
     });
 }
 
@@ -656,12 +809,12 @@ function handleMove(move) {
         addMoveToBox(fromPosition, toPosition);
         showGameResult(result.victory.winner);
     } else if (result.promotePawn) {
-//        const promotionPosition = result.promotePawn.position;
-//        const promotedPiece = await showPromotionMenu(fromPosition, promotionPosition);
-//        console.log("Выбрана фигура для промоушена: ", promotedPiece);
-//        updateChessboard(chessboard, fromPosition, toPosition);
-//        chessboard[toPosition] = promotedPiece;
-//        addMoveToBox(fromPosition, toPosition);
+        const promotedPiece = result.promotePawn.newPiece;
+        console.log("В промоушене");
+        finishPromotion(fromPosition, toPosition, promotedPiece);
+        updateChessboard(chessboard, fromPosition, toPosition);
+        chessboard[toPosition] = promotedPiece;
+        addMoveToBox(fromPosition, toPosition);
     } else if (result.castling) {
         console.log("рокировка!");
         const { from: rookFrom, to: rookTo } = result.castling;
@@ -734,17 +887,17 @@ function updateMoveHistory(moveHistory) {
     });
 }
 
-function handlePromotion(promotionData) {
-    showPromotionMenu(promotionData.from, promotionData.to)
-        .then(selectedPiece => {
-            stompClient.send(`/app/game/${sessionId}/promotion`, {},
-                JSON.stringify({
-                    position: promotionData.position,
-                    pieceType: selectedPiece
-                })
-            );
-        });
-}
+//function handlePromotion(promotionData) {
+//    showPromotionMenu(promotionData.from, promotionData.to)
+//        .then(selectedPiece => {
+//            stompClient.send(`/app/game/${sessionId}/promotion`, {},
+//                JSON.stringify({
+//                    position: promotionData.position,
+//                    pieceType: selectedPiece
+//                })
+//            );
+//        });
+//}
 
 function handleCastling(castlingData) {
     animateMove(castlingData.king.from, castlingData.king.to);

@@ -6,9 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.madi.demo.dto.CreateGameRequest;
-import org.madi.demo.dto.GameStatusDTO;
-import org.madi.demo.dto.GameUpdateDTO;
+import org.apache.commons.lang3.tuple.Pair;
+import org.madi.demo.dto.*;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.*;
 import org.madi.demo.model.Position;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 
@@ -67,8 +67,11 @@ public class ChessController {
 
 		String gameStatus = gameSession.getStatus().name();
 
-		String whitePlayer = gameSession.getPlayerWhite().getNickname();
-		String blackPlayer = gameSession.getPlayerBlack().getNickname();
+		User whiteUser = gameSession.getPlayerWhite();
+		User blackUser = gameSession.getPlayerBlack();
+
+		UserProfileDTO whitePlayer = new UserProfileDTO(whiteUser.getNickname(), whiteUser.getEmail(), whiteUser.getRating());
+		UserProfileDTO blackPlayer = new UserProfileDTO(blackUser.getNickname(), blackUser.getEmail(), blackUser.getRating());
 
 		Boolean promotionRequired = false; //session.isPromotionRequired();
 		Position promotionPosition = new Position("e2"); //promotionRequired ? session.getPromotionPosition() : null;
@@ -78,6 +81,11 @@ public class ChessController {
 
 		String gameResult = "";
 //		GameResultDTO gameResult = session.getGameResult();
+
+		List<Pair<String, String>> chat = gameSession.getChat();
+		List<ChatDTO> chatDTO = gameSession.getChat().stream()
+				.map(pair -> new ChatDTO(pair.getLeft(), pair.getRight()))
+				.toList();
 
 		GameStatusDTO dto = new GameStatusDTO(
 				chessboard,
@@ -92,7 +100,8 @@ public class ChessController {
 				promotionPosition,
 				castlingPossible,
 				castlingData,
-				gameResult
+				gameResult,
+				chatDTO
 		);
 		return ResponseEntity.ok(dto);
 	}
@@ -121,11 +130,22 @@ public class ChessController {
 		}
 
 		// 2. Обработка хода
-		Map<String, Object> moveResult = chessService.makeMove(
-				sessionId,
-				move.getFrom(),
-				move.getTo()
-		);
+		Map<String, Object> moveResult;
+		System.out.println("move.getPromotionPiece() :" +  move.getPromotionPiece());
+		if (move.getPromotionPiece() != null) {
+			System.out.println("в сервисе пытаюсь делать промоушн");
+			moveResult = chessService.promotePawn(
+					sessionId,
+					move.getFrom(),
+					move.getTo(),
+					move.getPromotionPiece());
+		} else {
+			moveResult = chessService.makeMove(
+					sessionId,
+					move.getFrom(),
+					move.getTo()
+			);
+		}
 
 		// 3. Рассылка обновления
 		messagingTemplate.convertAndSend(
@@ -148,13 +168,17 @@ public class ChessController {
 		);
 	}
 
-	@PostMapping("/make-move")
-	public ResponseEntity<Map<String, Object>> makeMove(
-			@RequestBody MoveRequest moveRequest,
-			@RequestParam String sessionId
-	) {
-		Map<String, Object> result = chessService.makeMove(sessionId, moveRequest.from, moveRequest.to);
-		return ResponseEntity.ok(result);
+	@MessageMapping("/{sessionId}/message")
+	public void sendMessage(@DestinationVariable String sessionId, Principal principal, @RequestBody String message) {
+		User user = userService.findUserByNickname(principal.getName());
+		GameSession session = sessionService.getSession(sessionId);
+		session.addMessage(user.getNickname(), message);
+
+		messagingTemplate.convertAndSendToUser(
+				session.getOpponentFor(user).getNickname(),
+				"/queue/new-message",
+				Map.of("message", message)
+		);
 	}
 
 	@GetMapping("/chessboard")
@@ -164,15 +188,15 @@ public class ChessController {
 		return ResponseEntity.ok(chessboard);
 	}
 
-	@PostMapping("/promotion")
-	public ResponseEntity<Chessboard> promotePawn(@RequestBody PromotionRequest request) {
-		Position position = request.position;
-		String newPieceType = request.newPieceType;
-		System.out.println("position: " +  position);
-		System.out.println("newPieceType: " +  newPieceType);
-		Chessboard chessboard = chessService.promotePawn(position, newPieceType);
-		return ResponseEntity.ok(chessboard);
-	}
+//	@PostMapping("/promotion")
+//	public ResponseEntity<Chessboard> promotePawn(@RequestBody PromotionRequest request) {
+//		Position position = request.position;
+//		String newPieceType = request.newPieceType;
+//		System.out.println("position: " +  position);
+//		System.out.println("newPieceType: " +  newPieceType);
+//		Chessboard chessboard = chessService.promotePawn(position, newPieceType);
+//		return ResponseEntity.ok(chessboard);
+//	}
 
 
 	@Setter
@@ -181,6 +205,7 @@ public class ChessController {
 	public static class MoveRequest {
 		private Position from;
 		private Position to;
+		private String promotionPiece;
 
 	}
 

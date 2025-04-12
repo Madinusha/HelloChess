@@ -108,6 +108,24 @@ class WebSocketManager {
         this.stompClient.subscribe('/user/queue/errors', (message) => {
             console.error('Ошибка:', message.body);
         });
+
+        this.stompClient.subscribe('/user/queue/new-message', (message) => {
+            const data = JSON.parse(message.body);
+            addMessage(data.message, true);
+        });
+
+    }
+
+    sendMessage(message) {
+        if (!this.sessionId) {
+            console.error('Session ID is not set!');
+            return;
+        }
+        this.stompClient.send(
+            `/app/${this.sessionId}/message`,
+            {},
+            JSON.stringify(message)
+        );
     }
 
     getPossibleMoves(position) {
@@ -122,15 +140,18 @@ class WebSocketManager {
         );
     }
 
-    makeMove(positionFrom, positionTo) {
+    makeMove(positionFrom, positionTo, promotionPiece = null) {
         if (!this.sessionId) {
             console.error('Session ID is not set!');
             return;
         }
+        console.log("promotionPiece: ", promotionPiece);
         const moveRequest = {
             from: positionFrom,
-            to: positionTo
+            to: positionTo,
+            promotionPiece: promotionPiece
         };
+
         this.stompClient.send(
             `/app/${this.sessionId}/move`,
             {},

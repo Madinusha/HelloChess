@@ -357,7 +357,7 @@ public class Chessboard {
 	}
 
 
-	public void eatFigure(Position from, Position to)
+	public void eatFigure(Position to)
 	{
 		figureCapture(getFigureAt(to));
 		deleteFigureAt(to);
@@ -395,7 +395,7 @@ public class Chessboard {
 			if (movingFigure instanceof Pawn && ((Pawn) movingFigure).canCaptureEnPassant(from, to, board)) {
 				MutablePair<Position, Position> lastMove = board.getMotionList().get(board.getMotionList().size() - 1);
 				Position toLastMove = lastMove.getValue();
-				this.eatFigure(from, toLastMove);
+				this.eatFigure(toLastMove);
 			}
 
 			// Перемещаем фигуру на новую позицию
@@ -405,9 +405,9 @@ public class Chessboard {
 
 			// Проверяем, если это пешка, меняем флаг
 			if (movingFigure instanceof Pawn) {
-				if (checkPromotion(to)) {
-					result.put("promotePawn", Map.of("position", to));
-				}
+//				if (checkPromotion(to)) {
+//					result.put("promotePawn", Map.of("position", to));
+//				}
 				((Pawn) movingFigure).setHasMoved();
 			}
 			if (movingFigure instanceof King) {
@@ -476,25 +476,45 @@ public class Chessboard {
 		return false;
 	}
 
-	public void exchangePawn(Position position, String figName)
+	public Map<String, Object> exchangePawn(Position positionFrom, Position positionTo, String newPieceType)
 	{
-		Piece Piece = getFigureAt(position);
-		switch (figName)
-		{
+		Map<String, Object> result = new HashMap<>();
+		Piece pawn = getFigureAt(positionFrom);
+		System.out.println("newPieceType: " + newPieceType);
+		Piece newPiece = null;
+		switch (newPieceType) {
 			case "Queen":
-				Piece = new Queen(Piece.getColor());
-				break;
-			case "Knight":
-				Piece = new Knight(Piece.getColor());
+				newPiece = new Queen(pawn.getColor());
 				break;
 			case "Rook":
-				Piece = new Rook(Piece.getColor());
+				newPiece = new Rook(pawn.getColor());
 				break;
 			case "Bishop":
-				Piece = new Bishop(Piece.getColor());
+				newPiece = new Bishop(pawn.getColor());
+				break;
+			case "Knight":
+				newPiece = new Knight(pawn.getColor());
 				break;
 		}
-		placeFigure(Piece, position);
+		deleteFigureAt(positionFrom);
+		if (getFigureAt(positionTo) != null) {
+			eatFigure(positionTo);
+		}
+		placeFigure(newPiece, positionTo);
+		motionList.add(new MutablePair<>(positionFrom, positionTo));
+		result.put("promotePawn", Map.of("newPiece", newPiece));
+		String opponentColor = pawn.getColor().equals("white")? "black" : "white";
+		String checkCheckmate = isCheckmate(opponentColor, this);
+		if (checkCheckmate != null) {
+			if (checkCheckmate.equals("draw")) {
+				result.put("draw", true);
+			} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
+				result.put("victory", Map.of("winner", checkCheckmate));
+			}
+		}
+		switchPlayer();
+		System.out.println(this);
+		return result;
 	}
 
 	private void figureCapture(Piece capturedFigure) {

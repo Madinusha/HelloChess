@@ -70,7 +70,7 @@ public class GameConstructorController {
 				"/topic/games/available",
 				Map.of(
 						"nickname", creator.getNickname(),
-						"rating", 100,
+						"rating", creator.getRating(),
 						"time", String.format("%d + %d",
 								request.getTimeControl().getMinutes(),
 								request.getTimeControl().getIncrement()

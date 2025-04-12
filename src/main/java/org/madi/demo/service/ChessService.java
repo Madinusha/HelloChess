@@ -30,9 +30,9 @@ public class ChessService {
 		startNewGame();
 	}
 
-	private void initiatePromotion(Position position) {
-		messagingTemplate.convertAndSend("/topic/promotion", position);
-	}
+//	private void initiatePromotion(Position position) {
+//		messagingTemplate.convertAndSend("/topic/promotion", position);
+//	}
 
 	public void startNewGame() {
 		chessboard = new Chessboard();
@@ -48,31 +48,9 @@ public class ChessService {
 		return session.getChessboard().moveFigure(from, to);
 	}
 
-	public Chessboard promotePawn(Position position, String newPieceType) {
-		Piece pawn = chessboard.getFigureAt(position);
-		logger.info("newPieceType: " + newPieceType);
-		if (pawn instanceof Pawn) {
-			Piece newPiece = null;
-			switch (newPieceType) {
-				case "Queen":
-					newPiece = new Queen(pawn.getColor());
-					break;
-				case "Rook":
-					newPiece = new Rook(pawn.getColor());
-					break;
-				case "Bishop":
-					newPiece = new Bishop(pawn.getColor());
-					break;
-				case "Knight":
-					newPiece = new Knight(pawn.getColor());
-					break;
-			}
-			if (newPiece != null) {
-				chessboard.placeFigure(newPiece, position);
-				logger.info(String.valueOf(chessboard));
-			}
-		}
-		return chessboard;
+	public Map<String, Object> promotePawn(String sessionId, Position positionFrom, Position positionTo, String newPieceType) {
+		GameSession session = sessionManager.getSession(sessionId);
+		return session.getChessboard().exchangePawn(positionFrom, positionTo, newPieceType);
 	}
 }
 

@@ -2,6 +2,7 @@ package org.madi.demo.entities;
 
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
 
 	@Id
@@ -36,11 +38,18 @@ public class User implements UserDetails {
 	@Column(nullable = false)
 	private String role;
 
+	@Column(columnDefinition = "INTEGER DEFAULT 0")
+	private int rating = 0;
+
 	public User(String nickname, String email, String password, String role) {
 		this.nickname = nickname;
 		this.email = email;
 		this.password = password;
 		this.role = role;
+	}
+
+	public void updateRating(int value) {
+		this.rating += value;
 	}
 
 	@Override

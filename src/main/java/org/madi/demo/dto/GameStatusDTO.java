@@ -2,6 +2,7 @@ package org.madi.demo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.lang3.tuple.Pair;
 import org.madi.demo.controller.ChessController;
 import org.madi.demo.model.Chessboard;
 import org.madi.demo.model.Position;
@@ -18,11 +19,12 @@ public class GameStatusDTO {
 	private String whiteTime;
 	private String blackTime;
 	private String gameStatus; // Статус игры (WAITING, ACTIVE, FINISHED)
-	private String whitePlayerUsername;
-	private String blackPlayerUsername;
+	private UserProfileDTO whitePlayerDTO;
+	private UserProfileDTO blackPlayerDTO;
 	private Boolean promotionRequired; // Требуется ли промоушен
 	private Position promotionPosition; // Позиция пешки для промоушена
 	private Boolean castlingPossible; // Возможна ли рокировка
 	private Map<String, Position> castlingData; // Данные для рокировки
 	private String gameResult; // Результат игры (если она завершена)
+	private List<ChatDTO> chatDTO;
 }

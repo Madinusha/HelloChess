@@ -112,7 +112,7 @@ public class UserController {
 //		System.out.println(user.getNickname() + " " + user.getEmail());
 
 		return ResponseEntity.ok(
-				new UserProfileDTO(user.getNickname(), user.getEmail())
+				new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating())
 		);
 	}
 

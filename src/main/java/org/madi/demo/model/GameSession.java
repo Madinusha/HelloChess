@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.madi.demo.entities.User;
+import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 
 @Getter
@@ -17,6 +18,7 @@ public class GameSession {
 	private GameStatus status;
 	private PieceColor creatorColor;
 	private User creator;
+	private List<Pair<String, String>> chat = new ArrayList<>();
 
 	public GameSession(String id, User creator, PieceColor creatorColor, GameTimer timer) {
 		this.id = id;
@@ -84,6 +86,14 @@ public class GameSession {
 		return timer.getIncrementSeconds();
 	}
 
+	public void addMessage(String userNickname, String message){
+		chat.add(Pair.of(userNickname, message));
+	}
+
+	public User getOpponentFor(User user) {
+		return user.equals(playerWhite)? playerBlack: playerWhite;
+	}
+
 	public enum GameStatus {
 		WAITING, // Ожидание второго игрока
 		ACTIVE,  // Игра началась
@@ -97,6 +107,7 @@ public class GameSession {
 			return this == WHITE ? BLACK : WHITE;
 		}
 	}
+
 	public Map<String, Object> toDto() {
 		return Map.of(
 				"nickname", creator.getNickname(),
