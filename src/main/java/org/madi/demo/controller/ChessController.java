@@ -60,10 +60,12 @@ public class ChessController {
 		Chessboard chessboard = gameSession.getChessboard();
 
 		String currentPlayerColor = gameSession.getCurrentPlayerColor();
-		List<MoveRequest> moveHistory = new ArrayList<>();
+		List<Map<String, Object>> moveHistory = gameSession.getChessboard().getMoveResults();
+		List<MutablePair<Integer, Piece>> eatenPieces = gameSession.getChessboard().getEatenFigures();
 
 		String whiteTime = gameSession.getTimer().getFormattedTime(true);
 		String blackTime = gameSession.getTimer().getFormattedTime(false);
+		Boolean timerActive =  gameSession.getTimer().isTimerActive();
 
 		String gameStatus = gameSession.getStatus().name();
 
@@ -91,8 +93,10 @@ public class ChessController {
 				chessboard,
 				currentPlayerColor,
 				moveHistory,
+				eatenPieces,
 				whiteTime,
 				blackTime,
+				timerActive,
 				gameStatus,
 				whitePlayer,
 				blackPlayer,
@@ -154,18 +158,20 @@ public class ChessController {
 						"type", "move",
 						"moveResult", moveResult,
 						"chessboard", session.getChessboard(),
-						"move", move,
 						"currentPlayer", session.getCurrentPlayerColor()
 				)
 		);
 		GameTimer timer = session.getTimer();
-		messagingTemplate.convertAndSend(
-				"/topic/game/timer" + sessionId,
-				Map.of(
-						"whiteTime", timer.getFormattedTime(true),
-						"blackTime", timer.getFormattedTime(false)
-				)
-		);
+		if (!timer.isStopped()) {
+			messagingTemplate.convertAndSend(
+					"/topic/game/" + sessionId + "/timer",
+					Map.of(
+							"whiteTime", timer.getFormattedTime(true),
+							"blackTime", timer.getFormattedTime(false),
+							"timerActive", timer.isTimerActive()
+					)
+			);
+		}
 	}
 
 	@MessageMapping("/{sessionId}/message")
@@ -187,17 +193,6 @@ public class ChessController {
 		Chessboard chessboard = chessService.getChessboard();
 		return ResponseEntity.ok(chessboard);
 	}
-
-//	@PostMapping("/promotion")
-//	public ResponseEntity<Chessboard> promotePawn(@RequestBody PromotionRequest request) {
-//		Position position = request.position;
-//		String newPieceType = request.newPieceType;
-//		System.out.println("position: " +  position);
-//		System.out.println("newPieceType: " +  newPieceType);
-//		Chessboard chessboard = chessService.promotePawn(position, newPieceType);
-//		return ResponseEntity.ok(chessboard);
-//	}
-
 
 	@Setter
 	@Getter

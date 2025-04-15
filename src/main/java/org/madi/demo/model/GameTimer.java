@@ -1,6 +1,9 @@
 package org.madi.demo.model;
 
 import lombok.Getter;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -13,37 +16,43 @@ public class GameTimer {
 	private final int incrementSeconds;
 	private final long increment; // В миллисекундах
 	private ScheduledExecutorService executor;
-	private boolean isWhiteTurn;
+	private boolean isWhiteTurn = true;
 	private boolean isStopped = false; // Флаг завершения
+	private boolean timerActive = false;
 	private boolean isTenthsMode = false; // Режим десятых долей секунды
 	private static final long CRITICAL_TIME_THRESHOLD = 5000; // Порог переключения на десятые доли (5 секунд)
+	private final SimpMessagingTemplate messagingTemplate;
+	private final String sessionId;
 
-	public GameTimer(int initialTimeMinutes, int incrementSeconds) {
+	public GameTimer(int initialTimeMinutes, int incrementSeconds, SimpMessagingTemplate messagingTemplate, String sessionId) {
 		this.initialTimeMinutes = initialTimeMinutes;
 		this.incrementSeconds = incrementSeconds;
 		this.whiteTime = initialTimeMinutes * 60 * 1000L; // минуты в миллисекунды
 		this.blackTime = initialTimeMinutes * 60 * 1000L;
 		this.increment = incrementSeconds * 1000L;
+
+		this.messagingTemplate = messagingTemplate;
+		this.sessionId = sessionId;
 	}
 
 	public void start() {
 		if (isStopped) return;
+		timerActive = true;
 		executor = new ScheduledThreadPoolExecutor(1); // Используем пул потоков
 		scheduleTick(); // Начинаем с режима секунд
 	}
 
 	private void scheduleTick() {
 		if (isTenthsMode) {
-			// В режиме десятых долей вызываем tick() каждые 100 мс
 			executor.scheduleAtFixedRate(this::tick, 100, 100, TimeUnit.MILLISECONDS);
 		} else {
-			// В обычном режиме вызываем tick() каждую секунду
 			executor.scheduleAtFixedRate(this::tick, 1000, 1000, TimeUnit.MILLISECONDS);
 		}
 	}
 
+	private long lastSentTime = 0;
 	private void tick() {
-		if (isStopped) return; // Если таймер остановлен, не уменьшаем время
+		if (isStopped) return;
 
 		if (isWhiteTurn) {
 			whiteTime = Math.max(whiteTime - getTickDuration(), 0);
@@ -53,6 +62,20 @@ public class GameTimer {
 
 		checkTimeout();
 		checkTenthsMode();
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - lastSentTime >= 5000) {
+			sendTimeToClients();
+			lastSentTime = currentTime;
+		}
+	}
+
+	private void sendTimeToClients() {
+		Map<String, Object> timeData = Map.of(
+				"whiteTime", getFormattedTime(true),
+				"blackTime", getFormattedTime(false),
+				"timerActive", timerActive
+		);
+		messagingTemplate.convertAndSend("/topic/game/" + sessionId + "/timer", timeData);
 	}
 
 	private long getTickDuration() {
@@ -69,13 +92,17 @@ public class GameTimer {
 		}
 	}
 
-	public void switchTurn() {
+	public void switchTurnWithIncrement() {
 		if (isStopped) return; // Если таймер остановлен, не переключаем
 		if (isWhiteTurn) {
 			whiteTime += increment;
 		} else {
 			blackTime += increment;
 		}
+		isWhiteTurn = !isWhiteTurn;
+	}
+
+	public void switchTurn() {
 		isWhiteTurn = !isWhiteTurn;
 	}
 

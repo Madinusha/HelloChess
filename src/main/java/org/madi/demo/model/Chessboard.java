@@ -15,13 +15,16 @@ public class Chessboard {
 	private Map<Position, Piece> board;
 	private List<MutablePair<Integer, Piece>> eatenFigures;
 	private List<MutablePair<Position, Position>> motionList;
+	private List<Map<String, Object>> moveResults;
 	private String currentPlayerColor = "WHITE";  // "WHITE" или "BLACK"
 	private String status; // "IN_PROGRESS", "CHECKMATE", "STALEMATE", "DRAW", etc.
+	private List<Map<Position, Piece>> boardHistory = new ArrayList<>();
 
 	public Chessboard(Map<Position, Piece> board) {
 		this.board = new HashMap<>(board);
 		this.motionList = new ArrayList<>();
 		this.eatenFigures = new ArrayList<>();
+		this.moveResults = new ArrayList<>();
 		initialize();
 	}
 
@@ -29,14 +32,15 @@ public class Chessboard {
 		this.board = new HashMap<>();
 		this.motionList = new ArrayList<>();
 		this.eatenFigures = new ArrayList<>();
+		this.moveResults = new ArrayList<>();
 		initialize();
 	}
 
 	public Map<Position, Piece> getChessboard() {
 		return board;
 	}
+
 	public void initialize() {
-		// Очистить доску перед началом новой игры
 		board.clear();
 
 		// Расставить белые фигуры
@@ -44,6 +48,7 @@ public class Chessboard {
 
 		// Расставить черные фигуры
 		placeInitialPieces("black");
+		boardHistory.add(deepCopyChessboard(board));
 	}
 
 	public Chessboard(List<Piece> figures, List<Position> positions) {
@@ -59,10 +64,12 @@ public class Chessboard {
 			placeFigure(Piece, position);
 		}
 	}
+
 	public Chessboard(Chessboard newBoard)
 	{	board = newBoard.getChessboard();
 		motionList = newBoard.getMotionList();
 		eatenFigures = newBoard.getEatenFigures();
+		this.moveResults = new ArrayList<>();
 		initialize();
 	}
 
@@ -81,9 +88,29 @@ public class Chessboard {
 
 		// Копируем список съеденных фигур
 		copiedBoard.getEatenFigures().addAll(originalBoard.getEatenFigures());
+		copiedBoard.moveResults = originalBoard.moveResults;
+		copiedBoard.boardHistory = originalBoard.boardHistory;
 
 		return copiedBoard;
 	}
+
+	private Map<Position, Piece> deepCopyChessboard(Map<Position, Piece> original) {
+		Map<Position, Piece> copy = new HashMap<>();
+
+		for (Map.Entry<Position, Piece> entry : original.entrySet()) {
+			// Копируем Position (предполагаем, что он immutable)
+			Position originalPos = entry.getKey();
+			Position posCopy = new Position(originalPos.getCol(), originalPos.getRow());
+
+			// Копируем Piece
+			Piece originalPiece = entry.getValue();
+			Piece pieceCopy = createCopyOfFigure(originalPiece); // Метод для копирования фигур
+
+			copy.put(posCopy, pieceCopy);
+		}
+		return copy;
+	}
+
 
 	private Piece createCopyOfFigure(Piece originalFigure) {
 		if (originalFigure instanceof Pawn) {
@@ -391,10 +418,12 @@ public class Chessboard {
 		if (movingFigure != null) {
 			if (targetFigure != null) {
 				figureCapture(targetFigure);
+				result.put("eatenPiece", targetFigure);
 			}
 			if (movingFigure instanceof Pawn && ((Pawn) movingFigure).canCaptureEnPassant(from, to, board)) {
 				MutablePair<Position, Position> lastMove = board.getMotionList().get(board.getMotionList().size() - 1);
 				Position toLastMove = lastMove.getValue();
+				result.put("eatenPiece", getFigureAt(toLastMove));
 				this.eatFigure(toLastMove);
 			}
 
@@ -405,16 +434,13 @@ public class Chessboard {
 
 			// Проверяем, если это пешка, меняем флаг
 			if (movingFigure instanceof Pawn) {
-//				if (checkPromotion(to)) {
-//					result.put("promotePawn", Map.of("position", to));
-//				}
 				((Pawn) movingFigure).setHasMoved();
 			}
 			if (movingFigure instanceof King) {
 				((King) movingFigure).setHasMoved();
 				if (Math.abs(from.getColAsNumber() - to.getColAsNumber()) == 2) {
-					Position rookFrom = from.getColAsNumber() < to.getColAsNumber()? new Position("h" + from.getRow()) : new Position("a" + from.getRow());
-					Position rookTo = from.getColAsNumber() < to.getColAsNumber()? new Position("f" + from.getRow()) : new Position("d" + from.getRow());
+					Position rookFrom = from.getColAsNumber() < to.getColAsNumber() ? new Position("h" + from.getRow()) : new Position("a" + from.getRow());
+					Position rookTo = from.getColAsNumber() < to.getColAsNumber() ? new Position("f" + from.getRow()) : new Position("d" + from.getRow());
 					var newPiece = new Rook(getFigureAt(rookFrom).getColor(), true);
 					placeFigure(newPiece, rookTo);
 					deleteFigureAt(rookFrom);
@@ -425,7 +451,7 @@ public class Chessboard {
 			if (movingFigure instanceof Rook) ((Rook) movingFigure).setHasMoved();
 			// Вывести информацию о ходе
 			System.out.println("Успех! " + movingFigure.getColor() + " " + movingFigure.getClass().getSimpleName() + " сделала ход с " + from + " на " + to + ".\n");
-
+			result.put("move", Map.of("from", from.toString(), "to", to.toString()));
 			String opponentColor = movingFigure.getColor().equals("white")? "black" : "white";
 			String checkCheckmate = isCheckmate(opponentColor, board);
 			if (checkCheckmate != null) {
@@ -438,6 +464,9 @@ public class Chessboard {
 
 		}
 		switchPlayer();
+
+		moveResults.add(result);
+		board.boardHistory.add(deepCopyChessboard(board.getChessboard()));
 		return result;
 	}
 
@@ -499,6 +528,7 @@ public class Chessboard {
 		deleteFigureAt(positionFrom);
 		if (getFigureAt(positionTo) != null) {
 			eatFigure(positionTo);
+			result.put("eatenPiece", getFigureAt(positionTo));
 		}
 		placeFigure(newPiece, positionTo);
 		motionList.add(new MutablePair<>(positionFrom, positionTo));
@@ -513,7 +543,9 @@ public class Chessboard {
 			}
 		}
 		switchPlayer();
-		System.out.println(this);
+		result.put("move", Map.of("from", positionFrom.toString(), "to", positionTo.toString()));
+		moveResults.add(result);
+		boardHistory.add(deepCopyChessboard(board));
 		return result;
 	}
 

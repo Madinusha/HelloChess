@@ -16,40 +16,44 @@ import java.util.Map;
 public class ChessService {
 
 	@Autowired
-	private GameSessionService sessionManager;
+	private GameSessionService sessionService;
 
 	private final SimpMessagingTemplate messagingTemplate;
 
 	@Getter
 	private Chessboard chessboard = new Chessboard();
 
-	private static final Logger logger = LoggerFactory.getLogger(ChessService.class);
-
 	public ChessService(SimpMessagingTemplate messagingTemplate) {
 		this.messagingTemplate = messagingTemplate;
 		startNewGame();
 	}
-
-//	private void initiatePromotion(Position position) {
-//		messagingTemplate.convertAndSend("/topic/promotion", position);
-//	}
 
 	public void startNewGame() {
 		chessboard = new Chessboard();
 	}
 
 	public List<Position> getPossibleMoves(String sessionId, Position position) {
-		GameSession session = sessionManager.getSession(sessionId);
+		GameSession session = sessionService.getSession(sessionId);
 		return session.getChessboard().getValidMoves(position);
 	}
 
 	public Map<String, Object> makeMove(String sessionId, Position from, Position to) {
-		GameSession session = sessionManager.getSession(sessionId);
-		return session.getChessboard().moveFigure(from, to);
+		GameSession session = sessionService.getSession(sessionId);
+		var result = session.getChessboard().moveFigure(from, to);
+		if (session.getChessboard().getMotionList().size() == 1) {
+			session.getTimer().switchTurn();
+		} else if (session.getChessboard().getMotionList().size() == 2){
+			session.getTimer().switchTurn();
+			session.getTimer().start();
+		} else {
+			session.getTimer().switchTurnWithIncrement();
+		}
+
+		return result;
 	}
 
 	public Map<String, Object> promotePawn(String sessionId, Position positionFrom, Position positionTo, String newPieceType) {
-		GameSession session = sessionManager.getSession(sessionId);
+		GameSession session = sessionService.getSession(sessionId);
 		return session.getChessboard().exchangePawn(positionFrom, positionTo, newPieceType);
 	}
 }

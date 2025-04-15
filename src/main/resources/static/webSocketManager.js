@@ -94,9 +94,11 @@ class WebSocketManager {
             handleGameUpdate(update);
         });
 
-        this.stompClient.subscribe(`/topic/game/timer/${this.sessionId}`, (message) => {
+        this.stompClient.subscribe(`/topic/game/${this.sessionId}/timer`, (message) => {
             const timerData = JSON.parse(message.body);
-            updateTimers(timerData.whiteTime, timerData.blackTime);
+            console.log("timerData ", timerData);
+//            const { whiteTime, blackTime } = timerData;
+            updateTimers(timerData.whiteTime, timerData.blackTime, timerData.timerActive);
         });
 
         // Добавляем подписку на возможные ходы
@@ -145,7 +147,6 @@ class WebSocketManager {
             console.error('Session ID is not set!');
             return;
         }
-        console.log("promotionPiece: ", promotionPiece);
         const moveRequest = {
             from: positionFrom,
             to: positionTo,

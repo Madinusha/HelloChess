@@ -2,9 +2,11 @@ package org.madi.demo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.madi.demo.controller.ChessController;
 import org.madi.demo.model.Chessboard;
+import org.madi.demo.model.Piece;
 import org.madi.demo.model.Position;
 
 import java.util.List;
@@ -15,9 +17,11 @@ import java.util.Map;
 public class GameStatusDTO {
 	private Chessboard chessboard; // Текущее состояние доски
 	private String currentPlayerColor; // Цвет игрока, который должен ходить
-	private List<ChessController.MoveRequest> moveHistory; // История ходов
+	private List<Map<String, Object>> moveHistory; // История ходов
+	private List<MutablePair<Integer, Piece>> eatenPieces;
 	private String whiteTime;
 	private String blackTime;
+	private Boolean timerActive;
 	private String gameStatus; // Статус игры (WAITING, ACTIVE, FINISHED)
 	private UserProfileDTO whitePlayerDTO;
 	private UserProfileDTO blackPlayerDTO;

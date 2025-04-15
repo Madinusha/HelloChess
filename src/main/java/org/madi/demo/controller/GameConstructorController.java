@@ -54,7 +54,8 @@ public class GameConstructorController {
 				sessionId,
 				creator,
 				request.getPlayerColor(),
-				new GameTimer(request.getTimeControl().getMinutes(), request.getTimeControl().getIncrement())
+				request.getTimeControl().getMinutes(),
+				request.getTimeControl().getIncrement()
 		);
 		System.out.println(request.getTimeControl().getMinutes());
 

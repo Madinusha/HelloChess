@@ -75,7 +75,7 @@ public class GameSession {
 
 	public void startGame() {
 		this.status = GameStatus.ACTIVE;
-		timer.start(); // Запускаем таймер при старте игры
+//		timer.start(); // Запускаем таймер при старте игры
 	}
 
 	public int getTimeControlMinutes() {
@@ -111,7 +111,7 @@ public class GameSession {
 	public Map<String, Object> toDto() {
 		return Map.of(
 				"nickname", creator.getNickname(),
-				"rating", 100,
+				"rating", creator.getRating(),
 				"time", String.format("%d + %d", getTimeControlMinutes(), getTimeControlIncrement()),
 				"sessionId", getId()
 		);

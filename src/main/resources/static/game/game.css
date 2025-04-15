@@ -127,7 +127,7 @@ body {
     position: absolute;
     width: 140%;
     height: 140%;
-    background: radial-gradient(circle at center, transparent 50%, rgba(0, 87, 50, 0.6) 30%);
+    background: radial-gradient(circle at center, transparent 60%, rgba(0, 87, 70, 0.6) 30%);
     z-index: 1;
     border-radius: 15%;
 }
@@ -153,7 +153,7 @@ body {
     z-index: 2;
 }
 .square .piece {
-    z-index: 100;
+    z-index: 50;
 }
 .square.last-move {
     position: relative;
@@ -221,6 +221,7 @@ body {
     border: none;
     box-shadow: 0px 0px 14px 0px rgba(34, 60, 80, 0.2);
     pointer-events: all;
+    z-index: 100;
 }
 .promote-button:hover {
     background-color: orange;
@@ -441,7 +442,8 @@ input[type="text"]:focus  {
     background-color: var(--light-beige);
     overflow-y: auto;
     box-shadow: 0px 3px 8px -1px rgba(34, 60, 80, 0.2) inset;
-
+    font-size: 0.9em;
+    flex-wrap: wrap;
 }
 #move-box-window::-webkit-scrollbar {
     width: 0;
@@ -520,7 +522,6 @@ input[type="text"]:focus  {
 }
 
 #result-container {
-    /*display: none;*/
     width: 100%;
     height: 4em;
     display: flex;
@@ -530,11 +531,25 @@ input[type="text"]:focus  {
     justify-content: center;
     gap: 0.2em;
     color: var(--carrot-red);
+   /* display: none;*/
 }
-#scale {
+.result-container {
+    width: 100%;
+    flex: 0 0 100%; /* Занимает всю ширину и переносит на новую строку */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+    background: var(--light-beige);
+    color: var(--carrot-red);
+}
+.scale {
     font-family: 'TeXGyreHeros', sans-serif;
     font-weight: bold;
+    font-size: 1.5em;
+    padding-bottom: 0.5em;
 }
-#result {
+.result {
     font-size: 1em;
+    padding-top: 0.5em;
 }

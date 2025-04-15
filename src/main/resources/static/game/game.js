@@ -1,12 +1,16 @@
 window.WebSocketManager = WebSocketManager;
 
 let wsManager = null;
-let timer1Interval;
-let timer2Interval;
-let activeTimer = null;
+const timerState = {
+    white: 0,
+    black: 0,
+    interval: null
+};
 
 // Пример использования
 let chessboard;
+let chessboardHistory = [];
+let eatenPieces = [];
 const promoteMenuPieces = {
     "1": { "fileName": "Queen"},
     "2": { "fileName": "Bishop", "hasMoved": false },
@@ -81,22 +85,26 @@ function initializeGameUI(gameStatus) {
     console.log("gameStatus: ", gameStatus);
 
     chessboard = gameStatus.chessboard.board;
+    chessboardHistory = gameStatus.chessboard.boardHistory;
     currentPlayerColor = gameStatus.currentPlayerColor;
+    eatenPieces = gameStatus.eatenPieces;
     const moveHistory = gameStatus.moveHistory;
+    console.log("moveHistory: ", moveHistory);
     const whiteTime = gameStatus.whiteTime;
     const blackTime = gameStatus.blackTime;
+    const timerActive = gameStatus.timerActive;
     const gameResult = gameStatus.gameResult;
 
     fillPageValues(gameStatus);
 
     // Рендерим доску
     console.log("myColor: ", myColor);
-    renderChessboard(chessboard, myColor === "BLACK");
-//    resizeBoard();
+        renderChessboard(chessboard, myColor === "BLACK");
     buttonsInit();
 
     // Обновляем таймеры
-    updateTimers(whiteTime, blackTime);
+    console.log("timerActive ", timerActive);
+    updateTimers(whiteTime, blackTime, timerActive);
 
     // Проверяем результат игры
     if (gameResult) {
@@ -112,9 +120,6 @@ function initializeGameUI(gameStatus) {
     if (gameStatus.castlingPossible) {
         highlightCastlingOptions(gameStatus.castlingData);
     }
-
-    // Отображаем историю ходов
-    moveHistory.forEach(move => addMoveToBox(move.from, move.to));
 }
 
 function fillPageValues(gameStatus){
@@ -123,10 +128,10 @@ function fillPageValues(gameStatus){
     const blackPlayer = gameStatus.blackPlayerDTO;
     const chat = gameStatus.chatDTO;
     showChat(chat);
+    showMoveHistory(gameStatus.moveHistory);
 
     let userNickname, opponentNickname;
     let userRating, opponentRating;
-    console.log("currentUser: ", currentUser);
 
     userNickname = whitePlayer.nickname;
     userRating = whitePlayer.rating;
@@ -138,8 +143,8 @@ function fillPageValues(gameStatus){
         [userRating, opponentRating] = [opponentRating, userRating];
     }
 
-    console.log("userNickname ", userNickname)
-    console.log("opponentNickname ", opponentNickname)
+//    console.log("userNickname ", userNickname)
+//    console.log("opponentNickname ", opponentNickname)
 
     // Обновляем интерфейс
     const nicknameElements = document.querySelectorAll('.mb-nickname');
@@ -149,6 +154,19 @@ function fillPageValues(gameStatus){
     const ratingElements = document.querySelectorAll('.mb-rating');
     ratingElements[0].textContent = opponentRating; // Оппонент (верхний блок)
     ratingElements[1].textContent = userRating;     // Пользователь (нижний блок)
+
+//    const timerElements = document.querySelectorAll('.mb-timer');
+//    timerElements[0].id = "timer2"; // Оппонент (верхний блок)
+//    timerElements[1].id = "timer1";     // Пользователь (нижний блок)
+
+    const userTimerId = myColor === "WHITE" ? "timer1" : "timer2";
+    const opponentTimerId = myColor === "WHITE" ? "timer2" : "timer1";
+
+    // Сохраняем в глобальной переменной или объекте состояния
+    window.timerSettings = {
+        userTimer: document.getElementById(userTimerId),
+        opponentTimer: document.getElementById(opponentTimerId)
+    };
 
     // Обновляем заголовок чата
     const chatHeader = document.getElementById('chat-box-header');
@@ -177,7 +195,6 @@ function updateChessboard(chessboard, fromPosition, toPosition) {
     // Удаляем фигуру с исходной позиции
     delete chessboard[fromPosition];
     chessboard[toPosition] = piece;
-
 }
 
 function renderChessboard(chessboard, isFlipped = false) {
@@ -300,15 +317,12 @@ function handleCellClick(position) {
 
 function makeMove(positionFrom, positionTo) {
     const piece = getPieceAt(positionFrom);
-    console.log("Фигура для хода: ", piece);
     if (piece.fileName === "Pawn") {
         const targetRank = positionTo[1]; // Получаем номер строки (например "8" или "1")
         const isPromotionRequired =
             (piece.color === "white" && targetRank === "8") ||
             (piece.color === "black" && targetRank === "1");
-        console.log("isPromotionRequired: ", isPromotionRequired);
         if (isPromotionRequired) {
-            console.log("Требуется превращение пешки");
             showPromotionMenu(positionFrom, positionTo)
                 .then(selectedPiece => {
                     if (selectedPiece) {
@@ -316,7 +330,6 @@ function makeMove(positionFrom, positionTo) {
                     } else {
                         console.log("Пользователь отменил выбор превращения");
                     }
-                    console.log("selectedPiece: ", selectedPiece);
                 })
                 .catch(error => {
                     console.error("Ошибка при выборе превращения:", error);
@@ -332,7 +345,6 @@ function getPieceAt(position) {
 }
 
 function showValidMovesFor(position, possibleMoves) {
-    console.log("position in showValidMovesFor: ", position);
     console.log(`Clicked on position: ${position}`);
     hideValidMove();
     square = document.getElementById(`${position.col}${position.row}`);
@@ -381,7 +393,6 @@ function animateMove(positionFrom, positionTo) {
         // Вычисляем смещение
         const deltaX = endPos.left - startPos.left;
         const deltaY = endPos.top - startPos.top;
-
         // Добавляем анимацию
         requestAnimationFrame(() => {
             piece.style.zIndex = 1000;
@@ -403,16 +414,6 @@ function animateMove(positionFrom, positionTo) {
                 const color = (targetPiece.src).includes("/white/") ? "white" : "black";
                 const lastSlashIndex = (targetPiece.src).lastIndexOf('/');
                 const pngIndex = (targetPiece.src).lastIndexOf('.png');
-                // Извлекаем строку между ними
-                const pieceName = (targetPiece.src).substring(lastSlashIndex + 1, pngIndex);
-                const pieceSymbol = chessSymbols[pieceName][color];
-
-                if (color == myColor.toLowerCase()) {
-                    document.getElementById("opponent").textContent  += pieceSymbol;
-                } else {
-                    document.getElementById("me").textContent  += pieceSymbol;
-                }
-
             } else moveSound.play();
 
             const pieceElement = document.createElement('img');
@@ -465,74 +466,14 @@ function showPromotionMenu(positionFrom, positionTo) {
 }
 
 async function finishPromotion(positionFrom, positionTo, newPiece) {
-    console.log("newPiece: ", newPiece);
     await animateMove(positionFrom, positionTo);
     const targetCell = document.getElementById(positionTo);
     const targetPawnPiece = targetCell.querySelector('img');
-    console.log("Щас удаляю ", targetPawnPiece.src);
     targetPawnPiece.remove();
     const pieceElement = document.createElement('img');
     pieceElement.classList.add('piece');
     pieceElement.src = `/static/images/${newPiece.color}/${newPiece.fileName}.png`;
     targetCell.appendChild(pieceElement);
-}
-
-
-function showPromotionMenu_OLD(fromPosition, targetPosition) {
-//     from - переменная типа стринг
-//     targetPosition - переменная типа Position
-
-    // Создаем промис, который завершится, когда будет сделан выбор
-    return new Promise((resolve) => {
-        const posToStr = targetPosition.col + parseInt(targetPosition.row);
-        const playerColor = getPieceAt(fromPosition).color;
-        const dir = targetPosition.row === 1 ? 1 : -1;
-
-        document.querySelectorAll('.square').forEach(square => {
-            square.classList.add('no-click');
-        });
-
-        for (let i = 0; i < 4; i++) {
-            const squareId = targetPosition.col + ((parseInt(targetPosition.row) + i * dir));
-            const square = document.getElementById(squareId);
-
-            const button = document.createElement('button');
-            button.classList.add('promote-button');
-
-            const piece = promoteMenuPieces[(i + 1).toString()];
-            piece.color = playerColor;
-            const pieceElement = document.createElement('img');
-            button.appendChild(pieceElement);
-            pieceElement.classList.add('piece');
-            pieceElement.src = `/static/images/${playerColor}/${piece.fileName}.png`;
-            square.appendChild(button);
-
-            // Добавляем обработчик нажатия кнопки
-            button.addEventListener('click', () => {
-                sendPromotionChoice(posToStr, piece.fileName);
-                const targetSquare = document.getElementById(posToStr);
-                const fromSquare = document.getElementById(fromPosition);
-                const fromPawnPiece = fromSquare.querySelector('img');
-                if (fromPawnPiece) {
-                    fromPawnPiece.remove();
-                }
-                const targetPawnPiece = targetSquare.querySelector('img');
-                if (targetPawnPiece) {
-                    targetPawnPiece.remove();
-                }
-                targetSquare.appendChild(pieceElement);
-                // Убираем все кнопки после выбора
-                document.querySelectorAll('.promote-button').forEach(button => {
-                    button.remove();
-                });
-                document.querySelectorAll('.square').forEach(square => {
-                    square.classList.remove('no-click');
-                });
-                // Разрешаем промис, передавая выбранную фигуру
-                resolve(piece);
-            });
-        }
-    });
 }
 
 function buttonsInit() {
@@ -598,57 +539,164 @@ function showChat(chat) {
 }
 
 let moveCount = 0; // Счетчик ходов
-function addMoveToBox(fromPosition, toPosition) {
+function addMoveToBox(fromPosition, toPosition, moveResult) {
     const moveBox = document.getElementById('move-box-window');
     const moveNumbers = document.getElementById('move-numbers');
     const whiteMoves = document.getElementById('white-moves');
     const blackMoves = document.getElementById('black-moves');
+    console.log("fromPosition ", fromPosition);
+    console.log("toPosition ", toPosition);
+    console.log("moveResult ", moveResult);
 
-    // Форматируем ход как строку "e2-e4"
-    const move = fromPosition + '-' + toPosition;
+    // Форматирование хода с учетом типа
+    const move = formatChessNotation(fromPosition, toPosition, moveResult);
+    console.log("Форматированный ход: ", move);
 
     const currentMoveBox = moveBox.querySelector('.current');
-    if (currentMoveBox) {
-        currentMoveBox.classList.remove('current');
+    if (currentMoveBox) currentMoveBox.classList.remove('current');
+
+    // Логика нумерации ходов
+    if (moveCount % 2 === 0) {
+        const moveNumber = Math.floor(moveCount / 2) + 1;
+        addMoveElement(moveNumbers, `${moveNumber}.`, 'move-box-row');
+
+        const whiteElement = addMoveElement(whiteMoves, move, 'current move-box-row to-bord');
+        whiteElement.innerHTML = addPieceSymbols(move, 'white');
+    } else {
+        const blackElement = addMoveElement(blackMoves, move, 'current move-box-row');
+        blackElement.innerHTML = addPieceSymbols(move, 'black');
     }
 
-    // Проверяем, чей ход
-    if (moveCount % 2 === 0) { // Ход белых
-        const moveNumber = Math.floor(moveCount / 2) + 1;
-        const numberElement = document.createElement('div');
-        numberElement.classList.add('move-box-row');
-        numberElement.textContent = moveNumber + '.';
-        moveNumbers.appendChild(numberElement);
-        // Добавляем ход белых
-        const whiteMoveElement = document.createElement('div');
-        whiteMoveElement.classList.add('current', 'move-box-row', 'to-bord');
-        whiteMoveElement.textContent = move;
-        whiteMoves.appendChild(whiteMoveElement);
-        moveBox.scrollTop = moveBox.scrollHeight;
-    } else { // Ход черных
-        const blackMoveElement = document.createElement('div');
-        blackMoveElement.textContent = move;
-        blackMoveElement.classList.add('current', 'move-box-row');
-        blackMoves.appendChild(blackMoveElement);
-    }
+    moveBox.scrollTop = moveBox.scrollHeight;
     moveCount++;
 }
 
-function showGameResult(result) {
-    const resultElement = document.getElementById('result-container');
-    const scaleElement = document.getElementById('scale');
-    const resultTextElement = document.getElementById('result');
-    if (result == "draw") {
-        resultTextElement.textContent = "Ничья.";
-        scaleElement.textContent = "½ - ½";
-    } else if (result == "white"){
-        resultTextElement.textContent = "Победа белых.";
-        scaleElement.textContent = "1 - 0";
-    } else if (result == "black"){
-        resultTextElement.textContent = "Победа черных.";
-        scaleElement.textContent = "0 - 1";
+function formatChessNotation(from, to, result) {
+    console.log("chessboardHistory ", chessboardHistory);
+    console.log("moveCount ", moveCount);
+    console.log("chessboardHistory[moveCount+1] ", chessboardHistory[moveCount+1]);
+    console.log(toString(chessboardHistory[moveCount+1]));
+    const piece = chessboardHistory[moveCount][from];
+    if (!piece) {
+        console.log("Нет фигуры на доске для истории ходов");
+        return '';
     }
-    resultElement.style.visibility = "visible";
+
+    let notation = '';
+
+    // Рокировка
+    if (result.castling) {
+        return to[0] === 'g' ? '0-0' : '0-0-0';
+    }
+
+    // Символ фигуры (кроме пешки)
+    if (piece.type !== 'Pawn') {
+        notation += getPieceSymbol(piece.fileName, piece.color);
+    }
+    notation += from;
+    // Взятие
+//    if (chessboard[to] || (piece.type === 'Pawn' && from[0] !== to[0])) {
+//        if (piece.type === 'Pawn') notation += from[0];
+//        notation += ':';
+//    } else notation += '-'; // '—'
+    console.log("eatenPieces ", eatenPieces);
+    console.log("moveCount ", moveCount);
+//    const eatenEntry = eatenPieces.find(item => item.moveNumber === moveCount);
+    const eatenEntry = result.eatenPiece;
+    if (eatenEntry) {
+        notation += ':';
+
+        const pieceSymbol = chessSymbols[eatenEntry.fileName][eatenEntry.color];
+        if (eatenEntry.color == myColor.toLowerCase()) {
+            document.getElementById("opponent").textContent  += pieceSymbol;
+        } else {
+            document.getElementById("me").textContent  += pieceSymbol;
+        }
+
+    } else notation += '-'; // '—'
+
+    // Целевая позиция
+     if (piece.type !== 'Pawn') {
+        notation += to.toLowerCase();
+     }
+
+    // Превращение пешки
+    if (result.promotePawn) {
+        notation += `=${getPieceSymbol(result.promotePawn.newPiece.fileName, result.promotePawn.newPiece.color)}`;
+    }
+
+    // Шах/мат
+    if (result.check) notation += '+';
+    if (result.checkmate) notation += '#';
+
+    return notation;
+}
+
+function getPieceSymbol(type, color) {
+    return chessSymbols[type][color]; // Учитываем цвет
+}
+
+function addPieceSymbols(notation, color) {
+    // Заменяем рокировку на символ короля
+    let formatted = notation
+        .replace(/0-0-0/g, '♔0-0-0')
+        .replace(/0-0/g, '♔0-0');
+
+    // Заменяем буквы фигур на символы
+    return formatted.replace(/([KQRNB])/g, (_, p) =>
+        Object.entries(chessSymbols)
+            .find(([k]) => k.startsWith(p))[1][color]
+    );
+}
+
+function addMoveElement(parent, text, className) {
+    const element = document.createElement('div');
+    element.className = className;
+    element.innerHTML = text;
+    parent.appendChild(element);
+    return element;
+}
+
+function showMoveHistory(moveResults) {
+    moveCount = 0;
+    if (!moveResults) {
+        console.log("не moveResults");
+        return;
+    }
+    moveResults.forEach(moveResult => {
+        addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
+    });
+}
+
+function showGameResult(result) {
+    const moveBoxWindow = document.getElementById('move-box-window');
+
+    // Создаем элемент результата
+    const resultRow = document.createElement('div');
+    resultRow.className = 'result-container';
+
+    // Текст результата
+    const resultText = document.createElement('span');
+    const scaleText = document.createElement('div');
+    resultText.className = 'result';
+    scaleText.className = 'scale';
+
+    if (result === "draw") {
+        resultText.textContent = "Ничья";
+        scaleText.textContent = "½ - ½";
+    } else if (result === "white") {
+        resultText.textContent = "Победа белых";
+        scaleText.textContent = "1 - 0";
+    } else if (result === "black") {
+        resultText.textContent = "Победа черных";
+        scaleText.textContent = "0 - 1";
+    }
+
+    resultRow.appendChild(resultText);
+    resultRow.appendChild(scaleText);
+
+    // Добавляем результат в конец истории ходов
+    moveBoxWindow.appendChild(resultRow);
 
     const retry = document.getElementById('retry');
     const findOpponent = document.getElementById('find-opponent');
@@ -659,13 +707,6 @@ function showGameResult(result) {
     findOpponent.style.display = "flex";
     whiteFlag.style.display = "none";
     draw.style.display = "none";
-}
-
-let resizeTimeout;
-
-function debounceResize() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(resizeBoard, 100); // Вызов resizeBoard через 100 мс после последнего изменения размера
 }
 
 function resizeBoard() {
@@ -705,108 +746,113 @@ function resizeBoard() {
     window.addEventListener('resize', () => {
         requestAnimationFrame(resizeBoard);
     });
-//    const board = document.getElementById('chess-board');
     resizeObserver.observe(board.parentElement);
 }
 
-
-
-
-// Обновление отображения таймера
 function updateTimerDisplay(timerId, time) {
     const timer = document.getElementById(timerId);
-    let minutes = Math.floor(time / 60000); // Минуты
-    let seconds = Math.floor((time % 60000) / 1000); // Секунды
-    let tenths = Math.floor((time % 1000) / 100); // Десятые доли секунды
+    const minutes = Math.floor(time / 60000);
+    const seconds = Math.floor((time % 60000) / 1000);
+    const tenths = Math.floor((time % 1000) / 100);
 
-    // Отображаем десятые доли только если время <= 5 секунд
-    if (time <= 5000) {
-        timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`;
-    } else {
-        timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
+    timer.textContent = time <= 5000
+        ? `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`
+        : `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-    // Изменяем цвет фона при критическом времени
-    if (time <= 5000) {
-        timer.style.backgroundColor = "orange";
-    } else {
-        timer.style.backgroundColor = "";
-    }
+    timer.style.backgroundColor = time <= 5000 ? "orange" : "";
 }
 
-// Запуск таймера
-function startTimer(timerId, time) {
-    clearInterval(timer1Interval);
-    clearInterval(timer2Interval);
-    activeTimer = timerId;
+// Функция для преобразования строки времени в миллисекунды
+function parseTime(timeStr) {
+    console.log("2 - parseTime ");
+    const [mins, secs, tenths] = timeStr.split(/[:.]/);
+    return (+mins * 60 + +secs) * 1000 + (tenths ? +tenths * 100 : 0);
+}
 
-    const interval = setInterval(() => {
-        if (time > 0) {
-            time -= 10; // Уменьшаем время на 10 мс (1/100 секунды)
-            updateTimerDisplay(timerId, time);
+function startTimer() {
+    console.log("4 - startTimer ");
+    clearInterval(timerState.interval);
+
+    timerState.interval = setInterval(() => {
+        if (currentPlayerColor === 'WHITE') {
+            timerState.white = Math.max(timerState.white - 100, 0);
         } else {
-            clearInterval(interval); // Остановить таймер, когда время истечет
-            if (timerId == "timer1") {
-                showGameResult("black"); // Белые проиграли по времени
-            } else if (timerId == "timer2") {
-                showGameResult("white"); // Черные проиграли по времени
-            }
-            activeTimer = null; // Сброс активного таймера
+            timerState.black = Math.max(timerState.black - 100, 0);
         }
-    }, 10);
 
-    if (timerId === 'timer1') {
-        timer1Interval = interval;
-    } else if (timerId === 'timer2') {
-        timer2Interval = interval;
+        if (myColor === "WHITE") {
+            updateTimerDisplay("timer1", timerState.black);
+            updateTimerDisplay("timer2", timerState.white);
+        } else {
+            updateTimerDisplay("timer1", timerState.white);
+            updateTimerDisplay("timer2", timerState.black);
+        }
+
+        if (timerState.white <= 0 || timerState.black <= 0) {
+            handleTimeExpired();
+            clearInterval(timerState.interval);
+        }
+    }, 100);
+}
+
+// Обработка окончания времени
+function handleTimeExpired() {
+    console.log("&& - handleTimeExpired ");
+    clearInterval(timerState.interval);
+    timerState.interval = null;
+    showGameResult((currentPlayerColor === 'WHITE' ? 'BLACK' : 'WHITE').toLower());
+}
+
+// Обновление таймеров
+function updateTimers(whiteTimeStr, blackTimeStr, timerActive = true) {
+    console.log("1 - updateTimers ");
+    timerState.white = parseTime(whiteTimeStr);
+    timerState.black = parseTime(blackTimeStr);
+
+    if (myColor === "WHITE") {
+        updateTimerDisplay("timer1", timerState.black);
+        updateTimerDisplay("timer2", timerState.white);
+    } else {
+        updateTimerDisplay("timer1", timerState.white);
+        updateTimerDisplay("timer2", timerState.black);
+    }
+
+
+    if (timerActive && !timerState.interval) {
+        startTimer();
     }
 }
 
-// Обновление таймеров на основе данных с сервера
-function updateTimers(whiteTime, blackTime) {
-    const whiteTimer = document.getElementById("timer1");
-    const blackTimer = document.getElementById("timer2");
+function switchPlayer() {
+    currentPlayerColor = currentPlayerColor === "WHITE" ? "BLACK" : "WHITE";
 
-    // Конвертируем время из строкового формата в миллисекунды
-    function parseTime(timeStr) {
-        const parts = timeStr.split(':');
-        const minutes = parseInt(parts[0], 10);
-        const seconds = parseInt(parts[1], 10);
-        const tenths = parts[2] ? parseInt(parts[2], 10) : 0;
-        return (minutes * 60 + seconds) * 1000 + tenths * 100;
-    }
-
-    const parsedWhiteTime = parseTime(whiteTime);
-    const parsedBlackTime = parseTime(blackTime);
-
-    // Обновляем отображение таймеров
-    updateTimerDisplay("timer1", parsedWhiteTime);
-    updateTimerDisplay("timer2", parsedBlackTime);
-
-    if (currentPlayerColor === "WHITE" && activeTimer !== "timer1") {
-        startTimer("timer1", parsedWhiteTime);
-    } else if (currentPlayerColor === "BLACK" && activeTimer !== "timer2") {
-        startTimer("timer2", parsedBlackTime);
-    }
 }
 
 // Функция для выполнения хода
 function handleMove(move) {
-    console.log("move: ", move);
+    console.log("handleMove: ", move);
     const result = move.moveResult;
-    const fromPosition = `${move.move.from.col}${move.move.from.row}`;
-    const toPosition = `${move.move.to.col}${move.move.to.row}`;
+    const fromPosition = `${result.move.from}`;
+    const toPosition = `${result.move.to}`;
+    chessboardHistory.push(move.chessboard.board);
+
+    if (result.eatenPiece) {
+        eatenPieces.push({
+            moveNumber: moveCount,
+            piece: result.eatenPiece
+        });
+    }
     if (result.draw) {
         console.log("draw");
         animateMove(fromPosition, toPosition);
         updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition, result);
         showGameResult("draw");
     } else if (result.victory) {
-        console.log("winer is ");
+        console.log("winner is ");
         animateMove(fromPosition, toPosition);
         updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition, result);
         showGameResult(result.victory.winner);
     } else if (result.promotePawn) {
         const promotedPiece = result.promotePawn.newPiece;
@@ -814,42 +860,25 @@ function handleMove(move) {
         finishPromotion(fromPosition, toPosition, promotedPiece);
         updateChessboard(chessboard, fromPosition, toPosition);
         chessboard[toPosition] = promotedPiece;
-        addMoveToBox(fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition, result);
     } else if (result.castling) {
         console.log("рокировка!");
         const { from: rookFrom, to: rookTo } = result.castling;
-        console.log(rookFrom, rookTo);
         animateMove(fromPosition, toPosition);
         animateMove(rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
         updateChessboard(chessboard, rookFrom.col + rookFrom.row, rookTo.col + rookTo.row);
         updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition, result);
     } else {
         animateMove(fromPosition, toPosition);
         updateChessboard(chessboard, fromPosition, toPosition);
-        addMoveToBox(fromPosition, toPosition);
+        addMoveToBox(fromPosition, toPosition, result);
     }
-//    resumeTimer();
-
+    console.log("currentPlayerColor ", currentPlayerColor);
+    currentPlayerColor = move.currentPlayer;
+    console.log("currentPlayerColor ", currentPlayerColor);
     return chessboard;
 }
-
-//async function sendPromotionChoice(position, selectedPieceType) {
-//    const response = await fetch('/api/chess/promotion', {
-//        method: 'POST',
-//        headers: {
-//            'Content-Type': 'application/json',
-//            [csrfHeader]: csrfToken
-//        },
-//        body: JSON.stringify({
-//            position: position,
-//            newPieceType: selectedPieceType
-//        })
-//    }).catch(error => {
-//        console.error('Ошибка при отправке запроса на промоушен:', error.message);
-//    });
-//    const result = await response.json();
-//}
 
 function displayUserProfileBtn(user) {
     // Пример отображения информации о пользователе
@@ -887,18 +916,6 @@ function updateMoveHistory(moveHistory) {
     });
 }
 
-//function handlePromotion(promotionData) {
-//    showPromotionMenu(promotionData.from, promotionData.to)
-//        .then(selectedPiece => {
-//            stompClient.send(`/app/game/${sessionId}/promotion`, {},
-//                JSON.stringify({
-//                    position: promotionData.position,
-//                    pieceType: selectedPiece
-//                })
-//            );
-//        });
-//}
-
 function handleCastling(castlingData) {
     animateMove(castlingData.king.from, castlingData.king.to);
     animateMove(castlingData.rook.from, castlingData.rook.to);
@@ -908,17 +925,28 @@ function handleCastling(castlingData) {
 function handleGameResult(result) {
     if (result.draw) {
         showGameResult('draw');
-    } else if (result.winner === 'white') {
-        showGameResult('white');
-    } else if (result.winner === 'black') {
-        showGameResult('black');
+    } else {
+        showGameResult(result.winner);
     }
 }
 
-function sendPromotionChoice(position, pieceType) {
-    stompClient.send(`/app/game/${sessionId}/promotion`, {},
-        JSON.stringify({ position: position, pieceType: pieceType }));
+function toString(board) {
+    let result = '';
+
+    for (let row = 8; row >= 1; row--) {
+        for (let colCode = 'a'.charCodeAt(0); colCode <= 'h'.charCodeAt(0); colCode++) {
+            const col = String.fromCharCode(colCode);
+            const position = `${col}${row}`;
+            const piece = board[position];
+
+            if (piece && chessSymbols[piece.fileName]) {
+                result += chessSymbols[piece.fileName][piece.color] + ' ';
+            } else {
+                result += '   ';
+            }
+        }
+        result += '\n';
+    }
+
+    return result;
 }
-
-
-

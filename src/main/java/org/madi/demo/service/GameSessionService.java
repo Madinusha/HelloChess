@@ -3,6 +3,7 @@ package org.madi.demo.service;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.GameSession;
 import org.madi.demo.model.GameTimer;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,20 +16,17 @@ import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 public class GameSessionService {
 	private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
 
-	public GameSession createSession(
-			String sessionId,
-			User creator,
-			GameSession.PieceColor color,
-			GameTimer timer
-	) {
-		GameSession session = new GameSession(
-				sessionId,
-				creator,
-				color,
-				timer
-		);
+	private final SimpMessagingTemplate messagingTemplate;
+
+	public GameSessionService(SimpMessagingTemplate messagingTemplate) {
+		this.messagingTemplate = messagingTemplate;
+	}
+
+	public GameSession createSession(String sessionId, User creator,
+									 GameSession.PieceColor color, int initialTime, int increment) {
+		GameTimer timer = new GameTimer(initialTime, increment, messagingTemplate, sessionId);
+		GameSession session = new GameSession(sessionId, creator, color, timer);
 		sessions.put(sessionId, session);
-		System.out.println("Вот такой искомый sessionId - " + sessionId);
 		return session;
 	}
 
