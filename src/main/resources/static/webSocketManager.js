@@ -97,7 +97,6 @@ class WebSocketManager {
         this.stompClient.subscribe(`/topic/game/${this.sessionId}/timer`, (message) => {
             const timerData = JSON.parse(message.body);
             console.log("timerData ", timerData);
-//            const { whiteTime, blackTime } = timerData;
             updateTimers(timerData.whiteTime, timerData.blackTime, timerData.timerActive);
         });
 

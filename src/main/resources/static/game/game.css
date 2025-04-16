@@ -76,8 +76,6 @@ body {
     min-height: 30vh;
     max-width: 90vh;
     max-height: 90vh;
-   /* width: calc(var(--square-size) * 8);
-    height: calc(var(--square-size) * 8);*/
     height: 60vh;
     resize: none;
 }
@@ -104,20 +102,7 @@ body {
 }
 .square.possible-move {
     position: relative;
-}/*
-.square.possible-move-on-piece {
-    position: relative;
 }
-.square.possible-move-on-piece::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-color: none;
-    pointer-events: none;
-    z-index: 2;
-}*/
 .square.possible-move-on-piece {
     position: relative;
     overflow: hidden;
@@ -151,6 +136,20 @@ body {
     background-color: rgba(0, 87, 50, 0.4);
     pointer-events: none;
     z-index: 2;
+}
+.square.in-check {
+    position: relative;
+    overflow: hidden;
+}
+.square.in-check::after {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(199, 49, 54, 0.9) 0%, rgba(199, 49, 54, 0.8) 40%, transparent 70%);
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 15%;
 }
 .square .piece {
     z-index: 50;
@@ -344,7 +343,7 @@ input[type="text"] {
     width: 100%;
     height: 50%;
     padding: 5px;
-    background-color: #D7D7D7;
+    background-color: #eee;
     border: none;
     border-radius: 7px;
     padding-left: 0.5em;
@@ -354,7 +353,7 @@ input[type="text"] {
 input[type="text"]::placeholder { /* подсказка */
     font-size: 16px;
     font-family: 'TeXGyreHeros', sans-serif;
-    color: var(--dark-purple);
+    color: #957377;
 }
 input[type="text"]:focus  {
     decoration: none;

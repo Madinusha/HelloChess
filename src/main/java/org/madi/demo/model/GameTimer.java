@@ -109,6 +109,7 @@ public class GameTimer {
 	public void stop() {
 		stopExecutor();
 		isStopped = true; // Устанавливаем флаг завершения
+		timerActive = false;
 	}
 
 	private void stopExecutor() {
@@ -126,6 +127,7 @@ public class GameTimer {
 
 	private void endGame(String winner) {
 		System.out.println("Game over! Winner: " + winner + ". Reason: timeout.");
+		sendTimeToClients();
 	}
 
 	public String getFormattedTime(boolean isWhite) {

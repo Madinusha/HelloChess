@@ -106,20 +106,20 @@ function initializeGameUI(gameStatus) {
     console.log("timerActive ", timerActive);
     updateTimers(whiteTime, blackTime, timerActive);
 
-    // Проверяем результат игры
-    if (gameResult) {
-        handleGameResult(gameResult);
-    }
+//    // Проверяем результат игры
+//    if (gameResult) {
+//        handleGameResult(gameResult);
+//    }
 
-    // Если требуется промоушен
-    if (gameStatus.promotionRequired) {
-        showPromotionMenu(gameStatus.promotionPosition.col + gameStatus.promotionPosition.row);
-    }
+//    // Если требуется промоушен
+//    if (gameStatus.promotionRequired) {
+//        showPromotionMenu(gameStatus.promotionPosition.col + gameStatus.promotionPosition.row);
+//    }
 
-    // Если возможна рокировка
-    if (gameStatus.castlingPossible) {
-        highlightCastlingOptions(gameStatus.castlingData);
-    }
+//    // Если возможна рокировка
+//    if (gameStatus.castlingPossible) {
+//        highlightCastlingOptions(gameStatus.castlingData);
+//    }
 }
 
 function fillPageValues(gameStatus){
@@ -377,6 +377,9 @@ function animateMove(positionFrom, positionTo) {
     return new Promise((resolve) => {
         console.log("positionFrom ", positionFrom);
         console.log("positionTo ", positionTo);
+        document.querySelectorAll('.in-check').forEach(sq => {
+            sq.classList.remove('in-check');
+        });
         const selectedSquare = document.getElementById(positionFrom);
         const targetSquare = document.getElementById(positionTo);
 
@@ -574,8 +577,8 @@ function addMoveToBox(fromPosition, toPosition, moveResult) {
 function formatChessNotation(from, to, result) {
     console.log("chessboardHistory ", chessboardHistory);
     console.log("moveCount ", moveCount);
-    console.log("chessboardHistory[moveCount+1] ", chessboardHistory[moveCount+1]);
-    console.log(toString(chessboardHistory[moveCount+1]));
+//    console.log("chessboardHistory[moveCount+1] ", chessboardHistory[moveCount+1]);
+//    console.log(toString(chessboardHistory[moveCount+1]));
     const piece = chessboardHistory[moveCount][from];
     if (!piece) {
         console.log("Нет фигуры на доске для истории ходов");
@@ -594,14 +597,7 @@ function formatChessNotation(from, to, result) {
         notation += getPieceSymbol(piece.fileName, piece.color);
     }
     notation += from;
-    // Взятие
-//    if (chessboard[to] || (piece.type === 'Pawn' && from[0] !== to[0])) {
-//        if (piece.type === 'Pawn') notation += from[0];
-//        notation += ':';
-//    } else notation += '-'; // '—'
-    console.log("eatenPieces ", eatenPieces);
-    console.log("moveCount ", moveCount);
-//    const eatenEntry = eatenPieces.find(item => item.moveNumber === moveCount);
+
     const eatenEntry = result.eatenPiece;
     if (eatenEntry) {
         notation += ':';
@@ -626,8 +622,8 @@ function formatChessNotation(from, to, result) {
     }
 
     // Шах/мат
-    if (result.check) notation += '+';
-    if (result.checkmate) notation += '#';
+    if (result.kingInCheck) notation += '+';
+    if (result.victory) notation += '#';
 
     return notation;
 }
@@ -657,15 +653,45 @@ function addMoveElement(parent, text, className) {
     return element;
 }
 
+//function showMoveHistory(moveResults) {
+//    moveCount = 0;
+//    if (!moveResults) {
+//        console.log("не moveResults");
+//        return;
+//    }
+//    for (let i = 0; i < moveResults.length; i++) {
+//        const moveResult = moveResults[i];
+//
+//        if (moveResult.castling) {
+//            addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
+//            // Пропускаем следующий ход (перемещение ладьи)
+//            i++;
+//            console.log("Пропускаю отображение ");
+//            continue;
+//        }
+//
+//        // Обычная обработка хода
+//        addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
+//    }
+//}
+
 function showMoveHistory(moveResults) {
     moveCount = 0;
-    if (!moveResults) {
+    if (!moveResults || moveResults.length === 0) {
         console.log("не moveResults");
         return;
     }
-    moveResults.forEach(moveResult => {
-        addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
-    });
+    for (let i = 0; i < moveResults.length; i++) {
+        const moveResult = moveResults[i];
+        if (moveResult.castling) {
+            console.log("moveResult в описании истории ", moveResult);
+            addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
+
+        } else {
+            addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
+        }
+
+    }
 }
 
 function showGameResult(result) {
@@ -697,6 +723,7 @@ function showGameResult(result) {
 
     // Добавляем результат в конец истории ходов
     moveBoxWindow.appendChild(resultRow);
+    moveBoxWindow.scrollTop = moveBoxWindow.scrollHeight;
 
     const retry = document.getElementById('retry');
     const findOpponent = document.getElementById('find-opponent');
@@ -789,23 +816,14 @@ function startTimer() {
         }
 
         if (timerState.white <= 0 || timerState.black <= 0) {
-            handleTimeExpired();
             clearInterval(timerState.interval);
+            timerState.interval = null;
         }
     }, 100);
 }
 
-// Обработка окончания времени
-function handleTimeExpired() {
-    console.log("&& - handleTimeExpired ");
-    clearInterval(timerState.interval);
-    timerState.interval = null;
-    showGameResult((currentPlayerColor === 'WHITE' ? 'BLACK' : 'WHITE').toLower());
-}
-
 // Обновление таймеров
 function updateTimers(whiteTimeStr, blackTimeStr, timerActive = true) {
-    console.log("1 - updateTimers ");
     timerState.white = parseTime(whiteTimeStr);
     timerState.black = parseTime(blackTimeStr);
 
@@ -817,6 +835,12 @@ function updateTimers(whiteTimeStr, blackTimeStr, timerActive = true) {
         updateTimerDisplay("timer2", timerState.black);
     }
 
+    if (timerState.white <= 0 || timerState.black <= 0) {
+        const winner = timerState.white <= 0 ? "black" : "white";
+        showGameResult(winner);
+        return;
+    }
+
 
     if (timerActive && !timerState.interval) {
         startTimer();
@@ -825,7 +849,6 @@ function updateTimers(whiteTimeStr, blackTimeStr, timerActive = true) {
 
 function switchPlayer() {
     currentPlayerColor = currentPlayerColor === "WHITE" ? "BLACK" : "WHITE";
-
 }
 
 // Функция для выполнения хода
@@ -874,9 +897,14 @@ function handleMove(move) {
         updateChessboard(chessboard, fromPosition, toPosition);
         addMoveToBox(fromPosition, toPosition, result);
     }
+    if (result.kingInCheck) {
+        console.log("КОРОЛЬ ПОД ШАХОМ :", result.kingInCheck);
+        document.getElementById(result.kingInCheck).classList.add('in-check');
+    }
     console.log("currentPlayerColor ", currentPlayerColor);
     currentPlayerColor = move.currentPlayer;
     console.log("currentPlayerColor ", currentPlayerColor);
+
     return chessboard;
 }
 

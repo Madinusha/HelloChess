@@ -2,6 +2,7 @@ package org.madi.demo.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.madi.demo.controller.ChessController;
 
@@ -10,8 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Setter
 @Getter
 public class Chessboard {
+
 	private Map<Position, Piece> board;
 	private List<MutablePair<Integer, Piece>> eatenFigures;
 	private List<MutablePair<Position, Position>> motionList;
@@ -73,23 +76,88 @@ public class Chessboard {
 		initialize();
 	}
 
+//	public Chessboard copyChessboard(Chessboard originalBoard) {
+//		Chessboard copiedBoard = new Chessboard();
+//
+//		// Проходимся по каждой клетке на доске
+//		for (Map.Entry<Position, Piece> entry : originalBoard.getChessboard().entrySet()) {
+//			Position position = entry.getKey();
+//			Piece originalFigure = entry.getValue();
+//
+//			// Создаем новый объект фигуры и добавляем его на клетку в новой доске
+//			Piece copiedFigure = createCopyOfFigure(originalFigure);
+//			copiedBoard.getChessboard().put(position, copiedFigure);
+//		}
+//
+//		// Копируем список съеденных фигур
+//		copiedBoard.getEatenFigures().addAll(originalBoard.getEatenFigures());
+//		copiedBoard.moveResults = originalBoard.moveResults;
+//		copiedBoard.boardHistory = originalBoard.boardHistory;
+//
+//		return copiedBoard;
+//	}
+
 	public Chessboard copyChessboard(Chessboard originalBoard) {
+		// Создаем новую доску
 		Chessboard copiedBoard = new Chessboard();
 
-		// Проходимся по каждой клетке на доске
+		// Глубокое копирование board (Map<Position, Piece>)
+		Map<Position, Piece> copiedBoardMap = new HashMap<>();
 		for (Map.Entry<Position, Piece> entry : originalBoard.getChessboard().entrySet()) {
 			Position position = entry.getKey();
 			Piece originalFigure = entry.getValue();
 
-			// Создаем новый объект фигуры и добавляем его на клетку в новой доске
+			// Создаем глубокую копию фигуры
 			Piece copiedFigure = createCopyOfFigure(originalFigure);
-			copiedBoard.getChessboard().put(position, copiedFigure);
+			copiedBoardMap.put(position, copiedFigure);
 		}
+		copiedBoard.setBoard(copiedBoardMap);
 
-		// Копируем список съеденных фигур
-		copiedBoard.getEatenFigures().addAll(originalBoard.getEatenFigures());
-		copiedBoard.moveResults = originalBoard.moveResults;
-		copiedBoard.boardHistory = originalBoard.boardHistory;
+		// Глубокое копирование eatenFigures (List<MutablePair<Integer, Piece>>)
+		List<MutablePair<Integer, Piece>> copiedEatenFigures = new ArrayList<>();
+		for (MutablePair<Integer, Piece> pair : originalBoard.getEatenFigures()) {
+			Piece copiedPiece = createCopyOfFigure(pair.getRight());
+			copiedEatenFigures.add(new MutablePair<>(pair.getLeft(), copiedPiece));
+		}
+		copiedBoard.setEatenFigures(copiedEatenFigures);
+
+		// Глубокое копирование motionList (List<MutablePair<Position, Position>>)
+		List<MutablePair<Position, Position>> copiedMotionList = new ArrayList<>();
+		for (MutablePair<Position, Position> pair : originalBoard.getMotionList()) {
+			copiedMotionList.add(new MutablePair<>(pair.getLeft(), pair.getRight()));
+		}
+		copiedBoard.setMotionList(copiedMotionList);
+
+		// Глубокое копирование moveResults (List<Map<String, Object>>)
+		List<Map<String, Object>> copiedMoveResults = new ArrayList<>();
+		for (Map<String, Object> moveResult : originalBoard.getMoveResults()) {
+			Map<String, Object> copiedMoveResult = new HashMap<>();
+			for (Map.Entry<String, Object> entry : moveResult.entrySet()) {
+				// Если значение — сложная структура, нужно копировать её глубоко
+				if (entry.getValue() instanceof Piece) {
+					copiedMoveResult.put(entry.getKey(), createCopyOfFigure((Piece) entry.getValue()));
+				} else {
+					copiedMoveResult.put(entry.getKey(), entry.getValue());
+				}
+			}
+			copiedMoveResults.add(copiedMoveResult);
+		}
+		copiedBoard.setMoveResults(copiedMoveResults);
+
+		// Глубокое копирование boardHistory (List<Map<Position, Piece>>)
+		List<Map<Position, Piece>> copiedBoardHistory = new ArrayList<>();
+		for (Map<Position, Piece> historyEntry : originalBoard.getBoardHistory()) {
+			Map<Position, Piece> copiedHistoryEntry = new HashMap<>();
+			for (Map.Entry<Position, Piece> entry : historyEntry.entrySet()) {
+				copiedHistoryEntry.put(entry.getKey(), createCopyOfFigure(entry.getValue()));
+			}
+			copiedBoardHistory.add(copiedHistoryEntry);
+		}
+		copiedBoard.setBoardHistory(copiedBoardHistory);
+
+		// Простое копирование примитивных полей
+		copiedBoard.setCurrentPlayerColor(originalBoard.getCurrentPlayerColor());
+		copiedBoard.setStatus(originalBoard.getStatus());
 
 		return copiedBoard;
 	}
@@ -459,6 +527,17 @@ public class Chessboard {
 					result.put("draw", true);
 				} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
 					result.put("victory", Map.of("winner", checkCheckmate));
+				}
+			} else {
+				boolean isKingInCheckWhite = isKingInCheck("white", board.board);
+				boolean isKingInCheckBlack = isKingInCheck("black", board.board);
+				if (isKingInCheckWhite) {
+					String kingPosition = findKingPosition("white", board.board).toString();
+					result.put("kingInCheck", kingPosition);
+				}
+				if (isKingInCheckBlack) {
+					String kingPosition = findKingPosition("black", board.board).toString();
+					result.put("kingInCheck", kingPosition);
 				}
 			}
 
