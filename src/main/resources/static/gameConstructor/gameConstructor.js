@@ -63,8 +63,6 @@ document.getElementById('create-game').addEventListener('click', async () => {
             timeControl: timeControl
         })
     );
-
-
 });
 
 function joinGame(sessionId) {

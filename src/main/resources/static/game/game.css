@@ -141,13 +141,13 @@ body {
     position: relative;
     overflow: hidden;
 }
-.square.in-check::after {
+.square.in-check::before {
     content: '';
     position: absolute;
     width: 120%;
     height: 120%;
     background: radial-gradient(circle, rgba(199, 49, 54, 0.9) 0%, rgba(199, 49, 54, 0.8) 40%, transparent 70%);
-    z-index: 3;
+    z-index: 40;
     pointer-events: none;
     border-radius: 15%;
 }
@@ -481,7 +481,6 @@ input[type="text"]:focus  {
     justify-content: center;
     gap: 0.5em;
     background: transparent;
-    padding: 0.3em;
 }
 
 #retry, #find-opponent {
@@ -530,7 +529,6 @@ input[type="text"]:focus  {
     justify-content: center;
     gap: 0.2em;
     color: var(--carrot-red);
-   /* display: none;*/
 }
 .result-container {
     width: 100%;
@@ -551,4 +549,86 @@ input[type="text"]:focus  {
 .result {
     font-size: 1em;
     padding-top: 0.5em;
+}
+
+#move-box-btns.has-retry-request {
+    padding: 0;
+}
+
+#retry-request-container {
+    position: relative;
+    display: none;
+    align-items: center;
+    gap: 0.5em;
+    color: var(--carrot-red);
+    font-size: 0.7em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#retry-request-container.show {
+    display: flex;
+}
+
+#retry-request-text {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#cancel-retry {
+    background: url(../images/times.png) center / cover no-repeat;
+    border: none;
+    cursor: pointer;
+    height: 100%;
+    aspect-ratio: 1;
+    background-color: var(--carrot-red);
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+}
+
+
+#cancel-retry:hover {
+    background-color: transparent;
+    filter:
+        brightness(0)
+        invert(1)
+        drop-shadow(0 0 2px rgba(255,255,255,0.5));
+}
+
+@media (max-width: 768px) {
+    #retry-request-container {
+        font-size: 0.8em;
+        padding: 3px 10px;
+    }
+}
+
+
+#find-opponent.loading {
+    position: relative;
+    color: transparent;
+    opacity: 0.5;
+}
+
+
+#find-opponent.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }

@@ -99,7 +99,7 @@ function initializeGameUI(gameStatus) {
 
     // Рендерим доску
     console.log("myColor: ", myColor);
-        renderChessboard(chessboard, myColor === "BLACK");
+    renderChessboard(chessboard, myColor === "BLACK");
     buttonsInit();
 
     // Обновляем таймеры
@@ -306,9 +306,9 @@ function handleCellClick(position) {
        hideValidMove();
        makeMove(selectedSquare.id, square.id);
     } else {
-        if (!square.querySelector('.piece')) {
+        if (!square.querySelector('.piece') || getPieceAt(position).color !== myColor.toLowerCase()) {
             hideValidMove();
-            console.log("нет фигуры");
+            console.log("Нет вашей фигуры");
             return;
         }
         wsManager.getPossibleMoves(position);
@@ -489,17 +489,11 @@ function buttonsInit() {
     const toggleButton = document.getElementById('toggle-button');
 
     toggleButton.addEventListener('click', () => {
-        if (chatBoxWindow.classList.contains('hidden')) {
-            chatBoxWindow.classList.remove('hidden');
-            chatBoxFooter.classList.remove('hidden');
-            chatBox.classList.remove('collapsed');
-        } else {
-            chatBoxWindow.classList.add('hidden');
-            chatBoxFooter.classList.add('hidden');
-            chatBox.classList.add('collapsed');
-        }
+        chatBox.classList.toggle('collapsed');
+        chatBoxWindow.classList.toggle('hidden');
+        chatBoxFooter.classList.toggle('hidden');
         toggleButton.classList.toggle('rotate');
-//        resizeBoard(); // Обновляем размеры после изменения состояния
+        resizeBoard();
     });
 
     const sendButton = document.getElementById('chat-box-send-button');
@@ -513,7 +507,7 @@ function buttonsInit() {
         const message = inputText.value.trim();
         if (message !== "") {
             sendMessage(message);
-            inputText.value = ""; // Очистить поле ввода
+            inputText.value = "";
         }
     });
 
@@ -521,6 +515,124 @@ function buttonsInit() {
         if (event.key === 'Enter') {
             sendButton.click();
         }
+    });
+
+    const retryButton = document.getElementById('retry');
+    const findOpponentButton = document.getElementById('find-opponent');
+    const whiteFlagButton = document.getElementById('white-flag');
+    const drawButton = document.getElementById('draw');
+
+    retryButton.addEventListener('click', () => {
+        handleRetryButtonClick();
+    });
+
+    findOpponentButton.addEventListener('click', () => {
+        handleFindOpponentButtonClick();
+    });
+}
+
+async function handleFindOpponentButtonClick() {
+    const button = document.getElementById('find-opponent');
+    if (!wsManager) {
+        console.error('WebSocket is not initialized!');
+        return;
+    }
+    try {
+        button.classList.add('loading');
+        button.disabled = true;
+        const { color, timeControl } = await new Promise((resolve, reject) => {
+            const subscription = wsManager.stompClient.subscribe(
+                '/user/queue/initial-params',
+                (message) => {
+                    try {
+                        subscription.unsubscribe();
+                        const gameRequest = JSON.parse(message.body);
+                        console.log("Получены параметры:", gameRequest);
+                        resolve({
+                            color: gameRequest.playerColor,
+                            timeControl: {
+                                minutes: gameRequest.timeControl.minutes,
+                                increment: gameRequest.timeControl.increment
+                            }
+                        });
+                    } catch (error) {
+                        // Отклоняем Promise при ошибке
+                        reject(error);
+                    }
+                }
+            );
+            // Таймаут на случай проблем
+            setTimeout(() => {
+                subscription.unsubscribe();
+                reject(new Error("Превышено время ожидания параметров"));
+            }, 5000); // 5 секунд
+
+            wsManager.stompClient.send(
+                `/app/game/${wsManager.sessionId}/initial-params`,
+                {},
+                {}
+            );
+        });
+
+        wsManager.stompClient.subscribe('/user/queue/game-created', (message) => {
+            const { sessionId } = JSON.parse(message.body);
+            console.log(`Successfully created game with session ID: ${sessionId}`);
+        });
+
+        // При подключении:
+        wsManager.stompClient.subscribe('/user/queue/game-start', (message) => {
+            console.log('Game start message received:', message.body);
+            const { sessionId } = JSON.parse(message.body);
+            button.classList.remove('loading');
+            button.disabled = false;
+            window.location.href = `/game?sessionId=${sessionId}`;
+        });
+
+        wsManager.stompClient.send(
+            "/app/game/create",
+            {},
+            JSON.stringify({
+                playerColor: color,
+                timeControl: timeControl
+            })
+        );
+    } catch (error) {
+        console.error("Ошибка:", error);
+    }
+}
+
+function handleRetryButtonClick() {
+//    wsManager.sendRetryRequest();
+    const retryButton = document.getElementById('retry');
+    const findOpponentButton = document.getElementById('find-opponent');
+    retryButton.style.display = 'none';
+    findOpponentButton.style.display = 'none';
+
+    const buttonsContainer = document.getElementById('move-box-btns');
+    buttonsContainer.classList.add('has-retry-request'); // Убираем паддинги у родителя
+
+    const requestContainer = document.createElement('div');
+    requestContainer.id = 'retry-request-container';
+    requestContainer.classList.add('show');
+
+    const text = document.createElement('span');
+    text.id = 'retry-request-text';
+    text.textContent = 'Отправлен запрос на реванш';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.id = 'cancel-retry';
+
+    requestContainer.appendChild(cancelButton);
+    requestContainer.appendChild(text);
+    buttonsContainer.insertBefore(requestContainer, buttonsContainer.firstChild);
+
+    cancelButton.addEventListener('click', () => {
+        //        wsManager.cancelRetryRequest();
+        buttonsContainer.classList.remove('has-retry-request');
+        requestContainer.remove();
+
+        retryButton.style.display = 'block';
+        findOpponentButton.style.display = 'block';
     });
 }
 
@@ -575,16 +687,13 @@ function addMoveToBox(fromPosition, toPosition, moveResult) {
 }
 
 function formatChessNotation(from, to, result) {
-    console.log("chessboardHistory ", chessboardHistory);
-    console.log("moveCount ", moveCount);
-//    console.log("chessboardHistory[moveCount+1] ", chessboardHistory[moveCount+1]);
-//    console.log(toString(chessboardHistory[moveCount+1]));
+//    console.log("chessboardHistory ", chessboardHistory);
+//    console.log("moveCount ", moveCount);
     const piece = chessboardHistory[moveCount][from];
     if (!piece) {
         console.log("Нет фигуры на доске для истории ходов");
         return '';
     }
-
     let notation = '';
 
     // Рокировка
@@ -601,14 +710,12 @@ function formatChessNotation(from, to, result) {
     const eatenEntry = result.eatenPiece;
     if (eatenEntry) {
         notation += ':';
-
         const pieceSymbol = chessSymbols[eatenEntry.fileName][eatenEntry.color];
         if (eatenEntry.color == myColor.toLowerCase()) {
             document.getElementById("opponent").textContent  += pieceSymbol;
         } else {
             document.getElementById("me").textContent  += pieceSymbol;
         }
-
     } else notation += '-'; // '—'
 
     // Целевая позиция
@@ -653,28 +760,6 @@ function addMoveElement(parent, text, className) {
     return element;
 }
 
-//function showMoveHistory(moveResults) {
-//    moveCount = 0;
-//    if (!moveResults) {
-//        console.log("не moveResults");
-//        return;
-//    }
-//    for (let i = 0; i < moveResults.length; i++) {
-//        const moveResult = moveResults[i];
-//
-//        if (moveResult.castling) {
-//            addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
-//            // Пропускаем следующий ход (перемещение ладьи)
-//            i++;
-//            console.log("Пропускаю отображение ");
-//            continue;
-//        }
-//
-//        // Обычная обработка хода
-//        addMoveToBox(`${moveResult.move.from}`, `${moveResult.move.to}`, moveResult);
-//    }
-//}
-
 function showMoveHistory(moveResults) {
     moveCount = 0;
     if (!moveResults || moveResults.length === 0) {
@@ -695,6 +780,8 @@ function showMoveHistory(moveResults) {
 }
 
 function showGameResult(result) {
+    clearInterval(timerState.interval);
+    timerState.interval = null;
     const moveBoxWindow = document.getElementById('move-box-window');
 
     // Создаем элемент результата
@@ -736,6 +823,7 @@ function showGameResult(result) {
     draw.style.display = "none";
 }
 
+let resizeObserver;
 function resizeBoard() {
     const board = document.getElementById('chess-board');
     const chatBox = document.getElementById('chat-box');
@@ -744,36 +832,22 @@ function resizeBoard() {
 
     // Замеряем размеры вне RAF для актуальных значений
     const boardSize = Math.min(
-        board.parentElement.offsetWidth,
-        board.parentElement.offsetHeight
+        board.offsetWidth,
+        board.offsetHeight
     );
+    if (chatBox.classList.contains('collapsed')) {
+        chatBox.style.height = `${chatBoxHeader.offsetHeight}px`;
+    } else {
+        chatBox.style.height = `${boardSize}px`;
+    }
 
-    requestAnimationFrame(() => {
-        board.style.width = `${boardSize}px`;
-        board.style.height = `${boardSize}px`;
-
-        const squareSize = boardSize / 8;
-        document.documentElement.style.setProperty('--square-size', `${squareSize}px`);
-
-        // Устанавливаем высоту чата и окна ходов
-        if (!chatBox.classList.contains('collapsed')) {
-            chatBox.style.height = `${boardSize}px`;
-        } else {
-            chatBox.style.height = `${chatBoxHeader.offsetHeight}px`;
-        }
-        moveBox.style.height = `${boardSize}px`;
-    });
-    const resizeObserver = new ResizeObserver(entries => {
-        // Дебаунсим вызовы
-        let timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(resizeBoard, 100);
-    });
-
-    window.addEventListener('resize', () => {
-        requestAnimationFrame(resizeBoard);
-    });
-    resizeObserver.observe(board.parentElement);
+    // Инициализация ResizeObserver (только один раз)
+    if (!resizeObserver) {
+        resizeObserver = new ResizeObserver(entries => {
+            requestAnimationFrame(resizeBoard);
+        });
+        resizeObserver.observe(board.parentElement);
+    }
 }
 
 function updateTimerDisplay(timerId, time) {
@@ -901,10 +975,7 @@ function handleMove(move) {
         console.log("КОРОЛЬ ПОД ШАХОМ :", result.kingInCheck);
         document.getElementById(result.kingInCheck).classList.add('in-check');
     }
-    console.log("currentPlayerColor ", currentPlayerColor);
     currentPlayerColor = move.currentPlayer;
-    console.log("currentPlayerColor ", currentPlayerColor);
-
     return chessboard;
 }
 
@@ -951,6 +1022,7 @@ function handleCastling(castlingData) {
 }
 
 function handleGameResult(result) {
+
     if (result.draw) {
         showGameResult('draw');
     } else {

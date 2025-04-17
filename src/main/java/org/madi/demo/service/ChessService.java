@@ -48,6 +48,10 @@ public class ChessService {
 		} else {
 			session.getTimer().switchTurnWithIncrement();
 		}
+		if (result.containsKey("draw") || result.containsKey("victory")) {
+			session.getTimer().stop();
+			System.out.println("Я остановил таймер потому что кто-то выиграл");
+		}
 
 		return result;
 	}

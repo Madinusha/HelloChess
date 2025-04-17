@@ -108,8 +108,9 @@ public class GameTimer {
 
 	public void stop() {
 		stopExecutor();
-		isStopped = true; // Устанавливаем флаг завершения
+		isStopped = true;
 		timerActive = false;
+		sendTimeToClients();
 	}
 
 	private void stopExecutor() {
@@ -121,13 +122,7 @@ public class GameTimer {
 	private void checkTimeout() {
 		if (whiteTime <= 0 || blackTime <= 0) {
 			stop();
-			endGame(isWhiteTurn ? "BLACK" : "WHITE"); // Уведомляем о победе противника
 		}
-	}
-
-	private void endGame(String winner) {
-		System.out.println("Game over! Winner: " + winner + ". Reason: timeout.");
-		sendTimeToClients();
 	}
 
 	public String getFormattedTime(boolean isWhite) {

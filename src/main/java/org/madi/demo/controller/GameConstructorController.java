@@ -114,6 +114,29 @@ public class GameConstructorController {
 		}
 	}
 
+	@MessageMapping("/game/{sessionId}/initial-params")
+	public void handleGameInitialParams(
+			@DestinationVariable String sessionId,
+			Principal principal
+	) {
+		GameSession session = sessionService.getSession(sessionId);
+		User user = userService.findUserByNickname(principal.getName());
+
+		CreateGameRequest gameRequest = new CreateGameRequest(
+				session.getInitialColor(),
+				new CreateGameRequest.TimeControl(
+						session.getTimer().getInitialTimeMinutes(),
+						session.getTimer().getIncrementSeconds()
+				)
+		);
+		// Отправка клиенту
+		messagingTemplate.convertAndSendToUser(
+				user.getNickname(),
+				"/queue/initial-params",
+				gameRequest
+		);
+	}
+
 	@GetMapping("/games/available")
 	public List<Map<String, Object>> getAvailableGames() {
 		return sessionService.getAvailableGames();

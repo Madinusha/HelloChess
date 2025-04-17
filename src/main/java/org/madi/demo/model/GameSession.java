@@ -19,10 +19,12 @@ public class GameSession {
 	private PieceColor creatorColor;
 	private User creator;
 	private List<Pair<String, String>> chat = new ArrayList<>();
+	public PieceColor initialColor;
 
 	public GameSession(String id, User creator, PieceColor creatorColor, GameTimer timer) {
 		this.id = id;
 		this.creator = creator;
+		this.initialColor = creatorColor;
 		this.creatorColor = resolveCreatorColor(creatorColor);
 		assignPlayers(creator, this.creatorColor);
 		this.timer = timer;

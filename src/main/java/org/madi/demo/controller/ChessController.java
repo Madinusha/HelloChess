@@ -203,14 +203,4 @@ public class ChessController {
 		private String promotionPiece;
 
 	}
-
-	@Setter
-	@Getter
-	@AllArgsConstructor
-	public static class PromotionRequest {
-		private Position position;
-		private String newPieceType;
-
-	}
-
 }
