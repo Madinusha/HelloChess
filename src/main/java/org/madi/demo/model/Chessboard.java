@@ -1,10 +1,8 @@
 package org.madi.demo.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.madi.demo.controller.ChessController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +18,7 @@ public class Chessboard {
 	private List<MutablePair<Position, Position>> motionList;
 	private List<Map<String, Object>> moveResults;
 	private String currentPlayerColor = "WHITE";  // "WHITE" или "BLACK"
-	private String status; // "IN_PROGRESS", "CHECKMATE", "STALEMATE", "DRAW", etc.
+	private String status = "*"; // "DRAW", "WHITE", "BLACK", "*"
 	private List<Map<Position, Piece>> boardHistory = new ArrayList<>();
 
 	public Chessboard(Map<Position, Piece> board) {
@@ -525,8 +523,10 @@ public class Chessboard {
 			if (checkCheckmate != null) {
 				if (checkCheckmate.equals("draw")) {
 					result.put("draw", true);
+					status = "DRAW";
 				} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
 					result.put("victory", Map.of("winner", checkCheckmate));
+					status = checkCheckmate.toLowerCase();
 				}
 			} else {
 				boolean isKingInCheckWhite = isKingInCheck("white", board.board);
@@ -617,8 +617,10 @@ public class Chessboard {
 		if (checkCheckmate != null) {
 			if (checkCheckmate.equals("draw")) {
 				result.put("draw", true);
+				status = "DRAW";
 			} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
 				result.put("victory", Map.of("winner", checkCheckmate));
+				status = checkCheckmate.toLowerCase();
 			}
 		}
 		switchPlayer();
@@ -706,6 +708,80 @@ public class Chessboard {
 
 		return false; // Фигур нет на пути
 	}
+
+	public String getPGN() {
+		return "PGN";
+	}
+//	public String generatePGN() {
+//		StringBuilder pgn = new StringBuilder();
+//		int moveNumber = 1;
+//
+//		for (int i = 0; i < motionList.size(); i++) {
+//			MutablePair<Position, Position> move = motionList.get(i);
+//			Position from = move.getLeft();
+//			Position to = move.getRight();
+//
+//			// Преобразуем ход в SAN (Standard Algebraic Notation)
+//			String sanMove = convertMoveToSAN(from, to);
+//
+//			// Добавляем номер хода для белых фигур
+//			if (i % 2 == 0) {
+//				pgn.append(moveNumber).append(". ");
+//				moveNumber++;
+//			}
+//
+//			// Добавляем ход в PGN
+//			pgn.append(sanMove).append(" ");
+//
+//			// Если это чёрный ход, добавляем пробел после хода
+//			if (i % 2 != 0) {
+//				pgn.append(" ");
+//			}
+//		}
+//
+//		return pgn.toString().trim();
+//	}
+//
+//	private String convertMoveToSAN(Position from, Position to, Map<String, Object> moveResult) {
+//		StringBuilder san = new StringBuilder();
+//
+//		// Определяем тип фигуры
+//		Piece piece = board.get(from);
+//		if (!(piece instanceof Pawn)) {
+//			san.append(piece.getShortName());
+//		}
+//
+//		// Если это захват, добавляем "x"
+//		if (board.containsKey(to)) {
+//			if (piece instanceof Pawn) {
+//				san.append(from.getCol()); // Для пешек указываем столбец
+//			}
+//			san.append("x");
+//		}
+//
+//		// Добавляем координаты клетки назначения
+//		san.append(to);
+//
+//		// Проверяем на рокировку
+//		if (moveResult.containsKey("castling")) {
+//			san = new StringBuilder(); // Очищаем предыдущие символы
+//			san.append(to.getColAsNumber() > from.getColAsNumber() ? "O-O" : "O-O-O");
+//		}
+//
+//		// Проверяем на превращение пешки
+//		if (moveResult.containsKey("promotePawn") && moveResult.get("promotePawn") instanceof Map) {
+//			@SuppressWarnings("unchecked") // подавляет предупреждение о небезопасном приведении типа
+//			Map<String, Object> promoteData = (Map<String, Object>) moveResult.get("promotePawn");
+//			Piece newPiece = (Piece) promoteData.get("newPiece");
+//
+//			if (newPiece != null) {
+//				san.append("=").append(newPiece.getShortName());
+//			}
+//		}
+//
+//		return san.toString();
+//	}
+
 
 	@Override
 	public String toString() {

@@ -1,5 +1,4 @@
 window.WebSocketManager = WebSocketManager;
-//window.joinGame = joinGame;
 
 let wsManager = null;
 
@@ -109,18 +108,6 @@ function removePlayerRow(sessionId) {
         row.remove();
     }
 }
-
-//const tableBody = document.querySelector('.table-body');
-//players.forEach(player => {
-//    const row = document.createElement('div');
-//    row.className = 'player-row';
-//    row.innerHTML = `
-//        <div class="column nickname">${player.nickname}</div>
-//        <div class="column rating">${player.rating}</div>
-//        <div class="column time-control">${player.time}</div>
-//    `;
-//    tableBody.appendChild(row);
-//});
 
 document.querySelectorAll('.clear-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {

@@ -21,4 +21,9 @@ public class Knight extends Piece {
 	{
 		return (getColor().equals("white")) ? "♘" : "♞";
 	}
+
+	@Override
+	public String getShortName() {
+		return "N";
+	}
 }

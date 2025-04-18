@@ -98,12 +98,12 @@ public class GameConstructorController {
 						"/queue/game-start",
 						Map.of("sessionId", sessionId)
 				);
-				System.out.println("Типа отправил создателю");
 				// Общее уведомление для всех участников
 				messagingTemplate.convertAndSend(
 						"/topic/game/" + sessionId,
 						Map.of("status", "ACTIVE")
 				);
+				closeGame(sessionId);
 			} catch (IllegalStateException e) {
 				messagingTemplate.convertAndSendToUser(
 						principal.getName(),
@@ -142,8 +142,7 @@ public class GameConstructorController {
 		return sessionService.getAvailableGames();
 	}
 
-	public void endGame(String sessionId) {
-		sessionService.removeSession(sessionId);
+	public void closeGame(String sessionId) {
 		messagingTemplate.convertAndSend(
 				"/topic/games/closed",
 				Map.of("sessionId", sessionId)

@@ -16,11 +16,25 @@ public class GameHistory {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
-	private String playerWhite;
+	@ManyToOne
+	@JoinColumn(name = "white_player_id")
+	private User whitePlayer;
+
+	@ManyToOne
+	@JoinColumn(name = "black_player_id")
+	private User blackPlayer;
 
 	@Column(nullable = false)
-	private String playerBlack;
+	private String PGN;
+
+	@Column(nullable = false)
+	private String result;
+
+	@Column(nullable = false)
+	private int initialTimeMinutes;
+
+	@Column(nullable = false)
+	private int initialTimeIncrement;
 
 	@Column(nullable = false)
 	private LocalDateTime startTime;

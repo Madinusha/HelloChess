@@ -16,4 +16,5 @@ public abstract class Piece {
 		return (getClass().getSimpleName());
 	}
 	public abstract boolean isValidMove(Position from, Position to, Chessboard board);
+	public abstract String getShortName();
 }

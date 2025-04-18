@@ -24,4 +24,9 @@ public class Queen extends Piece {
 	{
 		return (getColor().equals("white")) ? "♕" : "♛";
 	}
+
+	@Override
+	public String getShortName() {
+		return "Q";
+	}
 }

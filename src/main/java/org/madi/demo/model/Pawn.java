@@ -87,4 +87,9 @@ public class Pawn extends Piece {
 		return (getColor().equals("white")) ? "♙" : "♟";
 	}
 
+	@Override
+	public String getShortName() {
+		return "";
+	}
+
 }

@@ -187,12 +187,12 @@ public class ChessController {
 		);
 	}
 
-	@GetMapping("/chessboard")
-	public ResponseEntity<Chessboard> getChessboard() {
-		chessService.startNewGame();
-		Chessboard chessboard = chessService.getChessboard();
-		return ResponseEntity.ok(chessboard);
-	}
+//	@GetMapping("/chessboard")
+//	public ResponseEntity<Chessboard> getChessboard() {
+//		chessService.startNewGame();
+//		Chessboard chessboard = chessService.getChessboard();
+//		return ResponseEntity.ok(chessboard);
+//	}
 
 	@Setter
 	@Getter

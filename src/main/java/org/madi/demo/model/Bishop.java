@@ -22,4 +22,9 @@ public class Bishop extends Piece{ // Офицер
 	{
 		return (getColor().equals("white")) ? "♗" : "♝";
 	}
+
+	@Override
+	public String getShortName() {
+		return "B";
+	}
 }

@@ -38,4 +38,9 @@ public class Rook extends Piece { // Ладья
 	{
 		return (getColor().equals("white")) ? "♖" : "♜";
 	}
+
+	@Override
+	public String getShortName() {
+		return "R";
+	}
 }

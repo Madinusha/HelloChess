@@ -1,30 +1,36 @@
 package org.madi.demo.service;
 
 import lombok.Getter;
+import org.madi.demo.entities.GameHistory;
 import org.madi.demo.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.madi.demo.repository.GameHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class ChessService {
 
-	@Autowired
-	private GameSessionService sessionService;
-
+	private final GameSessionService gameSessionService;
 	private final SimpMessagingTemplate messagingTemplate;
-
+	private final GameHistoryRepository gameHistoryRepository;
 	@Getter
 	private Chessboard chessboard = new Chessboard();
 
-	public ChessService(SimpMessagingTemplate messagingTemplate) {
+	@Autowired
+	public ChessService(
+			GameSessionService gameSessionService,
+			SimpMessagingTemplate messagingTemplate,
+			GameHistoryRepository gameHistoryRepository
+	) {
+		this.gameSessionService = gameSessionService;
 		this.messagingTemplate = messagingTemplate;
+		this.gameHistoryRepository = gameHistoryRepository;
 		startNewGame();
 	}
 
@@ -33,12 +39,12 @@ public class ChessService {
 	}
 
 	public List<Position> getPossibleMoves(String sessionId, Position position) {
-		GameSession session = sessionService.getSession(sessionId);
+		GameSession session = gameSessionService.getSession(sessionId);
 		return session.getChessboard().getValidMoves(position);
 	}
 
 	public Map<String, Object> makeMove(String sessionId, Position from, Position to) {
-		GameSession session = sessionService.getSession(sessionId);
+		GameSession session = gameSessionService.getSession(sessionId);
 		var result = session.getChessboard().moveFigure(from, to);
 		if (session.getChessboard().getMotionList().size() == 1) {
 			session.getTimer().switchTurn();
@@ -50,14 +56,42 @@ public class ChessService {
 		}
 		if (result.containsKey("draw") || result.containsKey("victory")) {
 			session.getTimer().stop();
-			System.out.println("Я остановил таймер потому что кто-то выиграл");
+			System.out.println("Игра окончена");
+			session.setStatus(GameSession.GameStatus.FINISHED);
+			session.setEndTime(LocalDateTime.now());
+			endGame(sessionId);
 		}
 
 		return result;
 	}
 
+	public void endGame(String sessionId) {
+		GameSession session = gameSessionService.getSession(sessionId);
+
+		if (session.getPlayerWhite() == null || session.getPlayerBlack() == null) {
+			System.out.println("белый и черный игроки: " + session.getPlayerWhite() + " " + session.getPlayerBlack());
+			throw new IllegalStateException("Нельзя сохранить игру без обоих игроков");
+		}
+		System.out.println("белый и черный игроки: " + session.getPlayerWhite() + " " + session.getPlayerBlack());
+		System.out.println("черный " + session.getPlayerBlack().getId() + ", " + session.getPlayerBlack().getNickname());
+		System.out.println("белый " + session.getPlayerWhite().getId() + ", " + session.getPlayerWhite().getNickname());
+		System.out.println("Сейчас буду сохранять данные");
+		GameHistory history = new GameHistory();
+		System.out.println("щаща");
+		history.setWhitePlayer(session.getPlayerWhite());
+		history.setBlackPlayer(session.getPlayerBlack());
+		history.setResult(session.getChessboard().getStatus());
+		history.setInitialTimeMinutes(session.getTimer().getInitialTimeMinutes());
+		history.setInitialTimeIncrement(session.getTimer().getIncrementSeconds());
+		history.setStartTime(session.getStartTime());
+		history.setEndTime(session.getEndTime());
+		history.setPGN(session.getChessboard().getPGN());
+
+		gameHistoryRepository.save(history);
+	}
+
 	public Map<String, Object> promotePawn(String sessionId, Position positionFrom, Position positionTo, String newPieceType) {
-		GameSession session = sessionService.getSession(sessionId);
+		GameSession session = gameSessionService.getSession(sessionId);
 		return session.getChessboard().exchangePawn(positionFrom, positionTo, newPieceType);
 	}
 }

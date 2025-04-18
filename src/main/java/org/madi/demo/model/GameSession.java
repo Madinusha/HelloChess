@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.madi.demo.entities.User;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Getter
@@ -19,7 +21,9 @@ public class GameSession {
 	private PieceColor creatorColor;
 	private User creator;
 	private List<Pair<String, String>> chat = new ArrayList<>();
-	public PieceColor initialColor;
+	private PieceColor initialColor;
+	private LocalDateTime startTime;
+	private LocalDateTime endTime;
 
 	public GameSession(String id, User creator, PieceColor creatorColor, GameTimer timer) {
 		this.id = id;
@@ -77,7 +81,7 @@ public class GameSession {
 
 	public void startGame() {
 		this.status = GameStatus.ACTIVE;
-//		timer.start(); // Запускаем таймер при старте игры
+		startTime = LocalDateTime.now();
 	}
 
 	public int getTimeControlMinutes() {
