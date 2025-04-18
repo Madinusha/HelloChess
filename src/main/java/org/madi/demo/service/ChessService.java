@@ -15,7 +15,6 @@ import java.util.Map;
 
 @Service
 public class ChessService {
-
 	private final GameSessionService gameSessionService;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final GameHistoryRepository gameHistoryRepository;
@@ -64,7 +63,13 @@ public class ChessService {
 
 		return result;
 	}
-
+	public void endGame(String sessionId, String winner) {
+		GameSession session = gameSessionService.getSession(sessionId);
+		session.getChessboard().setStatus(winner);
+		session.setStatus(GameSession.GameStatus.FINISHED);
+		session.setEndTime(LocalDateTime.now());
+		endGame(sessionId);
+	}
 	public void endGame(String sessionId) {
 		GameSession session = gameSessionService.getSession(sessionId);
 
@@ -72,12 +77,7 @@ public class ChessService {
 			System.out.println("белый и черный игроки: " + session.getPlayerWhite() + " " + session.getPlayerBlack());
 			throw new IllegalStateException("Нельзя сохранить игру без обоих игроков");
 		}
-		System.out.println("белый и черный игроки: " + session.getPlayerWhite() + " " + session.getPlayerBlack());
-		System.out.println("черный " + session.getPlayerBlack().getId() + ", " + session.getPlayerBlack().getNickname());
-		System.out.println("белый " + session.getPlayerWhite().getId() + ", " + session.getPlayerWhite().getNickname());
-		System.out.println("Сейчас буду сохранять данные");
 		GameHistory history = new GameHistory();
-		System.out.println("щаща");
 		history.setWhitePlayer(session.getPlayerWhite());
 		history.setBlackPlayer(session.getPlayerBlack());
 		history.setResult(session.getChessboard().getStatus());

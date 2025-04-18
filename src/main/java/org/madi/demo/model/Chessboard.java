@@ -291,6 +291,9 @@ public class Chessboard {
 
 	public List<Position> getValidMoves(Position from) {
 		var result = new ArrayList<Position>();
+		if (status.equals("WHITE") || status.equals("BLACK") || status.equals("DRAW")) {
+			return result;
+		}
 		for (int row = 1; row <= 8; row++) {
 			for (int col = 1; col <= 8; col++) {
 				Position to = new Position(row, col);

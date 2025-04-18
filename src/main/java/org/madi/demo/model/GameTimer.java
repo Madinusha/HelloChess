@@ -1,6 +1,7 @@
 package org.madi.demo.model;
 
 import lombok.Getter;
+import org.madi.demo.service.ChessService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Map;
@@ -24,7 +25,9 @@ public class GameTimer {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final String sessionId;
 
-	public GameTimer(int initialTimeMinutes, int incrementSeconds, SimpMessagingTemplate messagingTemplate, String sessionId) {
+	private final ChessService chessService;
+
+	public GameTimer(int initialTimeMinutes, int incrementSeconds, SimpMessagingTemplate messagingTemplate, String sessionId, ChessService chessService) {
 		this.initialTimeMinutes = initialTimeMinutes;
 		this.incrementSeconds = incrementSeconds;
 		this.whiteTime = initialTimeMinutes * 60 * 1000L; // минуты в миллисекунды
@@ -33,6 +36,7 @@ public class GameTimer {
 
 		this.messagingTemplate = messagingTemplate;
 		this.sessionId = sessionId;
+		this.chessService = chessService;
 	}
 
 	public void start() {
@@ -120,8 +124,12 @@ public class GameTimer {
 	}
 
 	private void checkTimeout() {
-		if (whiteTime <= 0 || blackTime <= 0) {
+		if (whiteTime <= 0) {
 			stop();
+			chessService.endGame(sessionId, "WHITE");
+		} else if (blackTime <= 0) {
+			stop();
+			chessService.endGame(sessionId, "BLACK");
 		}
 	}
 
