@@ -27,24 +27,35 @@ async function checkUserProfile() {
                 [csrfHeader]: csrfToken,
                 "Accept": "application/json"
             },
-            credentials: "include"
+            credentials: "include",
+            redirect: "manual" // Отключаем автоматическое следование за редиректом
         });
+
+        if (response.type === "opaqueredirect") {
+//            window.location.href = "/login"; // обрабатываем вручную
+            console.log("Был редирект");
+            return;
+        }
 
         if (response.ok) {
             const user = await response.json();
-            displayUserProfileBtn(user);
-        } else if (response.status === 401) {
-            const login = document.getElementById("login");
-            login.style.display = "block";
-
-            const profileBox = document.getElementById("profile-box");
-            profileBox.style.display = "none";
+            if (user && user.nickname) {
+                displayUserProfileBtn(user);
+            } else {
+                console.error("Данные пользователя неполные:", user);
+                showLoginButton();
+            }
         } else {
-            console.error("Ошибка:", await response.text());
+            showLoginButton();
         }
     } catch (error) {
         console.error("Ошибка сети:", error);
     }
+}
+
+function showLoginButton() {
+    document.getElementById("login").style.display = "block";
+    document.getElementById("profile-box").style.display = "none";
 }
 
 function displayUserProfileBtn(user) {
@@ -52,7 +63,7 @@ function displayUserProfileBtn(user) {
     const profileBox = document.getElementById("profile-box");
     const profileBoxNickname = document.getElementById("profile-box-nickname");
     const profileBoxAvatar = document.getElementById("profile-box-avatar");
-    profileBoxNickname.textContent = `${user.username}`; // Отображаем имя пользователя
+    profileBoxNickname.textContent = `${user.nickname}`; // Отображаем имя пользователя
     profileBox.style.display = "flex";
 
     const login = document.getElementById("login");

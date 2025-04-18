@@ -10,6 +10,7 @@ import org.madi.demo.entities.User;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -100,20 +101,22 @@ public class UserController {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		if (authentication == null || !authentication.isAuthenticated()) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.cacheControl(CacheControl.noStore())
+					.build();
 		}
 
 		// Получаем пользователя из базы данных
 		User user = userService.findUserByNickname(authentication.getName());
 
 		if (user == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.cacheControl(CacheControl.noStore())
+					.build();
 		}
-//		System.out.println(user.getNickname() + " " + user.getEmail());
-
-		return ResponseEntity.ok(
-				new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating())
-		);
+		return ResponseEntity.ok()
+				.cacheControl(CacheControl.noStore()) // Основной случай успешного ответа
+				.body(new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating()));
 	}
 
 	@GetMapping("/{nickname}")

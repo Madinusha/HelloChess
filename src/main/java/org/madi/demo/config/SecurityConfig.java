@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
@@ -52,10 +53,11 @@ public class SecurityConfig {
 							"/login",
 							"/api/users/register",
 							"/api/users/login",
+							"/index",
 							"/static/**",
 							"/images/**",
-							"/favicon.ico",
-							"/api/users/profile"
+//							"/api/users/profile",
+							"/favicon.ico"
 					).permitAll()
 					.requestMatchers("/game").authenticated()
 					.anyRequest().authenticated()
@@ -63,7 +65,12 @@ public class SecurityConfig {
 			.formLogin(form -> form
 					.loginPage("/registration")
 					.defaultSuccessUrl("/gameConstructor")
+					.failureUrl("/login?error=true")
 					.permitAll()
+			)
+			.rememberMe(remember -> remember
+					.key("uniqueAndSecretKey") // Секретный ключ
+					.tokenValiditySeconds(86400) // 1 день
 			)
 			.logout(logout -> logout
 					.logoutSuccessUrl("/registration")
@@ -74,7 +81,8 @@ public class SecurityConfig {
 					.ignoringRequestMatchers("/ws/**") // Разрешить WebSocket без CSRF
 			)
 			.exceptionHandling(ex -> ex
-					.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
+					.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+			);
 
 		return http.build();
 	}

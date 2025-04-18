@@ -11,7 +11,7 @@
     <a href="/" id="logo">HelloChess</a>
     <nav class="navbar">
         <ul class="navbar-list">
-            <li class="navbar-item"><a href="#game" class="navbar-link">ИГРА</a></li>
+            <li class="navbar-item"><a th:onclick="|document.location.href='@{/gameConstructor}'|" class="navbar-link">ИГРА</a></li>
             <li class="navbar-item"><a href="#study" class="navbar-link">ОБУЧЕНИЕ</a></li>
             <li class="navbar-item"><a href="#tr" class="navbar-link">ЗАДАЧИ</a></li>
             <li class="navbar-item"><a href="#about" class="navbar-link">О НАС</a></li>
