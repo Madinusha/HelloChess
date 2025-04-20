@@ -229,6 +229,28 @@ public class ChessController {
 		);
 	}
 
+	@MessageMapping("/{sessionId}/white-flag")
+	public void sendWhiteFlag(@DestinationVariable String sessionId, Principal principal) {
+		User user = userService.findUserByNickname(principal.getName());
+		GameSession session = gameSessionService.getSession(sessionId);
+		User opponent = session.getOpponentFor(user);
+
+		String opponentColor = (user.getNickname()).equals(session.getPlayerWhite().getNickname())? "BLACK" : "WHITE";
+		chessService.endGame(sessionId, opponentColor);
+
+		messagingTemplate.convertAndSendToUser(
+				user.getNickname(),
+				"/queue/white-flag-raised",
+				Map.of("winner", opponentColor)
+		);
+
+		messagingTemplate.convertAndSendToUser(
+				opponent.getNickname(),
+				"/queue/white-flag-raised",
+				Map.of("winner", opponentColor)
+		);
+	}
+
 	@MessageMapping("/{sessionId}/message")
 	public void sendMessage(@DestinationVariable String sessionId, Principal principal, @RequestBody String message) {
 		User user = userService.findUserByNickname(principal.getName());

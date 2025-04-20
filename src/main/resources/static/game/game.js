@@ -644,7 +644,7 @@ function createRetryRequestContainer(messageText, needOkButton, onCancel, onOk, 
 }
 
 function handleWhiteFlagButtonClick() {
-
+    wsManager.raiseWhiteFlag();
 }
 
 function handleDrawButtonClick() {
@@ -865,13 +865,13 @@ function showGameResult(result) {
     resultText.className = 'result';
     scaleText.className = 'scale';
 
-    if (result === "draw") {
+    if (result.toLowerCase() === "draw") {
         resultText.textContent = "Ничья";
         scaleText.textContent = "½ - ½";
-    } else if (result === "white") {
+    } else if (result.toLowerCase() === "white") {
         resultText.textContent = "Победа белых";
         scaleText.textContent = "1 - 0";
-    } else if (result === "black") {
+    } else if (result.toLowerCase() === "black") {
         resultText.textContent = "Победа черных";
         scaleText.textContent = "0 - 1";
     }

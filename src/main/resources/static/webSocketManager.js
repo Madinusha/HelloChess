@@ -121,6 +121,12 @@ class WebSocketManager {
             handleDrawSuggestionFromOpponent();
         });
 
+        this.stompClient.subscribe('/user/queue/white-flag-raised', (message) => {
+                const { winner } = JSON.parse(message.body);
+                showGameResult(winner);
+            }
+        );
+
         this.stompClient.subscribe('/user/queue/retry', (message) => {
             const data = JSON.parse(message.body);
             const subscription = this.stompClient.subscribe(
@@ -353,4 +359,9 @@ class WebSocketManager {
         cancelButtonClean(false);
     }
 
+    async raiseWhiteFlag() {
+        this.stompClient.send(
+            `/app/${this.sessionId}/white-flag`, {}, {}
+        );
+    }
 }
