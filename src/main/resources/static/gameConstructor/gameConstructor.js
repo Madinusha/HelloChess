@@ -1,8 +1,5 @@
 window.WebSocketManager = WebSocketManager;
-
 let wsManager = null;
-
-const players = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -64,10 +61,6 @@ document.getElementById('create-game').addEventListener('click', async () => {
     );
 });
 
-function joinGame(sessionId) {
-    wsManager.joinGame(sessionId);
-}
-
 function getTimeControl() {
     const [minutes, seconds] = Array.from(document.querySelectorAll('.time-input'))
                                   .map(input => parseInt(input.value) || 0);
@@ -79,14 +72,17 @@ function getSelectedColor() {
     return selected ? selected.id.toUpperCase() : 'RANDOM';
 }
 
-
 function addPlayerRow(player) {
     const tableBody = document.querySelector('.table-body');
     const row = document.createElement('div');
     row.className = 'player-row';
-    row.dataset.sessionId = player.sessionId; // Храним sessionId в data-атрибуте
+    row.dataset.sessionId = player.sessionId;
 
-    // Создаем содержимое строки
+    const isMyGame = player.nickname === window.currentUser.nickname;
+    if (isMyGame) {
+        row.classList.add('my-game-row');
+    }
+
     row.innerHTML = `
         <div class="column nickname">${player.nickname}</div>
         <div class="column rating">${player.rating}</div>
@@ -94,10 +90,21 @@ function addPlayerRow(player) {
     `;
 
     row.addEventListener('click', () => {
-        joinGame(player.sessionId);
+        if (!isMyGame) {
+            wsManager.joinGame(player.sessionId);
+        } else {
+            wsManager.removeSession(player.sessionId);
+        }
+
     });
 
-    tableBody.appendChild(row);
+    // Вставляем в начало, если это моя игра
+    if (isMyGame) {
+        console.log("Моя игра");
+        tableBody.insertBefore(row, tableBody.firstChild);
+    } else {
+        tableBody.appendChild(row);
+    }
 }
 
 function removePlayerRow(sessionId) {

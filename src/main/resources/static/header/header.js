@@ -1,3 +1,8 @@
+window.currentUser = {
+    nickname: null,
+    rating: 0
+};
+
 document.addEventListener("DOMContentLoaded", function() {
     const profileBox = document.getElementById('profile-box');
     const dropdownNavbar = document.getElementById('dropdown-navbar');
@@ -40,6 +45,13 @@ async function checkUserProfile() {
         if (response.ok) {
             const user = await response.json();
             if (user && user.nickname) {
+                window.currentUser = {
+                    nickname: user.nickname,
+                    rating: user.rating
+                };
+
+                console.log("nick: ", window.currentUser.nickname);
+                console.log("rating: ", window.currentUser.rating);
                 displayUserProfileBtn(user);
             } else {
                 console.error("Данные пользователя неполные:", user);
@@ -68,4 +80,6 @@ function displayUserProfileBtn(user) {
 
     const login = document.getElementById("login");
     login.style.display = "none";
+
+
 }

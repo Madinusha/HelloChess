@@ -153,6 +153,21 @@ public class GameConstructorController {
 		);
 	}
 
+	@MessageMapping("/game/{sessionId}/remove")
+	public void removeCreation(
+			@DestinationVariable String sessionId,
+			Principal principal
+	) {
+		GameSession session = gameSessionService.getSession(sessionId);
+		User user = userService.findUserByNickname(principal.getName());
+
+		gameSessionService.removeSession(sessionId);
+		messagingTemplate.convertAndSend(
+				"/topic/games/closed",
+				Map.of("sessionId", sessionId)
+		);
+	}
+
 	@MessageMapping("/game/{sessionId}/cancel-creation")
 	public void cancelGameCreation(
 			@DestinationVariable String sessionId,

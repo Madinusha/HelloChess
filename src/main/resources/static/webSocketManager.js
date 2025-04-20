@@ -39,6 +39,10 @@ class WebSocketManager {
         });
     }
 
+    removeSession(sessionId){
+        this.stompClient.send(`/app/game/${sessionId}/remove`, {}, {});
+    }
+
     joinGame(sessionId) {
         if (!sessionId) {
             console.error('Session ID is required!');
