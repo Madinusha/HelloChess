@@ -44,19 +44,20 @@ class WebSocketManager {
             console.error('Session ID is required!');
             return;
         }
-        if (!wsManager.stompClient || !wsManager.stompClient.connected) {
+        if (!this.stompClient || !this.stompClient.connected) {
             console.error('WebSocket is not connected yet!');
             return;
         }
         // Отправляем запрос на присоединение к игре
-        wsManager.stompClient.send(`/app/game/${sessionId}/join`, {}, {});
+        this.stompClient.send(`/app/game/${sessionId}/join`, {}, {});
         // Подписываемся на уведомление об успешном присоединении
-        wsManager.stompClient.subscribe('/user/queue/game-joined', (message) => {
+        this.stompClient.subscribe('/user/queue/game-joined', (message) => {
             const { sessionId } = JSON.parse(message.body);
             console.log(`Successfully joined game with session ID: ${sessionId}`);
+            window.location.href = `/game?sessionId=${sessionId}`;
         });
         // Подписываемся на ошибки
-        wsManager.stompClient.subscribe('/user/queue/errors', (message) => {
+        this.stompClient.subscribe('/user/queue/errors', (message) => {
             const error = JSON.parse(message.body).error;
             console.error(`Error joining game: ${error}`);
             alert("Не удалось присоединиться к игре!");
@@ -115,6 +116,21 @@ class WebSocketManager {
             addMessage(data.message, true);
         });
 
+        this.stompClient.subscribe('/user/queue/retry', (message) => {
+            const data = JSON.parse(message.body);
+            const subscription = this.stompClient.subscribe(
+                `/topic/game/${data.sessionId}/closed`,
+                (message) => {
+                    const closedSessionId = JSON.parse(message.body).sessionId;
+                    cancelButtonClean();
+                    subscription.unsubscribe();
+                }
+            );
+
+            handleRetryRequestFromOpponent(data);
+
+        });
+
     }
 
     sendMessage(message) {
@@ -157,6 +173,134 @@ class WebSocketManager {
             {},
             JSON.stringify(moveRequest)
         );
+    }
+
+    async cancelCreationRequest(sessionId) {
+        return new Promise((resolve, reject) => {
+            const subscription = this.stompClient.subscribe(
+                `/topic/game/${sessionId}/closed`,
+                (message) => {
+                    const closedSessionId = JSON.parse(message.body).sessionId;
+                    if (closedSessionId === sessionId) {
+                        cancelButtonClean();
+                        subscription.unsubscribe();
+                        resolve(closedSessionId);
+                    }
+                }
+            );
+
+            this.stompClient.send(
+                `/app/game/${sessionId}/cancel-creation`,
+                {},
+                {}
+            );
+        });
+    }
+
+    async sendRetryRequest() {
+        try {
+            const { color, timeControl } = await new Promise((resolve, reject) => {
+                const subscription = this.stompClient.subscribe(
+                    '/user/queue/initial-params',
+                    (message) => {
+                        try {
+                            subscription.unsubscribe();
+                            const gameRequest = JSON.parse(message.body);
+                            resolve({
+                                color: gameRequest.playerColor,
+                                timeControl: {
+                                    minutes: gameRequest.timeControl.minutes,
+                                    increment: gameRequest.timeControl.increment
+                                }
+                            });
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }
+                );
+                setTimeout(() => {
+                    subscription.unsubscribe();
+                    reject(new Error("Timeout waiting for initial parameters"));
+                }, 5000);
+
+                this.stompClient.send(
+                    `/app/game/${this.sessionId}/initial-params`,
+                    {},
+                    {}
+                );
+            });
+
+            const sessionId = await new Promise((resolve, reject) => {
+                const gameCreatedSub = this.stompClient.subscribe(
+                    '/user/queue/game-created',
+                    (message) => {
+                        try {
+                            gameCreatedSub.unsubscribe();
+                            const { sessionId } = JSON.parse(message.body);
+                            resolve(sessionId);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }
+                );
+
+                this.stompClient.send(
+                    `/app/game/${this.sessionId}/retry`,
+                    {},
+                    JSON.stringify({
+                        playerColor: color,
+                        timeControl: timeControl
+                    })
+                );
+
+                setTimeout(() => {
+                    gameCreatedSub.unsubscribe();
+                    reject(new Error("Timeout waiting for game creation"));
+                }, 10000);
+            });
+
+            const startSubs = this.stompClient.subscribe('/user/queue/game-start', (message) => {
+                const { sessionId } = JSON.parse(message.body);
+                window.location.href = `/game?sessionId=${sessionId}`;
+            });
+
+            this.stompClient.subscribe(`/topic/game/${sessionId}/closed`, (message) => {
+                const { sessionId } = JSON.parse(message.body);
+                cancelButtonClean();
+                startSubs.unsubscribe();
+            });
+
+            return sessionId;
+
+        } catch (error) {
+            console.error("Ошибка:", error);
+            throw error;
+        }
+    }
+
+    joinRetryGame(sessionId) {
+        if (!sessionId) {
+            console.error('Session ID is required!');
+            return;
+        }
+        if (!this.stompClient || !this.stompClient.connected) {
+            console.error('WebSocket is not connected yet!');
+            return;
+        }
+        // Отправляем запрос на присоединение к игре
+        this.stompClient.send(`/app/game/${sessionId}/retry-join`, {}, {});
+        // Подписываемся на уведомление об успешном присоединении
+        this.stompClient.subscribe('/user/queue/game-joined', (message) => {
+            const { sessionId } = JSON.parse(message.body);
+            console.log(`Successfully joined game with session ID: ${sessionId}`);
+            window.location.href = `/game?sessionId=${sessionId}`;
+        });
+        // Подписываемся на ошибки
+        this.stompClient.subscribe('/user/queue/errors', (message) => {
+            const error = JSON.parse(message.body).error;
+            console.error(`Error joining game: ${error}`);
+            alert("Не удалось присоединиться к игре!");
+        });
     }
 
 }

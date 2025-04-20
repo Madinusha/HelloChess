@@ -103,7 +103,8 @@ public class GameSession {
 	public enum GameStatus {
 		WAITING, // Ожидание второго игрока
 		ACTIVE,  // Игра началась
-		FINISHED  // Игра завершена
+		FINISHED,  // Игра завершена
+		REQUEST
 	}
 
 	public enum PieceColor {

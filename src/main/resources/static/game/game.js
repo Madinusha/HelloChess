@@ -602,14 +602,53 @@ async function handleFindOpponentButtonClick() {
 }
 
 function handleRetryButtonClick() {
-//    wsManager.sendRetryRequest();
+    wsManager.sendRetryRequest().then(sessionId => {
+        // Только после успешного создания запроса
+        const retryButton = document.getElementById('retry');
+        const findOpponentButton = document.getElementById('find-opponent');
+        retryButton.style.display = 'none';
+        findOpponentButton.style.display = 'none';
+
+        const buttonsContainer = document.getElementById('move-box-btns');
+        buttonsContainer.classList.add('has-retry-request');
+
+        const requestContainer = document.createElement('div');
+        requestContainer.id = 'retry-request-container';
+        requestContainer.classList.add('show');
+
+        const text = document.createElement('span');
+        text.id = 'retry-request-text';
+        text.textContent = 'Отправлен запрос на реванш';
+
+        const cancelButton = document.createElement('button');
+        cancelButton.id = 'cancel-retry';
+
+        requestContainer.appendChild(cancelButton);
+        requestContainer.appendChild(text);
+        buttonsContainer.insertBefore(requestContainer, buttonsContainer.firstChild);
+
+        cancelButton.addEventListener('click', async () => {
+            try {
+                await wsManager.cancelCreationRequest(sessionId);
+                cancelButtonClean();
+            } catch (error) {
+                console.error("Ошибка отмены:", error);
+            }
+        });
+
+    }).catch(error => {
+        console.error("Ошибка создания реванша:", error);
+    });
+}
+
+function handleRetryRequestFromOpponent(data) {
     const retryButton = document.getElementById('retry');
     const findOpponentButton = document.getElementById('find-opponent');
     retryButton.style.display = 'none';
     findOpponentButton.style.display = 'none';
 
     const buttonsContainer = document.getElementById('move-box-btns');
-    buttonsContainer.classList.add('has-retry-request'); // Убираем паддинги у родителя
+    buttonsContainer.classList.add('has-retry-request');
 
     const requestContainer = document.createElement('div');
     requestContainer.id = 'retry-request-container';
@@ -617,23 +656,46 @@ function handleRetryButtonClick() {
 
     const text = document.createElement('span');
     text.id = 'retry-request-text';
-    text.textContent = 'Отправлен запрос на реванш';
+    text.textContent = 'Оппонент предлагает реванш.';
 
     const cancelButton = document.createElement('button');
     cancelButton.id = 'cancel-retry';
 
+    const okButton = document.createElement('button');
+    okButton.id = 'ok-retry';
+
     requestContainer.appendChild(cancelButton);
     requestContainer.appendChild(text);
+    requestContainer.appendChild(okButton);
     buttonsContainer.insertBefore(requestContainer, buttonsContainer.firstChild);
 
-    cancelButton.addEventListener('click', () => {
-        //        wsManager.cancelRetryRequest();
-        buttonsContainer.classList.remove('has-retry-request');
-        requestContainer.remove();
-
-        retryButton.style.display = 'block';
-        findOpponentButton.style.display = 'block';
+    cancelButton.addEventListener('click', async () => {
+        try {
+            await wsManager.cancelCreationRequest(data.sessionId);
+            cancelButtonClean();
+        } catch (error) {
+            console.error("Ошибка отмены:", error);
+        }
     });
+
+    okButton.addEventListener('click', () => {
+        wsManager.joinRetryGame(data.sessionId);
+    });
+}
+
+function cancelButtonClean() {
+    const buttonsContainer = document.getElementById('move-box-btns');
+    const requestContainer = document.getElementById('retry-request-container');
+    const retryButton = document.getElementById('retry');
+    const findOpponentButton = document.getElementById('find-opponent');
+
+    if (requestContainer) {
+        requestContainer.remove();
+    }
+    buttonsContainer.classList.remove('has-retry-request');
+
+    retryButton.style.display = 'block';
+    findOpponentButton.style.display = 'block';
 }
 
 function addMessage(message, isOpponent) {

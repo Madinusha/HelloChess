@@ -575,27 +575,69 @@ input[type="text"]:focus  {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 #cancel-retry {
-    background: url(../images/times.png) center / cover no-repeat;
+    position: relative;
+    background-color: transparent;
     border: none;
     cursor: pointer;
     height: 100%;
     aspect-ratio: 1;
-    background-color: var(--carrot-red);
     display: flex;
     align-items: center;
-    margin-right: auto;
+    margin-left: auto;
+    transition: all 0.3s ease;
 }
 
+#cancel-retry::before {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    background: url(../images/times.png) center / cover no-repeat;
+    filter: brightness(0) saturate(100%) invert(20%) sepia(30%) saturate(7091%) hue-rotate(343deg) brightness(100%) contrast(82%);
+    transition: all 0.3s ease;
+}
 
 #cancel-retry:hover {
+    background-color: var(--carrot-red);
+}
+
+#cancel-retry:hover::before {
+    filter: brightness(0) invert(1);
+}
+
+#ok-retry {
+    position: relative;
     background-color: transparent;
-    filter:
-        brightness(0)
-        invert(1)
-        drop-shadow(0 0 2px rgba(255,255,255,0.5));
+    border: none;
+    cursor: pointer;
+    height: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    transition: all 0.3s ease;
+}
+
+#ok-retry::before {
+    content: "";
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background: url(../images/check.png) center / cover no-repeat;
+    filter: brightness(0) saturate(100%) invert(41%) sepia(72%) saturate(495%) hue-rotate(68deg) brightness(98%) contrast(94%);
+    transition: all 0.3s ease;
+}
+
+#ok-retry:hover {
+    background-color: green;
+}
+
+#ok-retry:hover::before {
+    filter: invert(1);
 }
 
 @media (max-width: 768px) {

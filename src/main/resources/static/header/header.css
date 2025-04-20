@@ -1,3 +1,26 @@
+/* Regular */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'TeXGyreHeros Condensed';
+    src: url('../fonts/TeXGyreHeros/dehinted-TeXGyreHerosCondensed-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
 :root {
     --dark-purple: #553A4C;
     --light-purple: #957377;
@@ -11,7 +34,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--white-gray); /* светлый фон */
+    background-color: var(--white-gray);
     height: 7vh;
     width: 100%;
     position: relative;
@@ -24,7 +47,7 @@ button:focus  {
 }
 
 #logo {
-    font-family: 'Manteka', sans-serif;
+    font-family: 'TeXGyreHeros', sans-serif;
     font-weight: bold;
     font-size: 1.2em;
     margin-right: 1.3em;
@@ -98,7 +121,7 @@ button:focus  {
     background-color: transparent;
     color: var(--dark-purple);
     border: none;
-    font-family: 'Spoof Trial', sans-serif;
+    font-family: 'TeXGyreHeros', sans-serif;
     cursor: pointer;
 }
 #profile-box:active #profile-box-nickname {
@@ -183,7 +206,7 @@ button:focus  {
 .dropdown-navbar-menu-item a {
     text-decoration: none;
     color: var(--dark-purple);
-    font-family: 'Spoof Trial', sans-serif;
+    font-family: 'TeXGyreHeros', sans-serif;
 }
 .dropdown-navbar-menu-item img {
     height: 1.5em;

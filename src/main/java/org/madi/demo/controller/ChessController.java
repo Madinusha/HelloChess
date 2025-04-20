@@ -1,7 +1,5 @@
 package org.madi.demo.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,11 +13,8 @@ import org.madi.demo.service.ChessService;
 import org.madi.demo.service.GameSessionService;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -28,21 +23,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/game")
 public class ChessController {
-
 	private final ChessService chessService;
-	public ChessController(ChessService chessService) {
-		this.chessService = chessService;
-	}
 
 	@Autowired
-	private GameSessionService sessionService;
+	private GameSessionService gameSessionService;
 
 	@Autowired
 	private SimpMessagingTemplate messagingTemplate;
@@ -50,9 +40,13 @@ public class ChessController {
 	@Autowired
 	private UserService userService;
 
+	public ChessController(ChessService chessService) {
+		this.chessService = chessService;
+	}
+
 	@GetMapping("/{sessionId}/status")
 	public ResponseEntity<GameStatusDTO> getGameStatus(@PathVariable String sessionId, Principal principal) {
-		GameSession gameSession = sessionService.getSession(sessionId);
+		GameSession gameSession = gameSessionService.getSession(sessionId);
 		if (gameSession == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -128,7 +122,7 @@ public class ChessController {
 			SimpMessageHeaderAccessor headerAccessor
 	) {
 		// 1. Проверка прав
-		GameSession session = sessionService.getSession(sessionId);
+		GameSession session = gameSessionService.getSession(sessionId);
 		if (!session.isPlayersTurn(headerAccessor.getUser().getName())) {
 			throw new AccessDeniedException("Сейчас не ваш ход!");
 		}
@@ -177,7 +171,7 @@ public class ChessController {
 	@MessageMapping("/{sessionId}/message")
 	public void sendMessage(@DestinationVariable String sessionId, Principal principal, @RequestBody String message) {
 		User user = userService.findUserByNickname(principal.getName());
-		GameSession session = sessionService.getSession(sessionId);
+		GameSession session = gameSessionService.getSession(sessionId);
 		session.addMessage(user.getNickname(), message);
 
 		messagingTemplate.convertAndSendToUser(
@@ -186,13 +180,6 @@ public class ChessController {
 				Map.of("message", message)
 		);
 	}
-
-//	@GetMapping("/chessboard")
-//	public ResponseEntity<Chessboard> getChessboard() {
-//		chessService.startNewGame();
-//		Chessboard chessboard = chessService.getChessboard();
-//		return ResponseEntity.ok(chessboard);
-//	}
 
 	@Setter
 	@Getter

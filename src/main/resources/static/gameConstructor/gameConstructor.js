@@ -66,7 +66,6 @@ document.getElementById('create-game').addEventListener('click', async () => {
 
 function joinGame(sessionId) {
     wsManager.joinGame(sessionId);
-    window.location.href = `/game?sessionId=${sessionId}`;
 }
 
 function getTimeControl() {
