@@ -126,10 +126,10 @@ public class GameTimer {
 	private void checkTimeout() {
 		if (whiteTime <= 0) {
 			stop();
-			chessService.endGame(sessionId, "WHITE");
+			chessService.endGameWithTimeout(sessionId, "WHITE");
 		} else if (blackTime <= 0) {
 			stop();
-			chessService.endGame(sessionId, "BLACK");
+			chessService.endGameWithTimeout(sessionId, "BLACK");
 		}
 	}
 

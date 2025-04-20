@@ -522,13 +522,11 @@ function buttonsInit() {
     const whiteFlagButton = document.getElementById('white-flag');
     const drawButton = document.getElementById('draw');
 
-    retryButton.addEventListener('click', () => {
-        handleRetryButtonClick();
-    });
+    retryButton.addEventListener('click', handleRetryButtonClick);
+    findOpponentButton.addEventListener('click', handleFindOpponentButtonClick);
 
-    findOpponentButton.addEventListener('click', () => {
-        handleFindOpponentButtonClick();
-    });
+    whiteFlagButton.addEventListener('click', handleWhiteFlagButtonClick);
+    drawButton.addEventListener('click', handleDrawButtonClick);
 }
 
 async function handleFindOpponentButtonClick() {
@@ -556,12 +554,10 @@ async function handleFindOpponentButtonClick() {
                             }
                         });
                     } catch (error) {
-                        // Отклоняем Promise при ошибке
                         reject(error);
                     }
                 }
             );
-            // Таймаут на случай проблем
             setTimeout(() => {
                 subscription.unsubscribe();
                 reject(new Error("Превышено время ожидания параметров"));
@@ -579,7 +575,6 @@ async function handleFindOpponentButtonClick() {
             console.log(`Successfully created game with session ID: ${sessionId}`);
         });
 
-        // При подключении:
         wsManager.stompClient.subscribe('/user/queue/game-start', (message) => {
             console.log('Game start message received:', message.body);
             const { sessionId } = JSON.parse(message.body);
@@ -601,51 +596,14 @@ async function handleFindOpponentButtonClick() {
     }
 }
 
-function handleRetryButtonClick() {
-    wsManager.sendRetryRequest().then(sessionId => {
-        // Только после успешного создания запроса
-        const retryButton = document.getElementById('retry');
-        const findOpponentButton = document.getElementById('find-opponent');
-        retryButton.style.display = 'none';
-        findOpponentButton.style.display = 'none';
-
-        const buttonsContainer = document.getElementById('move-box-btns');
-        buttonsContainer.classList.add('has-retry-request');
-
-        const requestContainer = document.createElement('div');
-        requestContainer.id = 'retry-request-container';
-        requestContainer.classList.add('show');
-
-        const text = document.createElement('span');
-        text.id = 'retry-request-text';
-        text.textContent = 'Отправлен запрос на реванш';
-
-        const cancelButton = document.createElement('button');
-        cancelButton.id = 'cancel-retry';
-
-        requestContainer.appendChild(cancelButton);
-        requestContainer.appendChild(text);
-        buttonsContainer.insertBefore(requestContainer, buttonsContainer.firstChild);
-
-        cancelButton.addEventListener('click', async () => {
-            try {
-                await wsManager.cancelCreationRequest(sessionId);
-                cancelButtonClean();
-            } catch (error) {
-                console.error("Ошибка отмены:", error);
-            }
-        });
-
-    }).catch(error => {
-        console.error("Ошибка создания реванша:", error);
-    });
-}
-
-function handleRetryRequestFromOpponent(data) {
-    const retryButton = document.getElementById('retry');
-    const findOpponentButton = document.getElementById('find-opponent');
-    retryButton.style.display = 'none';
-    findOpponentButton.style.display = 'none';
+function createRetryRequestContainer(messageText, needOkButton, onCancel, onOk, afterGameButtons = true) {
+    if (afterGameButtons) {
+        document.getElementById('retry').style.display = 'none';
+        document.getElementById('find-opponent').style.display = 'none';
+    } else {
+        document.getElementById('white-flag').style.display = 'none';
+        document.getElementById('draw').style.display = 'none';
+    }
 
     const buttonsContainer = document.getElementById('move-box-btns');
     buttonsContainer.classList.add('has-retry-request');
@@ -656,46 +614,97 @@ function handleRetryRequestFromOpponent(data) {
 
     const text = document.createElement('span');
     text.id = 'retry-request-text';
-    text.textContent = 'Оппонент предлагает реванш.';
+    text.textContent = messageText;
 
     const cancelButton = document.createElement('button');
     cancelButton.id = 'cancel-retry';
-
-    const okButton = document.createElement('button');
-    okButton.id = 'ok-retry';
-
-    requestContainer.appendChild(cancelButton);
-    requestContainer.appendChild(text);
-    requestContainer.appendChild(okButton);
-    buttonsContainer.insertBefore(requestContainer, buttonsContainer.firstChild);
-
     cancelButton.addEventListener('click', async () => {
         try {
-            await wsManager.cancelCreationRequest(data.sessionId);
-            cancelButtonClean();
+            await onCancel();
+            cancelButtonClean(afterGameButtons);
         } catch (error) {
             console.error("Ошибка отмены:", error);
         }
     });
 
-    okButton.addEventListener('click', () => {
-        wsManager.joinRetryGame(data.sessionId);
+    requestContainer.appendChild(cancelButton);
+    requestContainer.appendChild(text);
+
+    if (needOkButton) {
+        const okButton = document.createElement('button');
+        okButton.id = 'ok-retry';
+        okButton.addEventListener('click', () => {
+            onOk?.();
+            cancelButtonClean(afterGameButtons);
+        });
+        requestContainer.appendChild(okButton);
+    }
+
+    buttonsContainer.insertBefore(requestContainer, buttonsContainer.firstChild);
+}
+
+function handleWhiteFlagButtonClick() {
+
+}
+
+function handleDrawButtonClick() {
+    wsManager.sendDrawSuggestion().then(() => {
+        createRetryRequestContainer(
+            'Отправлен запрос на ничью',
+            false,
+            () => wsManager.cancelDrawSuggestion(),
+            () => null,
+            false
+        );
     });
 }
 
-function cancelButtonClean() {
+function handleDrawSuggestionFromOpponent() {
+    createRetryRequestContainer(
+        'Оппонент предлагает ничью',
+        true,
+        () => wsManager.cancelDrawSuggestion(),
+        () => wsManager.acceptDrawSuggestion(),
+        false
+    );
+}
+
+function handleRetryButtonClick() {
+    wsManager.sendRetryRequest().then(sessionId => {
+        createRetryRequestContainer(
+            'Отправлен запрос на реванш',
+            false,
+            () => wsManager.cancelCreationRequest(sessionId)
+        );
+    }).catch(console.error);
+}
+
+function handleRetryRequestFromOpponent(data) {
+    createRetryRequestContainer(
+        'Оппонент предлагает реванш',
+        true,
+        () => wsManager.cancelCreationRequest(data.sessionId),
+        () => wsManager.joinRetryGame(data.sessionId)
+    );
+}
+
+function cancelButtonClean(afterGameButtons = true) {
     const buttonsContainer = document.getElementById('move-box-btns');
     const requestContainer = document.getElementById('retry-request-container');
-    const retryButton = document.getElementById('retry');
-    const findOpponentButton = document.getElementById('find-opponent');
 
     if (requestContainer) {
         requestContainer.remove();
     }
     buttonsContainer.classList.remove('has-retry-request');
 
-    retryButton.style.display = 'block';
-    findOpponentButton.style.display = 'block';
+    if (afterGameButtons) {
+        document.getElementById('retry').style.display = 'block';
+        document.getElementById('find-opponent').style.display = 'block';
+    } else {
+        document.getElementById('white-flag').style.display = 'block';
+        document.getElementById('draw').style.display = 'block';
+    }
+
 }
 
 function addMessage(message, isOpponent) {

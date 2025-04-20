@@ -58,19 +58,29 @@ public class ChessService {
 			System.out.println("Игра окончена");
 			session.setStatus(GameSession.GameStatus.FINISHED);
 			session.setEndTime(LocalDateTime.now());
-			endGame(sessionId);
+			createGameHistoryAndSave(sessionId);
 		}
 
 		return result;
 	}
+
 	public void endGame(String sessionId, String winner) {
+		GameSession session = gameSessionService.getSession(sessionId);
+		session.getTimer().stop();
+		session.setStatus(GameSession.GameStatus.FINISHED);
+		session.setEndTime(LocalDateTime.now());
+		session.getChessboard().setStatus(winner);
+		createGameHistoryAndSave(sessionId);
+	}
+
+	public void endGameWithTimeout(String sessionId, String winner) {
 		GameSession session = gameSessionService.getSession(sessionId);
 		session.getChessboard().setStatus(winner);
 		session.setStatus(GameSession.GameStatus.FINISHED);
 		session.setEndTime(LocalDateTime.now());
-		endGame(sessionId);
+		createGameHistoryAndSave(sessionId);
 	}
-	public void endGame(String sessionId) {
+	public void createGameHistoryAndSave(String sessionId) {
 		GameSession session = gameSessionService.getSession(sessionId);
 
 		if (session.getPlayerWhite() == null || session.getPlayerBlack() == null) {

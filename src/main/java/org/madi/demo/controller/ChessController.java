@@ -75,8 +75,7 @@ public class ChessController {
 		Boolean castlingPossible = false; //session.isCastlingPossible();
 		Map<String, Position> castlingData = new HashMap<>(); //castlingPossible ? session.getCastlingData() : null;
 
-		String gameResult = "";
-//		GameResultDTO gameResult = session.getGameResult();
+		String gameResult = gameSession.getChessboard().getStatus();
 
 		List<Pair<String, String>> chat = gameSession.getChat();
 		List<ChatDTO> chatDTO = gameSession.getChat().stream()
@@ -166,6 +165,68 @@ public class ChessController {
 					)
 			);
 		}
+	}
+
+	@MessageMapping("/{sessionId}/draw-suggestion")
+	public void sendDrawSuggestion(@DestinationVariable String sessionId, Principal principal) {
+		User user = userService.findUserByNickname(principal.getName());
+		GameSession session = gameSessionService.getSession(sessionId);
+		User opponent = session.getOpponentFor(user);
+
+		messagingTemplate.convertAndSendToUser(
+				user.getNickname(),
+				"/queue/draw-suggestion-created",
+				""
+		);
+
+		messagingTemplate.convertAndSendToUser(
+				opponent.getNickname(),
+				"/queue/draw-suggestion",
+				""
+		);
+	}
+
+	@MessageMapping("/{sessionId}/accept-draw-suggestion")
+	public void acceptDrawSuggestion(@DestinationVariable String sessionId, Principal principal) {
+		User user = userService.findUserByNickname(principal.getName());
+		GameSession session = gameSessionService.getSession(sessionId);
+		User opponent = session.getOpponentFor(user);
+		chessService.endGame(sessionId, "DRAW");
+
+		messagingTemplate.convertAndSendToUser(
+				opponent.getNickname(),
+				"/queue/draw-suggestion-accepted",
+				""
+		);
+
+		messagingTemplate.convertAndSendToUser(
+				user.getNickname(),
+				"/queue/draw-suggestion-accepted",
+				""
+		);
+
+		GameTimer timer = session.getTimer();
+		messagingTemplate.convertAndSend(
+				"/topic/game/" + sessionId + "/timer",
+				Map.of(
+						"whiteTime", timer.getFormattedTime(true),
+						"blackTime", timer.getFormattedTime(false),
+						"timerActive", timer.isTimerActive()
+				)
+		);
+	}
+
+	@MessageMapping("/{sessionId}/cancel-draw-suggestion")
+	public void cancelDrawSuggestion(@DestinationVariable String sessionId, Principal principal) {
+		User user = userService.findUserByNickname(principal.getName());
+		GameSession session = gameSessionService.getSession(sessionId);
+		User opponent = session.getOpponentFor(user);
+
+		messagingTemplate.convertAndSendToUser(
+				opponent.getNickname(),
+				"/queue/cancel-draw-suggestion",
+				""
+		);
 	}
 
 	@MessageMapping("/{sessionId}/message")

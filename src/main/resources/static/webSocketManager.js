@@ -116,6 +116,11 @@ class WebSocketManager {
             addMessage(data.message, true);
         });
 
+        this.stompClient.subscribe('/user/queue/draw-suggestion', (message) => {
+            console.log("пришел запрос на ничью");
+            handleDrawSuggestionFromOpponent();
+        });
+
         this.stompClient.subscribe('/user/queue/retry', (message) => {
             const data = JSON.parse(message.body);
             const subscription = this.stompClient.subscribe(
@@ -126,9 +131,7 @@ class WebSocketManager {
                     subscription.unsubscribe();
                 }
             );
-
             handleRetryRequestFromOpponent(data);
-
         });
 
     }
@@ -301,6 +304,53 @@ class WebSocketManager {
             console.error(`Error joining game: ${error}`);
             alert("Не удалось присоединиться к игре!");
         });
+    }
+
+    async sendDrawSuggestion() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const drawCreatedSub = this.stompClient.subscribe(
+                    '/user/queue/draw-suggestion-created', () => {
+                        drawCreatedSub.unsubscribe();
+                        resolve();
+                    }
+                );
+                this.stompClient.send(
+                    `/app/${this.sessionId}/draw-suggestion`, {}, {}
+                );
+            });
+            const acceptsSbscr = this.stompClient.subscribe('/user/queue/draw-suggestion-accepted', (message) => {
+                cancelButtonClean(false);
+                showGameResult("draw");
+            });
+
+            const cancelSbscr = this.stompClient.subscribe('/user/queue/cancel-draw-suggestion', (message) => {
+                cancelButtonClean(false);
+                acceptsSbscr.unsubscribe();
+                cancelSbscr.unsubscribe();
+            });
+            return response;
+        } catch (error) {
+            console.error("Ошибка:", error);
+            throw error;
+        }
+    }
+
+     acceptDrawSuggestion() {
+        this.stompClient.send(
+            `/app/${this.sessionId}/accept-draw-suggestion`, {}, {}
+        );
+        const startSubs = this.stompClient.subscribe('/user/queue/draw-suggestion-accepted', (message) => {
+            cancelButtonClean(false);
+            showGameResult("draw");
+        });
+    }
+
+    cancelDrawSuggestion() {
+        this.stompClient.send(
+            `/app/${this.sessionId}/cancel-draw-suggestion`, {}, {}
+        );
+        cancelButtonClean(false);
     }
 
 }
