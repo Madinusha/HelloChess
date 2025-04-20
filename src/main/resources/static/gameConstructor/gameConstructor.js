@@ -28,37 +28,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-document.getElementById('create-game').addEventListener('click', async () => {
-    if (!wsManager) {
-        console.error('WebSocket is not initialized!');
-        return;
-    }
+document.getElementById('classical').addEventListener('click', () => {
+    const timeControl = {
+        minutes: 30,
+        increment: 0
+    };
+    const color = 'RANDOM';
+    wsManager.createGame(color, timeControl);
+});
+
+document.getElementById('blitz').addEventListener('click', () => {
+    const timeControl = {
+        minutes: 3,
+        increment: 2
+    };
+    const color = 'RANDOM';
+    wsManager.createGame(color, timeControl);
+});
+
+document.getElementById('rapid').addEventListener('click', () => {
+    const timeControl = {
+        minutes: 10,
+        increment: 5
+    };
+    const color = 'RANDOM';
+    wsManager.createGame(color, timeControl);
+});
+
+document.getElementById('create-game').addEventListener('click', () => {
     const timeControl = {
         minutes: parseInt(document.querySelector('.time-input:nth-child(1)').value) || 10,
         increment: parseInt(document.querySelector('.time-input:nth-child(3)').value) || 0
     };
     const color = document.querySelector('#choose-color img.selected')?.id.toUpperCase() || 'RANDOM';
-
-    wsManager.stompClient.subscribe('/user/queue/game-created', (message) => {
-        const { sessionId } = JSON.parse(message.body);
-        console.log(`Successfully created game with session ID: ${sessionId}`);
-    });
-
-    // При подключении:
-    wsManager.stompClient.subscribe('/user/queue/game-start', (message) => {
-        console.log('Game start message received:', message.body);
-        const { sessionId } = JSON.parse(message.body);
-        window.location.href = `/game?sessionId=${sessionId}`;
-    });
-
-    wsManager.stompClient.send(
-        "/app/game/create",
-        {},
-        JSON.stringify({
-            playerColor: color,
-            timeControl: timeControl
-        })
-    );
+    wsManager.createGame(color, timeControl);
 });
 
 function getTimeControl() {

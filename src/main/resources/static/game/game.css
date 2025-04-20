@@ -210,7 +210,8 @@ body {
     width: 80%;
     height: auto;
     pointer-events: none;
-    transition: transform 0.1s ease-in-out;
+    will-change: transform;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .promote-button {
     background-color: #FFFFE0;

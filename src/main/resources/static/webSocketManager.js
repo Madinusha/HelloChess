@@ -43,6 +43,28 @@ class WebSocketManager {
         this.stompClient.send(`/app/game/${sessionId}/remove`, {}, {});
     }
 
+    createGame(playerColor, timeControl) {
+        this.stompClient.subscribe('/user/queue/game-created', (message) => {
+            const { sessionId } = JSON.parse(message.body);
+            console.log(`Successfully created game with session ID: ${sessionId}`);
+        });
+
+        this.stompClient.subscribe('/user/queue/game-start', (message) => {
+            console.log('Game start message received:', message.body);
+            const { sessionId } = JSON.parse(message.body);
+            window.location.href = `/game?sessionId=${sessionId}`;
+        });
+
+        this.stompClient.send(
+            "/app/game/create",
+            {},
+            JSON.stringify({
+                playerColor: playerColor,
+                timeControl: timeControl
+            })
+        );
+    }
+
     joinGame(sessionId) {
         if (!sessionId) {
             console.error('Session ID is required!');

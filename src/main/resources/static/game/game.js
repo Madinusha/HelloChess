@@ -373,7 +373,7 @@ function hideValidMove() {
     }
 }
 
-function animateMove(positionFrom, positionTo) {
+function animateMove(positionFrom, positionTo, eatenPiece = null) {
     return new Promise((resolve) => {
         console.log("positionFrom ", positionFrom);
         console.log("positionTo ", positionTo);
@@ -410,8 +410,14 @@ function animateMove(positionFrom, positionTo) {
             targetSquare.classList.add('last-move');
 
             const targetPiece = targetSquare.querySelector('.piece');
-            if (targetPiece) {
-                targetPiece.remove();
+
+            if (targetPiece || eatenPiece) {
+                if (targetPiece) {
+                    targetPiece.remove();
+                } else if(eatenPiece) {
+                    const eatenTargetPiece = document.getElementById(positionTo[0] + positionFrom[1]).querySelector('.piece');
+                    eatenTargetPiece.remove();
+                }
                 eatSound.play();
 
                 const color = (targetPiece.src).includes("/white/") ? "white" : "black";
@@ -424,6 +430,7 @@ function animateMove(positionFrom, positionTo) {
             pieceElement.src = piece.src;
             pieceElement.classList.add('piece');
             piece.remove();
+
             resolve();
         });
     });
@@ -431,7 +438,9 @@ function animateMove(positionFrom, positionTo) {
 
 function showPromotionMenu(positionFrom, positionTo) {
     const playerColor = getPieceAt(positionFrom).color;
-    const dir = positionTo.row === 1 ? 1 : -1;
+    console.log("positionFrom", positionFrom);
+    console.log("positionTo", positionTo);
+    const dir = positionTo[1] === "1" ? 1 : -1;
 
     return new Promise((resolve) => {
         document.querySelectorAll('.square').forEach(square => {
@@ -441,6 +450,10 @@ function showPromotionMenu(positionFrom, positionTo) {
         for (let i = 0; i < 4; i++) {
             const squareId = positionTo[0] + ((parseInt(positionTo[1]) + i * dir));
             const square = document.getElementById(squareId);
+            console.log("squareId", squareId);
+            console.log("square", square);
+            console.log("dir", dir);
+
 
             const button = document.createElement('button');
             button.classList.add('promote-button');
@@ -1038,7 +1051,7 @@ function handleMove(move) {
         updateChessboard(chessboard, fromPosition, toPosition);
         addMoveToBox(fromPosition, toPosition, result);
     } else {
-        animateMove(fromPosition, toPosition);
+        animateMove(fromPosition, toPosition, result.eatenPiece);
         updateChessboard(chessboard, fromPosition, toPosition);
         addMoveToBox(fromPosition, toPosition, result);
     }
