@@ -3,7 +3,6 @@ package org.madi.demo.model;
 import lombok.Getter;
 import org.madi.demo.service.ChessService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;

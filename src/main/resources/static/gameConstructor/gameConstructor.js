@@ -1,6 +1,26 @@
 window.WebSocketManager = WebSocketManager;
 let wsManager = null;
 
+const players = [
+    {nickname: "Bull_Digga", rating: 2100, time: "3 + 2"},
+    {nickname: "madi_nusha", rating: 1546, time: "15 + 10"},
+    {nickname: "Sonya777", rating: 1650, time: "3 + 2"},
+    {nickname: "prosto_Erik", rating: 1785, time: "15 + 10"},
+    {nickname: "Timur", rating: 1593, time: "3 + 2"}
+];
+
+const tableBody = document.querySelector('.table-body');
+players.forEach(player => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.innerHTML = `
+        <div class="column nickname">${player.nickname}</div>
+        <div class="column rating">${player.rating}</div>
+        <div class="column time-control">${player.time}</div>
+    `;
+    tableBody.appendChild(row);
+});
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch('/api/games/available');

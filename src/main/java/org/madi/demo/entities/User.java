@@ -1,6 +1,5 @@
 package org.madi.demo.entities;
 
-
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +8,9 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -40,6 +40,16 @@ public class User implements UserDetails {
 
 	@Column(columnDefinition = "INTEGER DEFAULT 0")
 	private int rating = 0;
+
+	// Отправленные запросы дружбы
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Friendship> sentFriendships = new ArrayList<>();
+
+	// Полученные запросы дружбы
+	@JsonIgnore
+	@OneToMany(mappedBy = "friend", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Friendship> receivedFriendships = new ArrayList<>();
 
 	public User(String nickname, String email, String password, String role) {
 		this.nickname = nickname;

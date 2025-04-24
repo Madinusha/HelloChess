@@ -3,6 +3,7 @@ package org.madi.demo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.madi.demo.dto.FriendRequestDTO;
 import org.madi.demo.dto.UserLoginDTO;
 import org.madi.demo.dto.UserProfileDTO;
 import org.madi.demo.dto.UserRegistrationDTO;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -41,7 +43,6 @@ public class UserController {
 		user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Кодируем пароль
 		user.setEmail(userDTO.getEmail());
 		user.setRole("user");
-
 		userService.saveUser(user);
 		return ResponseEntity.ok("Пользователь успешно зарегистрирован");
 	}
@@ -75,26 +76,6 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
 		}
 	}
-
-
-
-//
-//
-//	@GetMapping("/profile")
-//	public ResponseEntity<UserProfileDTO> getProfile() {
-//		// Получаем аутентификацию из контекста
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//		// Проверяем аутентификацию
-//		if (authentication == null || !authentication.isAuthenticated()) {
-//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//		}
-//
-//		User user = (User) authentication.getPrincipal();
-//		return ResponseEntity.ok(
-//				new UserProfileDTO(user.getNickname(), user.getEmail())
-//		);
-//	}
 
 	@GetMapping("/profile")
 	public ResponseEntity<UserProfileDTO> getProfile() {
