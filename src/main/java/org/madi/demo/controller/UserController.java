@@ -3,10 +3,7 @@ package org.madi.demo.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.madi.demo.dto.FriendRequestDTO;
-import org.madi.demo.dto.UserLoginDTO;
-import org.madi.demo.dto.UserProfileDTO;
-import org.madi.demo.dto.UserRegistrationDTO;
+import org.madi.demo.dto.*;
 import org.madi.demo.entities.User;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +17,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -103,5 +103,18 @@ public class UserController {
 	@GetMapping("/{nickname}")
 	public User getUserByNickname(@PathVariable String nickname) {
 		return userService.findUserByNickname(nickname);
+	}
+
+	@GetMapping("/{nickname}/creation-date")
+	public ResponseEntity<String> getCreationDate(@PathVariable String nickname) {
+		User user = userService.findUserByNickname(nickname);
+		if (user == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+		String formattedDate = user.getCreatedAt().format(formatter);
+
+		return ResponseEntity.ok(formattedDate);
 	}
 }

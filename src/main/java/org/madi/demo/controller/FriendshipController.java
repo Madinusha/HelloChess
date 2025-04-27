@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -31,15 +32,24 @@ public class FriendshipController {
 	@GetMapping
 	public ResponseEntity<List<FriendDTO>> getFriends() {
 		User currentUser = getCurrentUser();
+		System.out.println("current user: " + currentUser.getNickname());
 		List<FriendDTO> friends = friendshipService.getUserFriends(currentUser);
 		return ResponseEntity.ok(friends);
 	}
 
 	// Получить входящие запросы в друзья
 	@GetMapping("/requests")
-	public ResponseEntity<List<FriendRequestDTO>> getFriendRequests() {
+	public ResponseEntity<List<FriendDTO>> getFriendRequests() {
 		User currentUser = getCurrentUser();
-		List<FriendRequestDTO> requests = friendshipService.getPendingRequests(currentUser);
+		List<FriendDTO> requests = friendshipService.getPendingRequests(currentUser);
+		return ResponseEntity.ok(requests);
+	}
+
+	// Получить исходящие запросы (отправленные текущим пользователем)
+	@GetMapping("/requests/suggestions")
+	public ResponseEntity<List<FriendDTO>> getOutgoingRequests() {
+		User currentUser = getCurrentUser();
+		List<FriendDTO> requests = friendshipService.getOutgoingRequests(currentUser);
 		return ResponseEntity.ok(requests);
 	}
 
@@ -57,18 +67,44 @@ public class FriendshipController {
 		return ResponseEntity.ok("Запрос отправлен");
 	}
 
-	// Принять запрос
-	@PostMapping("/requests/{requestId}/accept")
-	public ResponseEntity<String> acceptFriendRequest(@PathVariable Long requestId) {
-		friendshipService.acceptFriendRequest(requestId, getCurrentUser());
+	@PostMapping("/requests/{nickname}/accept")
+	public ResponseEntity<String> acceptFriendRequest(@PathVariable String nickname) {
+		friendshipService.acceptFriendRequest(nickname, getCurrentUser());
 		return ResponseEntity.ok("Запрос принят");
 	}
 
-	// Отклонить запрос
-	@PostMapping("/requests/{requestId}/decline")
-	public ResponseEntity<String> declineFriendRequest(@PathVariable Long requestId) {
-		friendshipService.declineFriendRequest(requestId, getCurrentUser());
+	@DeleteMapping("/requests/{nickname}")
+	public ResponseEntity<String> declineFriendRequest(@PathVariable String nickname) {
+		friendshipService.declineFriendRequest(nickname, getCurrentUser());
 		return ResponseEntity.ok("Запрос отклонен");
+	}
+
+	@DeleteMapping("/{friendNickname}")
+	public ResponseEntity<String> removeFriend(@PathVariable String friendNickname) {
+		friendshipService.removeFriend(friendNickname, getCurrentUser());
+		return ResponseEntity.ok("Друг успешно удален");
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<FriendDTO>> searchUsers(
+			@RequestParam String q,
+			@RequestParam(defaultValue = "10") int limit) {
+
+		User currentUser = getCurrentUser();
+		List<User> foundUsers = userService.searchUsers(q, limit);
+
+		List<FriendDTO> results = foundUsers.stream()
+				.filter(user -> !user.getId().equals(currentUser.getId())) // Фильтруем текущего пользователя
+				.map(user -> {
+					FriendDTO dto = new FriendDTO();
+					dto.setNickname(user.getNickname());
+					dto.setRating(user.getRating());
+					dto.setStatusDetailed(friendshipService.getDetailedFriendshipStatus(currentUser, user));
+					return dto;
+				})
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(results);
 	}
 
 	private User getCurrentUser() {

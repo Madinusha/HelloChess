@@ -1,5 +1,6 @@
 window.currentUser = {
     nickname: null,
+    email: null,
     rating: 0
 };
 
@@ -47,11 +48,15 @@ async function checkUserProfile() {
             if (user && user.nickname) {
                 window.currentUser = {
                     nickname: user.nickname,
+                    email: user.email,
                     rating: user.rating
                 };
 
                 console.log("nick: ", window.currentUser.nickname);
                 console.log("rating: ", window.currentUser.rating);
+                window.dispatchEvent(new CustomEvent('userDataLoaded', {
+                    detail: window.currentUser
+                }));
                 displayUserProfileBtn(user);
             } else {
                 console.error("Данные пользователя неполные:", user);

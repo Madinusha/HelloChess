@@ -11,73 +11,128 @@
 </head>
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
-
-<div class="main">
-    <div id="profile-info">
-        <img id="main-info-image" th:src="@{/static/images/pawn_icon.png}" alt="Profile Picture">
-        <div id="profile-info-details">
-            <div id="profile-info-nickname"></div>
-            <div id="profile-info-email"></div>
-
-            <ul id="statistics" class="profile-info-items">
-                <li class="profile-info-item">
-                    <a href="#" class="navbar-link">
-                        <span>Победы</span>
-                        <span class="digits" id="Победы">12</span>
-                    </a>
-                </li>
-                <li class="profile-info-item">
-                    <a href="#" class="navbar-link">
-                        <span>Поражения</span>
-                        <span class="digits" id="Поражения">30</span>
-                    </a>
-                </li>
-                <li class="profile-info-item">
-                    <a href="#" class="navbar-link">
-                        <span>Ничья</span>
-                        <span class="digits" id="Ничья">46</span>
-                    </a>
-                </li>
-            </ul>
-
-            <ul id="networking" class="profile-info-items">
-                <li class="profile-info-item">
-                    <a href="#" class="navbar-link">
-<!--                        <img src="../images/profile-box-avatar.png" alt="Друзья" class="icon">-->
-                        <span>Друзья</span>
-                        <span class="digits" id="friends">2</span>
-                    </a>
-                </li>
-                <li class="profile-info-item">
-                    <a href="#" class="navbar-link">
-<!--                        <img src="../images/profile-box-avatar.png" alt="Подписчики" class="icon">-->
-                        <span>Подписчики</span>
-                        <span class="digits" id="followers">6</span>
-                    </a>
-                </li>
-                <li class="profile-info-item">
-                    <a href="#" class="navbar-link">
-<!--                        <img src="../images/profile-box-avatar.png" alt="Подписки" class="icon">-->
-                        <span>Подписки</span>
-                        <span class="digits" id="following">103</span>
-                    </a>
-                </li>
-            </ul>
+<div class="profile-container">
+    <!-- Основная информация -->
+    <div class="profile-header">
+        <img class="profile-avatar" th:src="@{/static/images/white/Pawn.png}" alt="Аватар">
+        <div class="profile-info">
+            <div class="info-top-row">
+                <div class="profile-nickname" id="profile-nickname">Nickname</div>
+                <button class="edit-button">Редактировать</button>
+            </div>
+            <div class="profile-email" id="profile-email">email@gmail.com</div>
+            <div class="info-bottom-row">
+                <div class="create-date" id="create-data">
+                    Дата создания: <span id="cd-date"></span>
+                </div>
+                <button class="settings-button"></button>
+            </div>
         </div>
     </div>
 
-    <div id="activities">
+    <!-- Вкладки -->
+    <div class="tabs">
+        <button class="tab active" data-tab="friends">Друзья</button>
+        <button class="tab" data-tab="stats">Статистика</button>
+        <button class="tab" data-tab="games">Партии</button>
+    </div>
 
+    <!-- Контент вкладок -->
+    <div class="tab-content">
+        <!-- Друзья -->
+        <div id="friends-tab" class="tab-pane active">
+            <div class="friends-search">
+                <div class="search-container">
+                    <span class="at-symbol">@</span>
+                    <input
+                            type="search"
+                            id="friend-search"
+                            name="friend-search"
+                            placeholder="Найти друга..."
+                            aria-label="Поиск по нику друга"
+                            class="search-input"
+                    >
+                    <button class="clear-btn" aria-label="Очистить поле">×</button>
+                </div>
+                <button class="search-button" id="search-button">Найти</button>
+                <div class="search-container">
+                    <span class="at-symbol">@</span>
+                    <input
+                            type="search"
+                            id="client-search"
+                            name="client-search"
+                            placeholder="Найти пользователя..."
+                            aria-label="Поиск по нику"
+                            class="search-input"
+                    >
+                    <button class="clear-btn" aria-label="Очистить поле">×</button>
+                </div>
+                <button class="search-button" id="client-search-button">Найти</button>
+            </div>
+
+            <!-- Внутренние вкладки друзей -->
+            <div class="friends-subtabs">
+                <div class="subtabs-header">
+                    <button class="subtab active" data-subtab="all">Все</button>
+                    <button class="subtab" data-subtab="requests">Входящие</button>
+                    <button class="subtab" data-subtab="suggestions">Исходящие</button>
+                </div>
+
+                <div class="subtab-content">
+                    <div id="all-friends" class="subtab-pane active">
+                        <div class="friends-list"></div>
+                    </div>
+
+                    <div id="requests-friends" class="subtab-pane">
+                        <div class="requests-list"></div>
+                    </div>
+
+                    <div id="suggestions-friends" class="subtab-pane">
+                        <div class="suggestions-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div id="stats-tab" class="tab-pane">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3>Игр сыграно</h3>
+                    <span class="stat-value" id="total-games">0</span>
+                </div>
+                <div class="stat-box">
+                    <h3>Победы</h3>
+                    <span class="stat-value" id="wins">0</span>
+                </div>
+                <div class="stat-box">
+                    <h3>Поражения</h3>
+                    <span class="stat-value" id="losses">0</span>
+                </div>
+                <div class="stat-box">
+                    <h3>Ничьи</h3>
+                    <span class="stat-value" id="draws">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- История партий -->
+        <div id="games-tab" class="tab-pane">
+            <div class="games-history">
+                <!-- Динамически заполняемые элементы партий -->
+            </div>
+        </div>
     </div>
 </div>
+
 <script>
     function goBack() {
       window.history.back();
     }
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 </body>
 </html>
+
 
 
