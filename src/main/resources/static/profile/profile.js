@@ -23,23 +23,137 @@ const mockData = {
         {nickname: 'Liliya777', rating: 2158}
     ]
 };
+
+const profileData = document.getElementById("profile-data");
+
+const nickname = profileData.getAttribute("data-nickname");
+const email = profileData.getAttribute("data-email");
+const rating = profileData.getAttribute("data-rating");
+const creationDate = profileData.getAttribute("data-creation-date");
+const statusDetailed = profileData.getAttribute("data-status-detailed");
+const isMyProfile = profileData.getAttribute("data-is-my-profile") === "true";
+
 const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
 const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-    });
+    loadProfileData();
+    displayFields();
 
-    window.addEventListener('userDataLoaded', (e) => {
-        loadProfileData(e.detail);
-    });
-
-    // На случай, если данные уже загружены
-    if (window.currentUser.nickname) {
-        loadProfileData(window.currentUser);
-    }
 });
+
+function loadProfileData() {
+    // Статистика
+    document.getElementById('total-games').textContent = mockData.stats.total;
+    document.getElementById('wins').textContent = mockData.stats.wins;
+    document.getElementById('losses').textContent = mockData.stats.losses;
+    document.getElementById('draws').textContent = mockData.stats.draws;
+
+    if (isMyProfile) {
+        loadFriendsData('requests');
+        loadFriendsData('suggestions');
+        loadFriendsData('all');
+    }
+}
+
+function displayFields(data) {
+    if (!isMyProfile) {
+        setupFriendActions(nickname);
+        const profileEmail = document.getElementById('profile-email');
+        if (profileEmail) {
+            profileEmail.style.display = 'none';
+        }
+
+        // Скрываем вкладку "Друзья"
+        const friendsTabButton = document.querySelector('.tabs button[data-tab="friends"]');
+        const friendsTabContent = document.getElementById('friends-tab');
+
+        if (friendsTabButton && friendsTabContent) {
+            friendsTabButton.style.display = 'none';
+            friendsTabContent.style.display = 'none';
+
+            // Устанавливаем активной следующую вкладку (например, "Статистика")
+            const statsTabButton = document.querySelector('.tabs button[data-tab="stats"]');
+            if (statsTabButton) {
+                statsTabButton.classList.add('active');
+                const statsTabContent = document.getElementById('stats-tab');
+                if (statsTabContent) {
+                    statsTabContent.classList.add('active');
+                }
+            }
+        }
+    }
+}
+
+async function setupFriendActions(nickname) {
+    try {
+        const response = await fetch(`/api/friends/${nickname}/friendship`, {
+            method: 'GET',
+            headers: {
+                [csrfHeader]: csrfToken
+            }
+        });
+        if (!response.ok) throw new Error('Не удалось получить статус дружбы');
+
+        const statusDetailed = await response.text();
+
+        document.querySelectorAll('#top-actions button').forEach(btn => {
+            btn.style.display = 'none';
+            btn.onclick = null;
+        });
+
+        switch(statusDetailed) {
+            case 'friend':
+                const versusBtn = document.getElementById('top-versus-btn');
+                const removeFriendBtn = document.getElementById('top-remove-friend-btn');
+                versusBtn.style.display = 'block';
+                versusBtn.onclick = () => startGameWithFriend(nickname);
+                removeFriendBtn.style.display = 'block';
+                removeFriendBtn.onclick = async () => {
+                    if (confirm(`Вы уверены, что хотите удалить ${nickname} из друзей?`)) {
+                        await removeFriend(nickname);
+                        await setupFriendActions(nickname);
+                        showToast('Друг удален');
+                    }
+                };
+                break;
+            case 'pending_outgoing':
+                const cancelBtn = document.getElementById('top-cancel-btn');
+                cancelBtn.style.display = 'block';
+                cancelBtn.onclick = async () => {
+                    await cancelFriendRequest(nickname);
+                    await setupFriendActions(nickname);
+                }
+                break;
+            case 'pending_incoming':
+                const acceptBtn = document.getElementById('top-accept-btn');
+                const declineBtn = document.getElementById('top-decline-btn');
+
+                acceptBtn.style.display = 'block';
+                acceptBtn.onclick = async () => {
+                    await acceptFriendRequest(nickname);
+                    await setupFriendActions(nickname);
+                }
+
+                declineBtn.style.display = 'block';
+                declineBtn.onclick = async () => {
+                    await declineFriendRequest(nickname);
+                    await setupFriendActions(nickname);
+                }
+                break;
+            default: // 'none'
+                const addFriendBtn = document.getElementById('top-add-friend-btn');
+                addFriendBtn.style.display = 'block';
+                addFriendBtn.onclick = async () => {
+                    await sendFriendRequest(nickname);
+                    await setupFriendActions(nickname);
+                }
+        }
+    } catch (error) {
+        console.error('Ошибка при настройке кнопок:', error);
+        showToast('Не удалось загрузить статус дружбы', 'error');
+    }
+}
 
 async function handleApiError(response, defaultMessage = 'Произошла ошибка') {
     if (!response.ok) {
@@ -77,19 +191,13 @@ let allFriends = [];
 
 function searchFriend() {
     const searchTerm = searchInput1.value.trim().toLowerCase();
-
     if (!searchTerm) {
-        // Если поле пустое, показываем всех друзей
         renderFriendsList(allFriends, '.friends-list', 'all');
         return;
     }
-
-    // Фильтруем друзей по нику
     const filteredFriends = allFriends.filter(friend =>
         friend.nickname.toLowerCase().includes(searchTerm)
     );
-
-    // Отображаем результаты
     renderFriendsList(filteredFriends, '.friends-list', 'all');
 }
 
@@ -109,32 +217,6 @@ function switchTab(tabName) {
     document.querySelector(`#${tabName}-tab`).classList.add('active');
 }
 
-// Загрузка данных профиля
-async function loadProfileData() {
-    try {
-
-        console.log("window.currentUser: ", window.currentUser);
-        // Основная информация
-        document.getElementById('profile-nickname').textContent = window.currentUser.nickname;
-        document.getElementById('profile-email').textContent = window.currentUser.email;
-        const creationDate = await getUserCreationDate(window.currentUser.nickname);
-        if (creationDate) {
-            document.getElementById('cd-date').textContent = " " + creationDate;
-        }
-        // Статистика
-        document.getElementById('total-games').textContent = mockData.stats.total;
-        document.getElementById('wins').textContent = mockData.stats.wins;
-        document.getElementById('losses').textContent = mockData.stats.losses;
-        document.getElementById('draws').textContent = mockData.stats.draws;
-
-        loadFriendsData('requests');
-        loadFriendsData('suggestions');
-        loadFriendsData('all');
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-    }
-}
-
 async function getUserCreationDate(nickname) {
     try {
         const response = await fetch(`/api/users/${encodeURIComponent(nickname)}/creation-date`);
@@ -149,6 +231,9 @@ async function getUserCreationDate(nickname) {
     }
 }
 
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
 // Обработчики внутренних вкладок
 document.querySelectorAll('.subtab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -272,6 +357,27 @@ function renderFriendsList(friends, containerSelector, tabType) {
         container.appendChild(row);
     });
     setupActionHandlers(containerSelector, tabType);
+    setupRowClickHandler(containerSelector);
+}
+
+function setupRowClickHandler(containerSelector) {
+    const container = document.querySelector(containerSelector);
+
+    container.addEventListener('click', (event) => {
+        if (event.target.closest('.actions button')) {
+            return;
+        }
+
+        const row = event.target.closest('.player-row');
+        if (!row) return;
+
+        const nickname = row.getAttribute('data-nickname');
+        console.log("nickname attr ", nickname);
+
+        if (nickname) {
+            window.location.href = `/profile?nickname=${encodeURIComponent(nickname)}`;
+        }
+    });
 }
 
 document.querySelectorAll('.clear-btn').forEach(btn => {
@@ -464,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function searchUsers(query) {
         try {
-            const response = await fetch(`/api/friends/search?q=${encodeURIComponent(query)}&limit=5`);
+            const response = await fetch(`/api/friends/search?q=${encodeURIComponent(query)}&limit=10`);
             await handleApiError(response, 'Ошибка поиска пользователей');
 
             const users = await response.json();
@@ -520,14 +626,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
+
         }).join('');
+        setupRowClickHandlerOnSearch();
         resultsContainer.style.display = 'block';
 
-        // Добавляем обработчики для всех типов кнопок
         setupFriendshipActionHandlers();
+
     }
 
-    function setupFriendshipActionHandlers() {
+    function setupRowClickHandlerOnSearch() {
+        const resultItems = document.querySelectorAll('.search-result-item');
+        resultItems.forEach(item => {
+            item.addEventListener('click', (event) => {
+                if (event.target.closest('.actions button')) {
+                    return;
+                }
+                const nickname = item.getAttribute('data-nickname');
+
+                if (nickname) {
+                    window.location.href = `/profile?nickname=${encodeURIComponent(nickname)}`;
+                }
+            });
+        });
+    }
+
+    function setupFriendshipActionHandlers(){
         // Добавление в друзья
         document.querySelectorAll('.add-friend-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
@@ -589,7 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function sendFriendRequest(nickname) {
+    window.sendFriendRequest = async function(nickname) {
         try {
             const response = await fetch(`/api/friends/requests/${encodeURIComponent(nickname)}`, {
                 method: 'POST',
@@ -646,3 +770,77 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+
+const container = document.getElementById('languages-container');
+const addBtn = document.getElementById('add-language-btn');
+
+// Добавление нового языка
+addBtn.addEventListener('click', function() {
+    const newRow = document.createElement('div');
+    newRow.className = 'language-row';
+    newRow.innerHTML = `
+        <select class="language-select about-input">
+            <option value="Русский">Русский</option>
+            <option value="Английский">Английский</option>
+            <option value="Немецкий">Немецкий</option>
+            <option value="Французский">Французский</option>
+            <option value="Испанский">Испанский</option>
+        </select>
+        <select class="level-select about-input">
+            <option value="родной">родной</option>
+            <option value="продвинутый">продвинутый</option>
+            <option value="средний">средний</option>
+            <option value="начальный">начальный</option>
+        </select>
+        <button class="remove-language-btn" type="button">×</button>
+    `;
+    container.appendChild(newRow);
+
+    // Добавляем обработчик удаления для новой строки
+    newRow.querySelector('.remove-language-btn').addEventListener('click', function() {
+        container.removeChild(newRow);
+    });
+});
+
+// Обработчик удаления для существующих строк
+document.querySelectorAll('.remove-language-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        container.removeChild(btn.closest('.language-row'));
+    });
+});
+
+function getLanguagesData() {
+    const rows = document.querySelectorAll('.language-row');
+    const languages = [];
+
+    rows.forEach(row => {
+        const language = row.querySelector('.language-select').value;
+        const level = row.querySelector('.level-select').value;
+        languages.push({language, level});
+    });
+
+    return languages;
+}
+
+const editButton = document.getElementById('top-edit-button');
+const cancelButton = document.getElementById('cancel-edit');
+const profileForm = document.getElementById('profile-form');
+
+// Обработчик кнопки "Редактировать"
+editButton.addEventListener('click', function() {
+
+    // 2. Переключаем видимость блоков
+    document.getElementById('about-view-mode').style.display = 'none';
+    document.getElementById('about-edit-mode').style.display = 'block';
+    editButton.style.display = 'none'; // Скрываем кнопку редактирования
+});
+
+//// Обработчик кнопки "Отмена"
+//cancelButton.addEventListener('click', function() {
+//    // Возвращаемся в режим просмотра
+//    document.getElementById('view-mode').style.display = 'block';
+//    document.getElementById('edit-mode').style.display = 'none';
+//    editButton.style.display = 'block'; // Показываем кнопку редактирования
+//});

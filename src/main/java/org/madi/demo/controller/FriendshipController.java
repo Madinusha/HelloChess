@@ -37,6 +37,14 @@ public class FriendshipController {
 		return ResponseEntity.ok(friends);
 	}
 
+	@GetMapping("/{nickname}/friendship")
+	public ResponseEntity<String> getFriendship(@PathVariable String nickname) {
+		User currentUser = getCurrentUser();
+		User targetUser = userService.findUserByNickname(nickname);
+		String statusDetailed = friendshipService.getDetailedFriendshipStatus(currentUser, targetUser);
+		return ResponseEntity.ok(statusDetailed);
+	}
+
 	// Получить входящие запросы в друзья
 	@GetMapping("/requests")
 	public ResponseEntity<List<FriendDTO>> getFriendRequests() {

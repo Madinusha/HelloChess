@@ -151,7 +151,10 @@ public class FriendshipService {
 	}
 
 	public String getDetailedFriendshipStatus(User currentUser, User otherUser) {
-		// Проверяем, есть ли подтвержденная дружба в любом направлении
+		if (currentUser.getNickname().equals(otherUser.getNickname())) {
+			return "me";
+		}
+
 		boolean isFriend = friendshipRepository.existsByUserAndFriendAndStatus(currentUser, otherUser, FriendshipStatus.ACCEPTED) ||
 				friendshipRepository.existsByUserAndFriendAndStatus(otherUser, currentUser, FriendshipStatus.ACCEPTED);
 

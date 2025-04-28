@@ -7,12 +7,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
 
-
 @SpringBootApplication
 public class HelloChessApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(HelloChessApplication.class, args);
 	}
-
 }

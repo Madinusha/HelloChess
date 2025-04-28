@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.madi.demo.dto.*;
 import org.madi.demo.entities.User;
+import org.madi.demo.service.FriendshipService;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -22,8 +23,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.security.Principal;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,6 +36,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private FriendshipService friendshipService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -116,5 +123,36 @@ public class UserController {
 		String formattedDate = user.getCreatedAt().format(formatter);
 
 		return ResponseEntity.ok(formattedDate);
+	}
+
+	@GetMapping("/profile/{nickname}")
+	public ResponseEntity<Map<String, Object>> getUserProfile(
+			@PathVariable String nickname,
+			Principal principal) {
+		User currentUser = userService.findUserByNickname(principal.getName());
+		User requestedUser = userService.findUserByNickname(nickname);
+		if (requestedUser == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		boolean isMyProfile = currentUser != null &&
+				currentUser.getNickname().equals(nickname);
+
+		String friendshipStatusDetailed = friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
+
+		UserProfilePageDTO profile = new UserProfilePageDTO();
+		profile.setNickname(requestedUser.getNickname());
+		profile.setRating(requestedUser.getRating());
+		profile.setStatusDetailed(friendshipStatusDetailed);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+		String formattedDate = currentUser.getCreatedAt().format(formatter);
+		profile.setCreationDate(formattedDate);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("profile", profile);
+		response.put("isMyProfile", isMyProfile);
+
+		return ResponseEntity.ok(response);
 	}
 }

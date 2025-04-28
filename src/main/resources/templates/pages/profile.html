@@ -12,18 +12,35 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="profile-container">
-    <!-- Основная информация -->
+    <div id="profile-data"
+         th:attr="data-nickname=${profile.nickname},
+              data-email=${profile.email},
+              data-rating=${profile.rating},
+              data-status-detailed=${profile.statusDetailed},
+              data-creation-date=${profile.creationDate},
+              data-is-my-profile=${isMyProfile}">
+    </div>
     <div class="profile-header">
-        <img class="profile-avatar" th:src="@{/static/images/white/Pawn.png}" alt="Аватар">
+        <img class="profile-avatar" th:src="@{/static/images/Конь.png}" alt="Аватар">
         <div class="profile-info">
             <div class="info-top-row">
-                <div class="profile-nickname" id="profile-nickname">Nickname</div>
-                <button class="edit-button">Редактировать</button>
+                <div class="profile-nickname" id="profile-nickname" th:text="${profile.nickname}">Nickname</div>
+                <div class="profile-rating" id="profile-rating" th:text="${profile.rating}"></div>
+                <div class="top-actions" id="top-actions">
+                    <button class="top-edit-button" id="top-edit-button">Редактировать</button>
+                    <button class="versus-btn" id="top-versus-btn"></button>
+                    <button class="remove-friend-btn" id="top-remove-friend-btn"></button>
+                    <button class="cancel-btn" id="top-cancel-btn">Отменить заявку</button>
+                    <button class="accept-btn" id="top-accept-btn">Принять</button>
+                    <button class="decline-btn" id="top-decline-btn">Отклонить</button>
+                    <button class="top-add-friend-btn" id="top-add-friend-btn">Добавить в друзья</button>
+                </div>
+
             </div>
-            <div class="profile-email" id="profile-email">email@gmail.com</div>
+            <div class="profile-email" id="profile-email" th:if="${isMyProfile}" th:text="${profile.email}"></div>
             <div class="info-bottom-row">
                 <div class="create-date" id="create-data">
-                    Дата создания: <span id="cd-date"></span>
+                    Дата создания: <span id="cd-date" th:text="${profile.creationDate}"></span>
                 </div>
                 <button class="settings-button"></button>
             </div>
@@ -32,15 +49,120 @@
 
     <!-- Вкладки -->
     <div class="tabs">
-        <button class="tab active" data-tab="friends">Друзья</button>
+        <button class="tab active" data-tab="about">О себе</button>
+        <button class="tab" data-tab="friends">Друзья</button>
         <button class="tab" data-tab="stats">Статистика</button>
         <button class="tab" data-tab="games">Партии</button>
     </div>
 
     <!-- Контент вкладок -->
     <div class="tab-content">
+        <div id="about-tab" class="tab-pane active">
+            <!-- Режим просмотра -->
+            <div id="about-view-mode" class="about-container">
+                <div class="about-section">
+                    <h3 class="about-title">Био:</h3>
+                    <p id="bio-content" class="about-content">Нет информации</p>
+                </div>
+
+                <div class="about-section">
+                    <h3 class="about-title">Хобби и интересы:</h3>
+                    <p id="hobbies-content" class="about-content">Нет информации</p>
+                </div>
+
+                <div class="about-section">
+                    <h3 class="about-title">Разряд:</h3>
+                    <p id="rank-content" class="about-content">Не указан</p>
+                </div>
+
+                <div class="about-section">
+                    <h3 class="about-title">Языки:</h3>
+                    <ul id="languages-list" class="about-list">
+                        <li>Русский - родной</li>
+                        <!-- Другие языки будут добавляться динамически -->
+                    </ul>
+                </div>
+
+                <div class="about-section">
+                    <h3 class="about-title">Контакты:</h3>
+                    <ul id="contacts-list" class="about-list">
+                        <li>Телеграм: не указан</li>
+                        <li>Instagram: не указан</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Режим редактирования (изначально скрыт) -->
+            <div id="about-edit-mode" class="about-container" style="display: none;">
+                <form id="about-form">
+                    <div class="about-section">
+                        <label class="about-label">Био:</label>
+                        <textarea id="edit-bio" class="about-input" rows="3"></textarea>
+                    </div>
+
+                    <div class="about-section">
+                        <label class="about-label">Хобби и интересы:</label>
+                        <textarea id="edit-hobbies" class="about-input" rows="2"></textarea>
+                    </div>
+
+                    <div class="about-section">
+                        <label class="about-label">Разряд:</label>
+                        <select id="edit-rank" class="about-input">
+                            <option value="">Выберите разряд</option>
+                            <option value="Без разряда">Без разряда</option>
+                            <option value="3-й разряд">3-й разряд</option>
+                            <option value="2-й разряд">2-й разряд</option>
+                            <option value="1-й разряд">1-й разряд</option>
+                            <option value="КМС">Кандидат в мастера спорта (КМС)</option>
+                            <option value="МС">Мастер спорта (МС)</option>
+                            <option value="Гроссмейстер">Гроссмейстер</option>
+                        </select>
+                    </div>
+
+                    <div class="about-section">
+                        <label class="about-label">Языки:</label>
+                        <div id="languages-container">
+                            <div class="language-row">
+                                <select class="language-select about-input">
+                                    <option value="Русский">Русский</option>
+                                    <option value="Английский">Английский</option>
+                                    <option value="Немецкий">Немецкий</option>
+                                    <option value="Французский">Французский</option>
+                                    <option value="Испанский">Испанский</option>
+                                </select>
+                                <select class="level-select about-input">
+                                    <option value="родной">родной</option>
+                                    <option value="начальный">начальный</option>
+                                    <option value="средний">средний</option>
+                                    <option value="продвинутый">продвинутый</option>
+                                </select>
+                                <button class="remove-language-btn" type="button">×</button>
+                            </div>
+                        </div>
+                        <button id="add-language-btn" class="add-button" type="button">+ Добавить язык</button>
+                    </div>
+
+                    <div class="about-section">
+                        <label class="about-label">Контакты:</label>
+                        <div class="contact-input-group">
+                            <span>Телеграм:</span>
+                            <input type="text" id="edit-telegram" class="about-input">
+                        </div>
+                        <div class="contact-input-group">
+                            <span>Instagram:</span>
+                            <input type="text" id="edit-instagram" class="about-input">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancel-edit-btn" class="cancel-button">Отмена</button>
+                        <button type="submit" class="save-button">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <!-- Друзья -->
-        <div id="friends-tab" class="tab-pane active">
+        <div id="friends-tab" class="tab-pane">
             <div class="friends-search">
                 <div class="search-container">
                     <span class="at-symbol">@</span>

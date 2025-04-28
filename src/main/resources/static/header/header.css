@@ -85,6 +85,9 @@ button:focus  {
 .navbar-link:hover {
     color: var(--carrot-red);
 }
+.navbar-item {
+    cursor: pointer;
+}
 
 #fast-nav {
     margin-left: auto;

@@ -70,6 +70,16 @@ async function checkUserProfile() {
     }
 }
 
+function goToProfile() {
+    const nickname = window.currentUser.nickname;
+    if (nickname) {
+        document.location.href = `/profile?nickname=${encodeURIComponent(nickname)}`;
+    } else {
+        alert("Вы не авторизованы. Пожалуйста, войдите в систему.");
+        document.location.href = "/registration";
+    }
+}
+
 function showLoginButton() {
     document.getElementById("login").style.display = "block";
     document.getElementById("profile-box").style.display = "none";
