@@ -529,7 +529,7 @@ public class Chessboard {
 					status = "DRAW";
 				} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
 					result.put("victory", Map.of("winner", checkCheckmate));
-					status = checkCheckmate.toLowerCase();
+					status = checkCheckmate.toUpperCase();
 				}
 			} else {
 				boolean isKingInCheckWhite = isKingInCheck("white", board.board);
@@ -623,7 +623,7 @@ public class Chessboard {
 				status = "DRAW";
 			} else if (checkCheckmate.equals("black") || checkCheckmate.equals("white")) {
 				result.put("victory", Map.of("winner", checkCheckmate));
-				status = checkCheckmate.toLowerCase();
+				status = checkCheckmate.toUpperCase();
 			}
 		}
 		switchPlayer();

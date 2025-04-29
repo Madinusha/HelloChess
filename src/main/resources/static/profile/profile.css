@@ -142,10 +142,9 @@ body {
     border-radius: 0.3em;
     cursor: pointer;
     margin-left: auto;
-
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0.5rem;
+    right: 0.5rem;
 }
 .top-edit-button:hover {
      background-color: var(--carrot-red);
@@ -769,7 +768,7 @@ body {
 }
 
 .contact-input-group span {
-    min-width: 6rem;
+    min-width: 3rem;
     color: var(--light-purple);
 }
 
@@ -836,6 +835,11 @@ body {
     min-width: 0;
 }
 
+.language-select option:disabled {
+    color: #ccc;
+    background-color: #f8f8f8;
+}
+
 .remove-language-btn {
     background: none;
     border: none;
@@ -859,6 +863,22 @@ body {
     background: var(--dark-purple);
 }
 
+#edit-birthdate {
+    letter-spacing: 1px;
+    font-family: monospace;
+    max-width: 25%;
+}
+
+.about-input[type="text"] {
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    #edit-birthdate {
+        font-size: 14px;
+    }
+}
+
 #view-mode, #edit-mode {
     transition: opacity 0.3s ease;
 }
@@ -868,4 +888,95 @@ body {
     justify-content: flex-end;
     gap: 0.5rem;
     margin-top: 1rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.contact-input-group {
+
+}
+
+.social-input {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.social-icon {
+    width: 1.5em;
+    height:  1.5em;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.telegram-icon {
+    background: url('../images/telegram.png') center/contain no-repeat;
+}
+
+.instagram-icon {
+    background: url('../images/insta.png') center/contain no-repeat;
+}
+
+.about-input:valid {
+    border-color: var(--beige);
+}
+
+.about-input:invalid:not(:placeholder-shown) {
+    border-color: var(--carrot-red);
+    box-shadow: 0 0 0 2px rgba(199, 49, 54, 0.1);
+}
+
+/* Подсказка при наведении на иконку */
+.social-icon:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 30px;
+    top: -30px;
+    background: var(--dark-purple);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* Иконка email */
+.email-icon {
+    background: url('../images/email.png') center/contain no-repeat;
+}
+
+/* Специфичные стили для email поля */
+input[type="email"] {
+    direction: ltr;
+   /* text-transform: lowercase;*/
+}
+
+/* Подсказка для email */
+.email-icon:hover::after {
+    content: "Введите ваш email";
+    position: absolute;
+    left: 30px;
+    top: -30px;
+    background: var(--dark-purple);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
 }

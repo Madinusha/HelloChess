@@ -72,15 +72,15 @@ function displayFields(data) {
             friendsTabButton.style.display = 'none';
             friendsTabContent.style.display = 'none';
 
-            // Устанавливаем активной следующую вкладку (например, "Статистика")
-            const statsTabButton = document.querySelector('.tabs button[data-tab="stats"]');
-            if (statsTabButton) {
-                statsTabButton.classList.add('active');
-                const statsTabContent = document.getElementById('stats-tab');
-                if (statsTabContent) {
-                    statsTabContent.classList.add('active');
-                }
-            }
+//            // Устанавливаем активной следующую вкладку (например, "Статистика")
+//            const statsTabButton = document.querySelector('.tabs button[data-tab="stats"]');
+//            if (statsTabButton) {
+//                statsTabButton.classList.add('active');
+//                const statsTabContent = document.getElementById('stats-tab');
+//                if (statsTabContent) {
+//                    statsTabContent.classList.add('active');
+//                }
+//            }
         }
     }
 }
@@ -773,59 +773,257 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-const container = document.getElementById('languages-container');
-const addBtn = document.getElementById('add-language-btn');
+document.getElementById('add-language-btn').addEventListener('click', function () {
+    const container = document.getElementById('languages-container');
+    const availableLanguages = window.appData.availableLanguages;
+    const languageLevels = window.appData.languageLevels;
+    console.log("languageLevels ", languageLevels);
+    // Создаем новую строку
+    const newGroup = document.createElement('div');
+    newGroup.className = 'language-row';
+
+    // Выбор языка
+    const languageSelect = document.createElement('select');
+    languageSelect.name = 'languages';
+    languageSelect.className = 'language-select about-input';
+    availableLanguages.forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang;
+        option.textContent = lang;
+        languageSelect.appendChild(option);
+    });
+
+    // Выбор уровня
+    const levelSelect = document.createElement('select');
+    levelSelect.name = 'languageLevels';
+    levelSelect.className = 'level-select about-input';
+   languageLevels.forEach(level => {
+       const option = document.createElement('option');
+       option.value = level; // Используем саму строку
+       option.textContent = level; // Отображаемая строка
+       levelSelect.appendChild(option);
+   });
+
+
+    // Кнопка удаления
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-language-btn';
+    removeBtn.textContent = '×';
+
+    container.addEventListener('click', function (event) {
+        // Проверяем, что клик был по кнопке удаления
+        if (event.target.classList.contains('remove-language-btn')) {
+            // Находим ближайшую группу языков и удаляем её
+            const languageGroup = event.target.closest('.language-row');
+            if (languageGroup) {
+                container.removeChild(languageGroup);
+            }
+        }
+    });
+
+    // Добавляем элементы в строку
+    newGroup.appendChild(languageSelect);
+    newGroup.appendChild(levelSelect);
+    newGroup.appendChild(removeBtn);
+
+    // Добавляем строку в контейнер
+    container.appendChild(newGroup);
+});
+//
+//
+//
+//document.addEventListener('DOMContentLoaded', function () {
+//    const container = document.getElementById('languages-container');
+//    const availableLanguages = window.appData.availableLanguages;
+//    const languageLevels = window.appData.languageLevels;
+//
+//    const addBtn = document.getElementById('add-language-btn');
+//    addBtn.addEventListener('click', function () {
+//        const newGroup = document.createElement('div');
+//        newGroup.className = 'language-input-group';
+//
+//        // Создаем выпадающий список для языков
+//        const languageSelect = document.createElement('select');
+//        languageSelect.name = 'languages';
+//        languageSelect.className = 'about-input';
+//        languageSelect.innerHTML = `<option value="">Выберите язык</option>`;
+//        availableLanguages.forEach(lang => {
+//            const option = document.createElement('option');
+//            option.value = lang;
+//            option.textContent = lang;
+//            languageSelect.appendChild(option);
+//        });
+//
+//        // Создаем выпадающий список для уровней языка
+//        const levelSelect = document.createElement('select');
+//        levelSelect.name = 'languageLevels';
+//        levelSelect.className = 'about-input';
+//        languageLevels.forEach(level => {
+//            const option = document.createElement('option');
+//            option.value = level;
+//            option.textContent = level.displayName;
+//            levelSelect.appendChild(option);
+//        });
+//
+//        // Кнопка удаления
+//        const removeBtn = document.createElement('button');
+//        removeBtn.type = 'button';
+//        removeBtn.className = 'remove-language-btn';
+//        removeBtn.textContent = '×';
+//        removeBtn.addEventListener('click', function () {
+//            container.removeChild(newGroup);
+//        });
+//
+//        // Добавляем элементы в группу
+//        newGroup.appendChild(languageSelect);
+//        newGroup.appendChild(levelSelect);
+//        newGroup.appendChild(removeBtn);
+//
+//        // Добавляем группу в контейнер
+//        container.appendChild(newGroup);
+//    });
+//});
+
+
+
+//
+//const container = document.getElementById('languages-container');
+//const addBtn = document.getElementById('add-language-btn');
+//
+//
+//addBtn.addEventListener('click', function() {
+//    const container = document.getElementById('languages-container');
+//    const newGroup = document.createElement('div');
+//    newGroup.className = 'language-input-group';
+//    newGroup.innerHTML = `
+//        <select name="languages" class="about-input">
+//            <option value="">Выберите язык</option>
+//            <option th:each="lang : ${availableLanguages}"
+//                    th:value="${lang}"
+//                    th:text="${lang}">
+//            </option>
+//        </select>
+//        <select name="languageLevels" class="about-input">
+//            <option th:each="level : ${T(org.madi.demo.entities.UserLanguage.LanguageLevel).values()}"
+//                    th:value="${level}"
+//                    th:text="${level.displayName}">
+//            </option>
+//        </select>
+//        <button type="button" class="remove-language-btn">×</button>
+//    `;
+//    container.appendChild(newGroup);
+//});
+//
+//// Обработчик для удаления языков
+//document.addEventListener('click', function(e) {
+//    if (e.target.classList.contains('remove-language-btn')) {
+//        e.target.closest('.language-input-group').remove();
+//    }
+//});
 
 // Добавление нового языка
-addBtn.addEventListener('click', function() {
-    const newRow = document.createElement('div');
-    newRow.className = 'language-row';
-    newRow.innerHTML = `
-        <select class="language-select about-input">
-            <option value="Русский">Русский</option>
-            <option value="Английский">Английский</option>
-            <option value="Немецкий">Немецкий</option>
-            <option value="Французский">Французский</option>
-            <option value="Испанский">Испанский</option>
-        </select>
-        <select class="level-select about-input">
-            <option value="родной">родной</option>
-            <option value="продвинутый">продвинутый</option>
-            <option value="средний">средний</option>
-            <option value="начальный">начальный</option>
-        </select>
-        <button class="remove-language-btn" type="button">×</button>
-    `;
-    container.appendChild(newRow);
+//addBtn.addEventListener('click', function() {
+//    // Получаем все уже выбранные языки
+//    const selectedLanguages = Array.from(
+//        document.querySelectorAll('.language-select')
+//    ).map(select => select.value);
+//
+//    // Все доступные языки
+//    const allLanguages = [
+//        'Русский',
+//        'Английский',
+//        'Немецкий',
+//        'Французский',
+//        'Испанский'
+//    ];
+//
+//    // Фильтруем доступные языки (исключая уже выбранные)
+//    const availableLanguages = allLanguages.filter(lang =>
+//        !selectedLanguages.includes(lang)
+//    );
+//
+//    // Если нет доступных языков
+//    if (availableLanguages.length === 0) {
+//        alert('Все языки уже добавлены');
+//        return;
+//    }
+//
+//    // Создаем новую строку
+//    const newRow = document.createElement('div');
+//    newRow.className = 'language-row';
+//    newRow.innerHTML = `
+//        <select name="languages" class="about-input">
+//            <option value="">Выберите язык</option>
+//            <option th:each="lang : ${availableLanguages}"
+//                    th:value="${lang}"
+//                    th:text="${lang}">
+//            </option>
+//        </select>
+//        <select name="languageLevels" class="about-input">
+//            <option th:each="level : ${T(org.madi.demo.entities.UserLanguage.LanguageLevel).values()}"
+//                    th:value="${level}"
+//                    th:text="${level.displayName}">
+//            </option>
+//        </select>
+//        <button type="button" class="remove-language-btn">×</button>
+//    `;
+//
+//    container.appendChild(newRow);
+//
+//    // Включаем выбор уровня после выбора языка
+//    newRow.querySelector('.language-select').addEventListener('change', function() {
+//        const levelSelect = this.closest('.language-row').querySelector('.level-select');
+//        levelSelect.disabled = !this.value;
+//        if (!this.value) {
+//            levelSelect.value = '';
+//        }
+//        updateLanguageSelects();
+//    });
+//
+//    // Обработчик удаления строки
+//    newRow.querySelector('.remove-language-btn').addEventListener('click', function() {
+//        container.removeChild(newRow);
+//        updateLanguageSelects();
+//    });
+//});
 
-    // Добавляем обработчик удаления для новой строки
-    newRow.querySelector('.remove-language-btn').addEventListener('click', function() {
-        container.removeChild(newRow);
+// Функция обновления доступных языков
+function updateLanguageSelects() {
+    const allSelects = document.querySelectorAll('.language-select');
+    const allSelectedLanguages = Array.from(allSelects)
+        .map(select => select.value)
+        .filter(Boolean);
+
+    allSelects.forEach(select => {
+        const currentValue = select.value;
+        Array.from(select.options).forEach(option => {
+            if (option.value === '') return;
+
+            option.disabled = allSelectedLanguages.includes(option.value) &&
+                            option.value !== currentValue;
+        });
     });
-});
 
-// Обработчик удаления для существующих строк
-document.querySelectorAll('.remove-language-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        container.removeChild(btn.closest('.language-row'));
-    });
-});
+    // Показываем/скрываем кнопку добавления
+    const addBtn = document.getElementById('add-language-btn');
+    const allLanguages = ['Русский', 'Английский', 'Немецкий', 'Французский', 'Испанский'];
+    addBtn.disabled = allSelectedLanguages.length >= allLanguages.length;
+}
 
-function getLanguagesData() {
-    const rows = document.querySelectorAll('.language-row');
-    const languages = [];
-
-    rows.forEach(row => {
-        const language = row.querySelector('.language-select').value;
-        const level = row.querySelector('.level-select').value;
-        languages.push({language, level});
-    });
-
-    return languages;
+function getSelectedLanguages() {
+    return Array.from(document.querySelectorAll('.language-select'))
+        .map(select => ({
+            language: select.value,
+            level: select.value ?
+                select.closest('.language-row').querySelector('.level-select').value :
+                null
+        }))
+        .filter(item => item.language); // Фильтруем пустые значения
 }
 
 const editButton = document.getElementById('top-edit-button');
-const cancelButton = document.getElementById('cancel-edit');
+const cancelButton = document.getElementById('cancel-edit-btn');
 const profileForm = document.getElementById('profile-form');
 
 // Обработчик кнопки "Редактировать"
@@ -837,10 +1035,40 @@ editButton.addEventListener('click', function() {
     editButton.style.display = 'none'; // Скрываем кнопку редактирования
 });
 
-//// Обработчик кнопки "Отмена"
-//cancelButton.addEventListener('click', function() {
-//    // Возвращаемся в режим просмотра
-//    document.getElementById('view-mode').style.display = 'block';
-//    document.getElementById('edit-mode').style.display = 'none';
-//    editButton.style.display = 'block'; // Показываем кнопку редактирования
-//});
+// Обработчик кнопки "Отмена"
+cancelButton.addEventListener('click', function() {
+    // Возвращаемся в режим просмотра
+    document.getElementById('about-view-mode').style.display = 'block';
+    document.getElementById('about-edit-mode').style.display = 'none';
+    editButton.style.display = 'block'; // Показываем кнопку редактирования
+});
+
+// Автоматическое добавление @ для Telegram
+document.getElementById('edit-telegram').addEventListener('input', function(e) {
+    if (!this.value.startsWith('@') && this.value.length > 0) {
+        this.value = '@' + this.value.replace(/^@/, '');
+    }
+});
+
+// Проверка Instagram (без @)
+document.getElementById('edit-instagram').addEventListener('input', function(e) {
+    this.value = this.value.replace(/@/g, '').toLowerCase();
+});
+
+// Добавляем tooltips
+document.querySelector('.telegram-icon').setAttribute('data-tooltip', 'Введите ваш @username в Telegram');
+document.querySelector('.instagram-icon').setAttribute('data-tooltip', 'Введите ваш ник Instagram без @, только буквы/цифры');
+
+// Обновление режима просмотра при редактировании
+function updateViewMode() {
+    // Для пола
+    const genderSelect = document.getElementById('edit-gender');
+    document.getElementById('gender-view').textContent =
+        genderSelect.value === 'female' ? 'Женский' :
+        genderSelect.value === 'male' ? 'Мужской' : 'Не указан';
+
+    // Для даты рождения
+    const birthdateInput = document.getElementById('edit-birthdate');
+    document.getElementById('birthdate-view').textContent =
+        birthdateInput.value || 'Не указана';
+}

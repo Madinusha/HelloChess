@@ -11,4 +11,5 @@ public class UserProfilePageDTO {
 	private String email;
 	private String statusDetailed; // "none", "friend", "pending_outgoing", "pending_incoming", "declined"
 	private String creationDate;
+
 }

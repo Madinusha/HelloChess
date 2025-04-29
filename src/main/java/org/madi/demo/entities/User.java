@@ -11,10 +11,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -57,6 +57,41 @@ public class User implements UserDetails {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
+	@Column(columnDefinition = "TEXT")
+	private String bio;
+
+	@Column(name = "birth_date")
+	private LocalDate birthDate;
+
+	@Enumerated(EnumType.STRING)
+	@Column
+	private Gender gender; // enum: MALE, FEMALE
+
+	@Column
+	private String telegram;
+
+	@Column
+	private String instagram;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "rank_id")
+	private Rank rank;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<UserLanguage> languages = new ArrayList<>();
+
+	public void addLanguage(String language, UserLanguage.LanguageLevel level) {
+		UserLanguage userLanguage = new UserLanguage();
+		userLanguage.setUser(this);
+		userLanguage.setLanguage(language);
+		userLanguage.setLevel(level);
+		this.languages.add(userLanguage);
+	}
+
+	public void removeLanguage(String language) {
+		languages.removeIf(lang -> lang.getLanguage().equals(language));
+	}
+
 	public User(String nickname, String email, String password, String role) {
 		this.nickname = nickname;
 		this.email = email;
@@ -96,5 +131,9 @@ public class User implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+
+	public enum Gender {
+		MALE, FEMALE
 	}
 }

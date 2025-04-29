@@ -1,21 +1,30 @@
 package org.madi.demo.controller;
 
+import org.madi.demo.dto.ProfileUpdateDTO;
 import org.madi.demo.dto.UserProfilePageDTO;
+import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
+import org.madi.demo.entities.UserLanguage;
 import org.madi.demo.service.FriendshipService;
+import org.madi.demo.service.RankService;
+import org.madi.demo.service.UserLanguageService;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class MainController {
@@ -57,8 +66,15 @@ public class MainController {
 
 	@Autowired
 	private UserService userService;
+
 	@Autowired
 	private FriendshipService friendshipService;
+
+	@Autowired
+	private RankService rankService;
+
+	@Autowired
+	private UserLanguageService userLanguageService;
 
 	@GetMapping("/profile")
 	public String profile(
@@ -95,9 +111,81 @@ public class MainController {
 		String formattedDate = currentUser.getCreatedAt().format(formatter);
 		profile.setCreationDate(formattedDate);
 
+		List<UserLanguage> userLanguages = userLanguageService.findByUser(requestedUser);
+		model.addAttribute("userLanguages", userLanguages);
+
+		// Получаем все доступные языки для выпадающего списка
+		List<String> availableLanguages = Arrays.asList("Русский", "Английский", "Немецкий", "Французский", "Испанский");
+		model.addAttribute("availableLanguages", availableLanguages);
+		List<String> languageLevels = Arrays.stream(UserLanguage.LanguageLevel.values())
+				.map(UserLanguage.LanguageLevel::getDisplayName)
+				.toList();
+		model.addAttribute("languageLevels", languageLevels);
+
+		model.addAttribute("user", requestedUser);
 		model.addAttribute("profile", profile);
 		model.addAttribute("isMyProfile", isMyProfile);
+		model.addAttribute("allRanks", rankService.getAllRanksSorted());
+
+		ProfileUpdateDTO profileUpdateDTO = new ProfileUpdateDTO();
+		profileUpdateDTO.setBio(requestedUser.getBio());
+		profileUpdateDTO.setBirthDate(requestedUser.getBirthDate());
+		profileUpdateDTO.setGender(requestedUser.getGender() != null ? requestedUser.getGender().name() : null);
+		profileUpdateDTO.setRankId(requestedUser.getRank() != null ? requestedUser.getRank().getId() : null);
+		profileUpdateDTO.setTelegram(requestedUser.getTelegram());
+		profileUpdateDTO.setInstagram(requestedUser.getInstagram());
+		profileUpdateDTO.setLanguages(userLanguages.stream()
+				.map(UserLanguage::getLanguage)
+				.toList());
+		profileUpdateDTO.setLanguageLevels(
+				userLanguages.stream()
+						.map(userLang -> userLang.getLevel().getDisplayName()) // Получаем displayName уровня
+						.toList()
+		);
+
+		model.addAttribute("profileUpdateDTO", profileUpdateDTO);
 
 		return "pages/profile";
+	}
+
+	@PostMapping("/profile/update")
+	public String updateProfile(
+			@ModelAttribute ProfileUpdateDTO updateDTO,
+			Principal principal,
+			RedirectAttributes redirectAttributes) {
+
+		User user = userService.findUserByNickname(principal.getName());
+
+		// Обновляем основные поля
+		user.setBio(updateDTO.getBio());
+		user.setBirthDate(updateDTO.getBirthDate());
+		user.setGender(User.Gender.valueOf(updateDTO.getGender()));
+		user.setTelegram(updateDTO.getTelegram());
+		user.setInstagram(updateDTO.getInstagram());
+
+		// Обновляем разряд
+		if (updateDTO.getRankId() != null) {
+			Rank rank = rankService.findById(updateDTO.getRankId());
+			user.setRank(rank);
+		} else {
+			user.setRank(null);
+		}
+
+		// Обновляем языки
+		List<UserLanguage.LanguageLevel> levels = updateDTO.getLanguageLevels().stream()
+				.map(UserLanguage.LanguageLevel::fromDisplayName)
+				.toList();
+
+		// Обновляем языки
+		userLanguageService.updateUserLanguages(
+				user,
+				updateDTO.getLanguages(),
+				levels
+		);
+
+		userService.saveUser(user);
+
+		redirectAttributes.addFlashAttribute("success", "Профиль успешно обновлен");
+		return "redirect:/profile?nickname=" + user.getNickname();
 	}
 }

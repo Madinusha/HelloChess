@@ -62,95 +62,170 @@
             <div id="about-view-mode" class="about-container">
                 <div class="about-section">
                     <h3 class="about-title">Био:</h3>
-                    <p id="bio-content" class="about-content">Нет информации</p>
+                    <p id="bio-content" class="about-content" th:text="${user.bio ?: 'Я люблю HelloChess! <3'}"></p>
                 </div>
 
                 <div class="about-section">
-                    <h3 class="about-title">Хобби и интересы:</h3>
-                    <p id="hobbies-content" class="about-content">Нет информации</p>
+                    <h3 class="about-title">Дата рождения:</h3>
+                    <p id="birthdate-view" th:text="${user.birthDate ?: 'Не указана'}"></p>
                 </div>
 
                 <div class="about-section">
                     <h3 class="about-title">Разряд:</h3>
-                    <p id="rank-content" class="about-content">Не указан</p>
+                    <p id="rank-content" class="about-content"
+                       th:text="${user.rank?.fullName ?: 'Не указан'}"></p>
+                </div>
+
+                <div class="about-section">
+                    <h3 class="about-title">Пол:</h3>
+                    <p id="gender-view" th:text="${user.gender ?: 'Не указан'}"></p>
                 </div>
 
                 <div class="about-section">
                     <h3 class="about-title">Языки:</h3>
                     <ul id="languages-list" class="about-list">
-                        <li>Русский - родной</li>
-                        <!-- Другие языки будут добавляться динамически -->
+                        <li th:if="${userLanguages.empty}">Русский - родной</li>
+                        <li th:each="lang : ${userLanguages}"
+                            th:text="${lang.language} + ' - ' + ${lang.level?.displayName}">
+                        </li>
                     </ul>
                 </div>
 
                 <div class="about-section">
                     <h3 class="about-title">Контакты:</h3>
                     <ul id="contacts-list" class="about-list">
-                        <li>Телеграм: не указан</li>
-                        <li>Instagram: не указан</li>
+                        <li>
+                            <span class="social-icon telegram-icon"></span>
+                            Telegram: <span th:text="${user.telegram} ?: 'не указан'"></span>
+                        </li>
+                        <li>
+                            <span class="social-icon instagram-icon"></span>
+                            Instagram: <span th:text="${user.instagram} ?: 'не указан'"></span>
+                        </li>
                     </ul>
                 </div>
             </div>
 
+
+
             <!-- Режим редактирования (изначально скрыт) -->
             <div id="about-edit-mode" class="about-container" style="display: none;">
-                <form id="about-form">
+                <form id="about-form" th:action="@{/profile/update}" method="post" th:object="${profileUpdateDTO}">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+
+                    <!-- Био -->
                     <div class="about-section">
                         <label class="about-label">Био:</label>
-                        <textarea id="edit-bio" class="about-input" rows="3"></textarea>
+                        <textarea name="bio" class="about-input" rows="3" th:field="*{bio}"></textarea>
                     </div>
 
+                    <!-- Дата рождения -->
                     <div class="about-section">
-                        <label class="about-label">Хобби и интересы:</label>
-                        <textarea id="edit-hobbies" class="about-input" rows="2"></textarea>
+                        <label class="about-label">Дата рождения:</label>
+                        <input type="date" id="edit-birthdate" name="birthDate" class="about-input" th:field="*{birthDate}">
                     </div>
 
+                    <!-- Разряд -->
                     <div class="about-section">
                         <label class="about-label">Разряд:</label>
-                        <select id="edit-rank" class="about-input">
-                            <option value="">Выберите разряд</option>
-                            <option value="Без разряда">Без разряда</option>
-                            <option value="3-й разряд">3-й разряд</option>
-                            <option value="2-й разряд">2-й разряд</option>
-                            <option value="1-й разряд">1-й разряд</option>
-                            <option value="КМС">Кандидат в мастера спорта (КМС)</option>
-                            <option value="МС">Мастер спорта (МС)</option>
-                            <option value="Гроссмейстер">Гроссмейстер</option>
+                        <select name="rankId" id="edit-rank" class="about-input" th:field="*{rankId}">
+                            <option value="">-- Без разряда --</option>
+                            <option th:each="rank : ${allRanks}"
+                                    th:value="${rank.id}"
+                                    th:text="${rank.fullName}">
+                            </option>
                         </select>
                     </div>
 
                     <div class="about-section">
+                        <label class="about-label">Пол:</label>
+                        <select name="gender" class="about-input" th:field="*{gender}">
+                            <option value="">-- Не указан --</option>
+                            <option value="MALE">Мужской</option>
+                            <option value="FEMALE">Женский</option>
+                        </select>
+                    </div>
+
+                    <!-- Языки -->
+                    <script type="text/javascript" th:inline="javascript">
+                        window.appData = {
+                            availableLanguages: /*[[${availableLanguages}]]*/,
+                            languageLevels: /*[[${languageLevels}]]*/
+                        };
+                    </script>
+
+                    <div class="about-section">
                         <label class="about-label">Языки:</label>
                         <div id="languages-container">
-                            <div class="language-row">
-                                <select class="language-select about-input">
-                                    <option value="Русский">Русский</option>
-                                    <option value="Английский">Английский</option>
-                                    <option value="Немецкий">Немецкий</option>
-                                    <option value="Французский">Французский</option>
-                                    <option value="Испанский">Испанский</option>
+                            <!-- Каждый язык будет отображаться в своей строке -->
+                            <div th:each="lang, iter : ${userLanguages}" class="language-row">
+                                <select name="languages" class="language-select about-input">
+                                    <option th:each="availLang : ${availableLanguages}"
+                                            th:value="${availLang}"
+                                            th:text="${availLang}"
+                                            th:selected="${lang.language == availLang}">
+                                    </option>
                                 </select>
-                                <select class="level-select about-input">
-                                    <option value="родной">родной</option>
-                                    <option value="начальный">начальный</option>
-                                    <option value="средний">средний</option>
-                                    <option value="продвинутый">продвинутый</option>
+                                <select name="languageLevels" class="level-select about-input">
+                                    <option th:each="level : ${T(org.madi.demo.entities.UserLanguage.LanguageLevel).values()}"
+                                            th:value="${level}"
+                                            th:text="${level.displayName}"
+                                            th:selected="${lang.level == level}">
+                                    </option>
                                 </select>
-                                <button class="remove-language-btn" type="button">×</button>
+                                <button type="button" class="remove-language-btn">×</button>
                             </div>
                         </div>
+                        <!-- Кнопка добавления нового языка -->
                         <button id="add-language-btn" class="add-button" type="button">+ Добавить язык</button>
                     </div>
 
+<!--                    <div class="about-section">-->
+<!--                        <label class="about-label">Языки:</label>-->
+<!--                        <div id="languages-container">-->
+<!--                            <div th:each="lang, iter : ${userLanguages}" class="language-input-group">-->
+<!--                                <select name="languages" class="about-input">-->
+<!--                                    <option th:each="availLang : ${availableLanguages}"-->
+<!--                                            th:value="${availLang}"-->
+<!--                                            th:text="${availLang}"-->
+<!--                                            th:selected="${lang.language == availLang}">-->
+<!--                                    </option>-->
+<!--                                </select>-->
+<!--                                <select name="languageLevels" class="about-input">-->
+<!--                                    <option th:each="level : ${T(org.madi.demo.entities.UserLanguage.LanguageLevel).values()}"-->
+<!--                                            th:value="${level}"-->
+<!--                                            th:text="${level.displayName}"-->
+<!--                                            th:selected="${lang.level == level}">-->
+<!--                                    </option>-->
+<!--                                </select>-->
+<!--                                <button type="button" class="remove-language-btn">×</button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <button id="add-language-btn" class="add-button" type="button">+ Добавить язык</button>-->
+<!--                    </div>-->
+
+                    <!-- Контакты -->
                     <div class="about-section">
                         <label class="about-label">Контакты:</label>
+
                         <div class="contact-input-group">
-                            <span>Телеграм:</span>
-                            <input type="text" id="edit-telegram" class="about-input">
+                            <div class="social-input">
+                                <span class="social-icon telegram-icon"></span>
+                                <input type="text" id="edit-telegram" class="about-input" name="telegram" th:value="${user.telegram}"
+                                       placeholder="@username"
+                                       pattern="^@[A-Za-z0-9_]{5,32}$"
+                                       title="Введите Telegram в формате @username">
+                            </div>
                         </div>
+
                         <div class="contact-input-group">
-                            <span>Instagram:</span>
-                            <input type="text" id="edit-instagram" class="about-input">
+                            <div class="social-input">
+                                <span class="social-icon instagram-icon"></span>
+                                <input type="text" id="edit-instagram" class="about-input" name="instagram" th:value="${user.instagram}"
+                                       placeholder="username"
+                                       pattern="^[A-Za-z][A-Za-z0-9_.]{1,30}$"
+                                       title="Введите Instagram без @ и спецсимволов">
+                            </div>
                         </div>
                     </div>
 
