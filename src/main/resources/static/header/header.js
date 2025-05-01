@@ -5,20 +5,6 @@ window.currentUser = {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
-    const profileBox = document.getElementById('profile-box');
-    const dropdownNavbar = document.getElementById('dropdown-navbar');
-
-    profileBox.addEventListener('click', () => {
-        dropdownNavbar.classList.toggle('show');
-        profileBox.classList.toggle('active');
-    });
-
-    // Закрытие навбара при клике вне его области
-    document.addEventListener('click', (event) => {
-        if (!profileBox.contains(event.target) && !dropdownNavbar.contains(event.target)) {
-            dropdownNavbar.classList.remove('show');
-        }
-    });
     checkUserProfile();
 });
 

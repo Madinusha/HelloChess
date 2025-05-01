@@ -54,14 +54,14 @@ public class MainController {
 		return "pages/registration";
 	}
 
-//	@GetMapping("/profile")
-//	public String profile() {
-//		return "pages/profile";
-//	}
-
 	@GetMapping("/gameConstructor")
 	public String gameConstructor() {
 		return "pages/gameConstructor";
+	}
+
+	@GetMapping("/education")
+	public String education() {
+		return "pages/education";
 	}
 
 	@Autowired

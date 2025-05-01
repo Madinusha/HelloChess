@@ -1,8 +1,10 @@
 package org.madi.demo.controller;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.Data;
 import org.madi.demo.dto.*;
 import org.madi.demo.entities.User;
 import org.madi.demo.service.FriendshipService;
@@ -22,6 +24,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
@@ -105,6 +108,41 @@ public class UserController {
 		return ResponseEntity.ok()
 				.cacheControl(CacheControl.noStore()) // Основной случай успешного ответа
 				.body(new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating()));
+	}
+
+	@PostMapping("/logout")
+	public String logout(HttpServletRequest request) throws ServletException {
+		request.logout();
+		return "redirect:/registration";
+	}
+
+	@PostMapping("/delete")
+	public ResponseEntity<?> deleteAccount(
+			@RequestBody DeleteAccountRequest request,
+			Principal principal,
+			HttpServletRequest servletRequest
+	) {
+		User user = userService.findUserByNickname(principal.getName());
+		if (user == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Пользователь не авторизован");
+		}
+
+		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный пароль");
+		}
+		userService.deleteUser(user);
+		try {
+			servletRequest.logout();
+		} catch (ServletException e) {
+			System.err.println("Error during logout: " + e.getMessage());
+		}
+
+		return ResponseEntity.ok().build();
+	}
+
+	@Data
+	private static class DeleteAccountRequest {
+		private String password;
 	}
 
 	@GetMapping("/{nickname}")

@@ -185,10 +185,95 @@ body {
     width: 1.5em;
     height: 1.5em;
     background: url('../images/dropdown-navbar-settings.png') no-repeat center;
+    filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
     background-size: contain;
     border: none;
     cursor: pointer;
     padding: 0;
+}
+
+#dropdown-navbar {
+    width: 15vw;
+    font-size: 0.8em;
+    visibility: hidden;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
+    border-radius: 0.3em;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.2s ease-in-out, visibility 0s linear 0.3s;
+    overflow: hidden;
+    cursor: pointer;
+}
+#dropdown-navbar.show {
+    visibility: visible;
+    transform: translateX(0);
+    transition-delay: 0s;
+}
+
+.dropdown-navbar-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding: 0.5em;
+}
+.dropdown-navbar-menu-item:hover {
+    background-color: var(--carrot-red);
+}
+.dropdown-navbar-menu-item:hover a{
+    color: white;
+}
+.dropdown-navbar-menu-item:hover img{
+    filter: brightness(0) invert(1);
+}
+.dropdown-navbar-menu-item a {
+    text-decoration: none;
+    color: var(--dark-purple);
+    font-family: 'TeXGyreHeros', sans-serif;
+}
+.dropdown-navbar-menu-item img {
+    height: 1.5em;
+    aspect-ratio: 1 / 1;
+    filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
+    margin-right: 0.4em;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.modal-hidden {
     display: none;
 }
 

@@ -42,7 +42,32 @@
                 <div class="create-date" id="create-data">
                     Дата создания: <span id="cd-date" th:text="${profile.creationDate}"></span>
                 </div>
-                <button class="settings-button"></button>
+
+                <button id="settings-button" class="settings-button"></button>
+                <div id="dropdown-navbar" class="hidden">
+                    <div id="logout-btn" class="dropdown-navbar-menu-item logout-btn">
+                        <img th:src="@{/static/images/dropdown-navbar-exit.png}">
+                        <a>Выйти</a>
+                    </div>
+                    <div id="delete-account-btn" class="dropdown-navbar-menu-item delete-account-btn">
+                        <img th:src="@{/static/images/times.png}">
+                        <a>Удалить аккаунт</a>
+                    </div>
+                </div>
+
+                <div id="confirmDeleteModal" class="modal modal-hidden">
+                    <div class="modal-content">
+                        <h3>Подтвердите удаление аккаунта</h3>
+                        <p>Это действие необратимо. Введите ваш пароль для подтверждения:</p>
+                        <input type="password" id="passwordConfirm" placeholder="Ваш пароль">
+                        <div class="modal-actions">
+                            <button id="confirmDeleteBtn">Удалить</button>
+                            <button id="cancelDeleteBtn">Отмена</button>
+                        </div>
+                        <p id="deleteError" class="error-message hidden"></p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
