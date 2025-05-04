@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study with HC</title>
+    <title>Study HelloChess</title>
     <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <link rel="stylesheet" th:href="@{/static/education/education.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
@@ -12,17 +12,68 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 
-<div class="main">
+<div class="main" >
+    <div id="profile-data"
+         th:attr="data-isAdmin=${isAdmin}">
+    </div>
+    <div id="education-data"
+         th:attr="
+        data-isAdmin=${isAdmin ? 'true' : 'false'},
+        data-piece-lessons=${#strings.listJoin(pieceLessonsJson, ',')},
+        data-tactics-lessons=${#strings.listJoin(tacticsLessonsJson, ',')},
+        data-advanced-lessons=${#strings.listJoin(advancedLessonsJson, ',')}
+    ">
+    </div>
+
     <nav class="e-navbar">
         <ul class="e-navbar-list">
-            <li class="e-navbar-item"><a href="#piece" class="e-navbar-link">Фигуры</a></li>
-            <li class="e-navbar-item"><a href="#techniques" class="e-navbar-link">Приемы</a></li>
-            <li class="e-navbar-item"><a href="#tasks" class="e-navbar-link">Задачи</a></li>
+            <li class="e-navbar-item"><a href="#PIECE_TECHNIQUE" class="e-navbar-link">Фигуры</a></li>
+            <li class="e-navbar-item"><a href="#TACTICS" class="e-navbar-link">Приемы</a></li>
+            <li class="e-navbar-item"><a href="#ADVANCED_LEVEL" class="e-navbar-link">Повышенный уровень</a></li>
+            <li class="e-navbar-item"><a href="#" class="e-navbar-link">Задачи</a></li>
+
+            <li class="e-navbar-item" th:if="${isAdmin}" id="toggleEditMode">Режим редактирования</li>
         </ul>
     </nav>
-    <div class="lessons"></div>
+
+    <div class="lessons">
+        <h1 class="course-title">Шахматные фигуры</h1>
+        <div id="PIECE_TECHNIQUE" class="lesson-container"></div>
+        <h1 class="course-title">Шахматные приемы</h1>
+        <div id="TACTICS" class="lesson-container"></div>
+        <h1 class="course-title">Повышенный уровень</h1>
+        <div id="ADVANCED_LEVEL" class="lesson-container"></div>
+    </div>
 </div>
 
+<div class="modal-overlay" id="addLessonModal" style="display: none;">
+    <div class="modal-content">
+        <h3 id="modal-title">Добавить новый урок</h3>
+        <input type="hidden" id="editLessonId" value="">
+
+        <div class="form-group">
+            <label for="lessonTitle">Название урока:</label>
+            <input type="text" id="lessonTitle" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="lessonDescription">Краткое описание:</label>
+            <textarea id="lessonDescription" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Выберите изображение:</label>
+            <div id="imageGallery" class="image-gallery">
+            </div>
+            <input type="hidden" id="selectedImage" name="image" />
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" id="cancelAddLesson">Отменить</button>
+            <button class="save-btn" id="saveLesson">Сохранить</button>
+        </div>
+    </div>
+</div>
 <script>
     function goBack() {
       window.history.back();

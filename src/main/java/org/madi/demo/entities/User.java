@@ -80,6 +80,12 @@ public class User implements UserDetails {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<UserLanguage> languages = new ArrayList<>();
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserLessonProgress> lessonProgresses = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserTaskProgress> taskProgresses = new ArrayList<>();
+
 	public void addLanguage(String language, UserLanguage.LanguageLevel level) {
 		UserLanguage userLanguage = new UserLanguage();
 		userLanguage.setUser(this);

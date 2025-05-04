@@ -1,15 +1,15 @@
 package org.madi.demo.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.dto.ProfileUpdateDTO;
 import org.madi.demo.dto.UserProfilePageDTO;
 import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
-import org.madi.demo.service.FriendshipService;
-import org.madi.demo.service.RankService;
-import org.madi.demo.service.UserLanguageService;
-import org.madi.demo.service.UserService;
+import org.madi.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
@@ -26,9 +27,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.madi.demo.entities.Lesson.LessonType.*;
+
 @Controller
 public class MainController {
 
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private FriendshipService friendshipService;
+
+	@Autowired
+	private RankService rankService;
+
+	@Autowired
+	private UserLanguageService userLanguageService;
+
+	@Autowired
+	private LessonService lessonService;
+
+	private final ObjectMapper objectMapper;
+
+	public MainController(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
 
 	@GetMapping("/")
 	public String index() {
@@ -60,21 +83,28 @@ public class MainController {
 	}
 
 	@GetMapping("/education")
-	public String education() {
+	public String education(Model model, Authentication authentication) throws JsonProcessingException {
+		boolean isAdmin = false;
+
+		if (authentication != null && authentication.isAuthenticated()) {
+			isAdmin = authentication.getAuthorities().stream()
+					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		}
+
+		model.addAttribute("isAdmin", isAdmin);
+		List<LessonDTO> piece = lessonService.getLessonsByType(PIECE_TECHNIQUE);
+		List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
+		List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
+		for (var lesson : piece) {
+			System.out.println("lesson есть " + lesson.getTitle());
+			System.out.println("json " + objectMapper.writeValueAsString(piece));
+		}
+
+		model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
+		model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
+		model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
 		return "pages/education";
 	}
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private FriendshipService friendshipService;
-
-	@Autowired
-	private RankService rankService;
-
-	@Autowired
-	private UserLanguageService userLanguageService;
 
 	@GetMapping("/profile")
 	public String profile(
