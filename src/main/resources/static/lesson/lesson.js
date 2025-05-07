@@ -6,6 +6,10 @@ let currentMoveSide = 'white';
 let chessboard = {};
 let editorChessboard = {};
 let editorMoveHistory = []; // Массив для хранения истории ходов в формате ["e2-e4", "e7-e5"]
+let taskMoveHistory = []; // История ходов пользователя
+let taskInitialPosition = [];
+let currentTask = null; // Текущая задача
+let taskRatings = [ 3, 2, 1];
 
 const chessSymbols = {
     "King": { "white": "♔", "black": "♚" },
@@ -167,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             deleteTask.addEventListener('click', function() {
-                const selectedItem = document.querySelector('.task-item.selected');
+                const selectedItem = document.querySelector('.task-item.selected-task');
                 if (!selectedItem) {
                     alert('Выберите задачу для удаления');
                     return;
@@ -225,11 +229,10 @@ function loadTasks() {
         item.className = 'task-item';
         item.textContent = `${task.order}`;
         item.dataset.taskId = task.id;
+        item.dataset.taskOrder = task.order;
 
         item.addEventListener('click', function () {
-            document.querySelectorAll('.task-item').forEach(el => el.classList.remove('selected-task'));
             renderTask(task);
-            item.classList.add('selected-task');
         });
 
         container.appendChild(item);
@@ -246,17 +249,217 @@ function loadTasks() {
 }
 
 function renderTask(task) {
+    currentTask = task;
+    taskMoveHistory = [];
+    taskInitialPosition = deepCopy(currentTask.chessData.initialFen)
     const descriptionElement = document.getElementById('t-description');
     if (descriptionElement) {
         descriptionElement.textContent = task.description || 'Нет описания';
     }
 
     if (task.chessData && task.chessData.initialFen) {
-        chessboard = task.chessData.initialFen;
-        renderChessboard(task.chessData.initialFen, true, false);
+        chessboard = deepCopy(task.chessData.initialFen);
+        renderChessboard(chessboard, true, false);
     } else {
         console.warn("Нет данных для отрисовки доски");
     }
+    document.querySelectorAll('.task-item').forEach(el => {
+        const isSelected = parseInt(el.dataset.taskOrder, 10) === parseInt(task.order, 10);
+        el.classList.toggle('selected-task', isSelected);
+    });
+}
+
+function checkTaskCompletion() {
+    if (!currentTask || !currentTask.chessData || !currentTask.chessData.initialFen) {
+        console.warn("Нет данных для проверки задачи");
+        return;
+    }
+
+    const solutionMoves = currentTask.chessData.solutionMoves || [];
+    console.log("taskInitialPosition\n ", taskInitialPosition);
+    // Проверяем, есть ли пончики в начальной позиции
+    const hasDonuts = Object.values(taskInitialPosition).some(piece => piece.fileName === 'Donut');
+    console.log("изначально были пончики? hasDonuts ", hasDonuts);
+
+    const descriptionBox = document.getElementById('t-description');
+    if (!descriptionBox) return;
+
+
+    if (hasDonuts) {
+        // Проверка: все ли пончики съедены
+        const hasRemainingDonuts = Object.values(chessboard).some(piece => piece.fileName === 'Donut');
+        console.log("Сейчас есть пончики? hasRemainingDonuts ", hasRemainingDonuts);
+        if (!hasRemainingDonuts) {
+            // Задача выполнена: подсчёт звёзд
+            const moveCount = taskMoveHistory.length;
+            const solutionLength = solutionMoves.length;
+            console.log("moveCount ", moveCount);
+            let stars = 1;
+            let goods = 'В следующий раз получится лучше!';
+            if (moveCount <= solutionLength) {
+                stars = 3;
+                goods = 'Ты супер!';
+            } else if (moveCount <= solutionLength + 2) {
+                stars = 2;
+                goods = 'Очень хорошо!';
+            }
+            descriptionBox.textContent = goods;
+            console.log(`Задача выполнена! Оценка: ${stars} звезд(ы)`);
+            taskMoveHistory = null;
+            completeTask(stars, currentTask);
+            return;
+        }
+        descriptionBox.textContent = "Ага, дальше";
+    } else {
+          // Проверка: совпадает ли начало последовательности ходов с решением
+          const matchesSolution = solutionMoves.every((move, i) => taskMoveHistory[i] === move);
+
+          if (matchesSolution && taskMoveHistory.length >= solutionMoves.length) {
+              // Задача выполнена успешно
+              console.log("Задача выполнена! Оценка: 3 звезды");
+              descriptionBox.textContent = "Молодец!";
+              completeTask(3, currentTask);
+
+              // Можно добавить кнопку "еще раз" или другую логику
+          } else if (matchesSolution && taskMoveHistory.length < solutionMoves.length) {
+              // Пользователь на правильном пути, но еще не завершил задачу
+              console.log("Продолжайте: текущие ходы совпадают с решением");
+              descriptionBox.textContent = "Круто! Продолжай";
+          } else {
+              // Ошибка: последовательность не совпадает
+              console.log("Ошибка: последовательность ходов не совпадает с решением");
+
+              descriptionBox.textContent = "Кажется, не то... Попробуй снова";
+              descriptionBox.classList.add('wrong-answer');
+              // Создаём кнопку "еще раз"
+              const retryButton = document.createElement('button');
+              retryButton.textContent = "Еще раз";
+              retryButton.classList.add('task-retry');
+              retryButton.onclick = () => {
+                  taskMoveHistory = [];
+                  if (retryButton.parentElement) {
+                      retryButton.parentElement.removeChild(retryButton);
+                  }
+                  descriptionBox.classList.remove('wrong-answer');
+                  renderTask(currentTask);
+              };
+
+              descriptionBox.appendChild(retryButton);
+
+              // Блокируем дальнейшие ходы
+              taskMoveHistory = null;
+          }
+    }
+}
+
+function completeTask(stars, task) {
+    const taskContainer = document.getElementById('taskContainer');
+    const taskElements = taskContainer.querySelectorAll('.task-item');
+
+    const educationData = document.getElementById('education-data');
+    const tasksJson = educationData?.getAttribute('data-tasks');
+
+    let tasks = [];
+
+    try {
+        tasks = tasksJson ? JSON.parse(tasksJson) : [];
+    } catch (error) {
+        console.error("Ошибка парсинга JSON:", error);
+        tasks = [];
+    }
+
+
+
+    // Получаем ID пользователя из данных страницы
+    const userId = document.getElementById('user-profile')?.dataset.userId;
+    const taskId = task.id;
+
+    if (userId && taskId) {
+        // Отправляем прогресс на сервер
+        fetch(`/api/progress/task?userId=${userId}&taskId=${taskId}&stars=${stars}`, {
+            method: 'POST',
+            headers: {
+                [csrfHeader]: csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Не удалось сохранить прогресс');
+            }
+            console.log('Прогресс успешно сохранен');
+        })
+        .catch(error => {
+            console.error('Ошибка сохранения прогресса:', error);
+            alert('Не удалось сохранить прогресс. Проверьте соединение.');
+        });
+    }
+
+
+
+    if (taskElements[task.order - 1]) {
+        taskElements[task.order - 1].classList.add('done');
+        taskRatings.push(stars);
+    }
+
+    setTimeout(() => {
+        if (task.order - 1 < taskElements.length - 1) {
+            renderTask(tasks[task.order]);
+        } else {
+            showLessonCompletionModal();
+        }
+
+    }, 1300);
+}
+
+function showLessonCompletionModal() {
+    const overlay = document.createElement('div');
+    overlay.style = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style = `
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    `;
+
+    const totalStars = taskRatings.reduce((sum, rating) => sum + rating, 0);
+    const averageRating = (totalStars / taskRatings.length).toFixed(2);
+
+    // Переводим в 5-балльную систему (3 звезды = 5 баллов)
+    const fiveStarRating = ((averageRating / 3) * 5).toFixed(2);
+
+    modal.innerHTML = `
+        <h2>🎉 Поздравляем!</h2>
+        <p>Вы успешно освоили урок!</p>
+        <p>Средний балл: <strong>${fiveStarRating}</strong> из 5</p>
+        <button id="returnToLessonsBtn" style="
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #8585b7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        ">Вернуться в меню уроков</button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    document.getElementById('returnToLessonsBtn').addEventListener('click', () => {
+        window.location.href = '/education';
+    });
 }
 
 function getInitialPosition() {
@@ -343,6 +546,7 @@ function makeMove(selectedSquareId, squareId) {
 
     updateChessboard(localChessboard, fromPosition, toPosition);
 
+    checkTaskCompletion();
 }
 
 async function fetchPossibleMoves(position) {
@@ -395,6 +599,7 @@ function hideValidMove() {
 function addMoveToBox(fromPosition, toPosition) {
     const moveNotation = `${fromPosition.replace('editor-', '')}-${toPosition.replace('editor-', '')}`;
     editorMoveHistory.push(moveNotation);
+    taskMoveHistory.push(moveNotation);
 
     const moveBox = document.getElementById('move-box-window');
     const moveNumbers = document.getElementById('move-numbers');
@@ -424,9 +629,6 @@ function clearMoveHistory() {
 }
 
 function showValidMovesFor(position, possibleMoves) {
-//    console.log('Received position:', position);
-//    console.log('Possible moves:', possibleMoves);
-
     let localChessboard;
     if (editMode) {
         localChessboard = editorChessboard;
@@ -503,6 +705,7 @@ function renderChessboard(chessboard, isFlipped = false, editBoard = false) {
                 // Явно задаем путь к пончику
                 if (piece.fileName === 'Donut') {
                     img.src = '/static/images/Donut.png';
+                    img.classList.add('donut');
                 } else {
                     img.src = `/static/images/${piece.color}/${piece.fileName}.png`;
                 }

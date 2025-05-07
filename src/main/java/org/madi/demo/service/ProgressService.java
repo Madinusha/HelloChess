@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.madi.demo.entities.*;
 import org.madi.demo.repository.*;
 import org.springframework.stereotype.Service;
@@ -13,27 +14,22 @@ public class ProgressService {
 
 	private final UserLessonProgressRepository lessonProgressRepository;
 	private final UserTaskProgressRepository taskProgressRepository;
+	private final LessonRepository lessonRepository;
 
 	public ProgressService(
 			UserLessonProgressRepository lessonProgressRepo,
-			UserTaskProgressRepository taskProgressRepo
+			UserTaskProgressRepository taskProgressRepo, LessonRepository lessonRepository
 	) {
 		this.lessonProgressRepository = lessonProgressRepo;
 		this.taskProgressRepository = taskProgressRepo;
+		this.lessonRepository = lessonRepository;
 	}
 
-	/**
-	 * Обновляет прогресс пользователя по задаче и связанному уроку
-	 * @param user Пользователь
-	 * @param task Задача
-	 * @param stars Количество звезд за задачу (0-3)
-	 */
 	@Transactional
 	public void updateTaskProgress(User user, Task task, int stars) {
-		// Ограничиваем звезды диапазоном 0-3
 		stars = Math.max(0, Math.min(3, stars));
 
-		// Получаем или создаем прогресс по задаче
+		// 1. Обновляем прогресс по задаче
 		UserTaskProgress taskProgress = taskProgressRepository.findByUserAndTask(user, task)
 				.orElseGet(UserTaskProgress::new);
 
@@ -42,18 +38,31 @@ public class ProgressService {
 		taskProgress.setStars(stars);
 		taskProgressRepository.save(taskProgress);
 
-		// Обновляем прогресс урока
-		Lesson lesson = task.getLesson();
+		// 2. Загружаем урок вместе с задачами (JOIN FETCH)
+		Lesson lesson = lessonRepository.findByIdWithTasks(task.getLesson().getId())
+				.orElseThrow(() -> new EntityNotFoundException("Lesson not found"));
+
+		// 3. Обновляем прогресс урока
 		UserLessonProgress lessonProgress = lessonProgressRepository.findByUserAndLesson(user, lesson)
 				.orElseGet(UserLessonProgress::new);
 
-		// Обновляем количество выполненных задач
-		if (taskProgress.getStars() > 0 && (taskProgress.getStars() - taskProgress.getStars()) > 0) {
+		// 4. Пересчитываем количество выполненных задач
+		if (stars > 0 && (taskProgress.getStars() == 0 || taskProgress.getStars() < stars)) {
 			lessonProgress.setCompletedTasksCount(lessonProgress.getCompletedTasksCount() + 1);
 		}
 
-		// Пересчитываем общее количество звезд в уроке
-		int totalStars = taskProgressRepository.findByUserAndTaskIn(user, lesson.getTasks())
+
+		// 5. Пересчитываем общее количество звезд по всем задачам урока
+		List<Task> tasksInLesson = lesson.getTasks();
+
+		List<UserTaskProgress> userTaskProgresses = taskProgressRepository.findByUserAndTaskIn(user, tasksInLesson);
+		int completedTasks = (int) userTaskProgresses.stream()
+				.filter(p -> p.getStars() > 0)
+				.count();
+
+		lessonProgress.setCompletedTasksCount(completedTasks);
+
+		int totalStars = taskProgressRepository.findByUserAndTaskIn(user, tasksInLesson)
 				.stream()
 				.mapToInt(UserTaskProgress::getStars)
 				.sum();

@@ -22,6 +22,7 @@
         data-current-lesson-json=${currentLessonJson}
     ">
     </div>
+    <div id="user-profile" th:attr="data-user-id=${userId}" style="display: none;"></div>
 
     <audio id="moveSound" th:src="@{/static/sounds/movePiece.wav}"></audio>
     <audio id="eatSound" th:src="@{/static/sounds/eatPiece.wav}"></audio>
@@ -85,10 +86,10 @@
             <!-- Шаг 1 -->
             <div id="step1-controls" class="controls-wrapper">
                 <div class="control-group">
-                    <label>Ход:</label>
+<!--                    <label>Ход:</label>-->
                     <select id="move-side">
-                        <option value="white">Белые</option>
-                        <option value="black">Чёрные</option>
+                        <option value="white">Ходить за белых</option>
+                        <option value="black">Ходить за чёрных</option>
                     </select>
                 </div>
 

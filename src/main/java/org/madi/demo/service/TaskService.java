@@ -61,6 +61,9 @@ public class TaskService {
 		}
 
 		Task savedTask = taskRepository.save(task);
+
+		lesson.setTaskCount(lesson.getTaskCount() + 1);
+		lessonRepository.save(lesson);
 		return convertToDto(savedTask);
 	}
 

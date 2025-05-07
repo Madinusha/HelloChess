@@ -107,12 +107,16 @@ public class MainController {
 			Model model,
 			Authentication authentication
 	) throws JsonProcessingException {
-		// Проверка прав администратора
+		User user = null;
+		if (authentication != null && authentication.isAuthenticated()) {
+			user = (User) authentication.getPrincipal();
+		}
+
 		boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
 				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 		model.addAttribute("isAdmin", isAdmin);
 
-		// Получаем данные урока
+
 		LessonDTO lesson = lessonService.getLessonById(lessonId);
 		if (lesson == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found");
@@ -129,7 +133,7 @@ public class MainController {
 			System.out.println("task есть " + task.getOrder());
 			System.out.println("json " + objectMapper.writeValueAsString(task));
 		}
-
+		model.addAttribute("userId", user != null ? user.getId() : null);
 		model.addAttribute("currentLessonJson", lessonJson);
 		model.addAttribute("currentLesson", lesson);
 		model.addAttribute("sameTypeLessonsJson", objectMapper.writeValueAsString(sameTypeLessons));
