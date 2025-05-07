@@ -41,9 +41,8 @@ public class LessonController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<LessonDTO> getLesson(@PathVariable Long id) {
-		return lessonService.getLessonById(id)
-				.map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+		LessonDTO lesson = lessonService.getLessonById(id);
+		return ResponseEntity.ok(lesson);
 	}
 
 	@GetMapping

@@ -34,7 +34,7 @@ public class Task {
 
 	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(columnDefinition = "jsonb")
-	private ChessTaskData chessData;
+	private String chessData;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lesson_id", nullable = false)

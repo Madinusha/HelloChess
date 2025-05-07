@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -104,5 +105,12 @@ public class ChessService {
 		GameSession session = gameSessionService.getSession(sessionId);
 		return session.getChessboard().exchangePawn(positionFrom, positionTo, newPieceType);
 	}
+
+	public List<Position> getPossibleMovesForOnePiece( String position, Map<String, Map<String, Object>> clientData) {
+		Chessboard board = new Chessboard(clientData, true);
+		System.out.println("chessboard:\n " + board.toString());
+		return board.getPossibleMovesForOnePiece(new Position(position), board);
+	}
+
 }
 

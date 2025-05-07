@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study HelloChess</title>
+    <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <link rel="stylesheet" th:href="@{/static/lesson/lesson.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/lesson/lesson.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="main" >
+    <div id="education-data"
+         th:attr="
+        data-isAdmin=${isAdmin ? 'true' : 'false'},
+        data-same-type-lessons=${sameTypeLessonsJson},
+        data-tasks=${tasksJson},
+        data-lesson-type=${lessonType},
+        data-current-lesson-json=${currentLessonJson}
+    ">
+    </div>
+
+    <audio id="moveSound" th:src="@{/static/sounds/movePiece.wav}"></audio>
+    <audio id="eatSound" th:src="@{/static/sounds/eatPiece.wav}"></audio>
+
+    <nav class="e-navbar">
+        <ul class="e-navbar-list" id="lessonList">
+        </ul>
+    </nav>
+
+    <div id="chess-board"></div>
+
+
+    <div class="right-side">
+        <div class="lesson-content">
+            <div class="lc-header">
+                <img th:src="${currentLesson.image}"
+                     alt="Изображение урока"
+                     class="lc-image">
+                <div class="lc-text">
+                    <div th:text="${currentLesson.title}" class="lc-title"></div>
+                    <div th:utext="${currentLesson.description}" class="lc-description"></div>
+                </div>
+            </div>
+
+            <div class="t-description" id="t-description">Пока задачки нет :(</div>
+
+            <div class="task-container" id="taskContainer">
+<!--                <div class="task-item">☆☆☆</div>-->
+<!--                <div class="task-item">☆☆☆</div>-->
+<!--                <div class="task-item">☆☆☆</div>-->
+            </div>
+
+
+        </div>
+        <div class="admin-panel" id="admin-panel" style="display: none;">
+            <div class="delete-task" id="delete-task"></div>
+            <div class="edit-task" id="edit-task"></div>
+            <div class="add-task" id="add-task"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="chess-editor-modal" class="modal" style="display: none;">
+    <div class="modal-content chess-editor">
+        <!-- Блок с заголовком -->
+        <div class="step-header">
+            <h2 id="step-title">Шаг 1: Выберите начальную позицию</h2>
+        </div>
+
+        <!-- Игровое поле -->
+        <div class="chess-board-container">
+            <div class="piece-panel white-pieces" id="white-pieces"></div>
+            <div id="editor-chess-board"></div>
+            <div class="piece-panel black-pieces" id="black-pieces"></div>
+        </div>
+
+        <!-- Панель управления -->
+        <div class="editor-actions">
+            <!-- Шаг 1 -->
+            <div id="step1-controls" class="controls-wrapper">
+                <div class="control-group">
+                    <label>Ход:</label>
+                    <select id="move-side">
+                        <option value="white">Белые</option>
+                        <option value="black">Чёрные</option>
+                    </select>
+                </div>
+
+                <button id="reset-position">Начальная позиция</button>
+                <button id="clear-board">Очистить доску</button>
+                <button id="flip-board">Перевернуть доску</button>
+
+                <div class="editor-buttons">
+                    <button id="cancel-edit">Отмена</button>
+                    <button id="next-step">Далее</button>
+                </div>
+            </div>
+
+            <!-- Шаг 2 -->
+            <div id="step2-controls" class="controls-wrapper" style="display: none;">
+                <div class="control-group">
+                    <label for="task-description">Описание задачи:</label>
+                    <textarea
+                            id="task-description"
+                            class="task-description-input"
+                            placeholder="Введите описание задачи для обучения..."
+                            rows="3"
+                    ></textarea>
+                </div>
+
+
+                <div id="move-box">
+                    <h3 class="mb-title">История ходов</h3>
+                    <div id="move-box-window">
+                        <div class="move-box-column" id="move-numbers"></div>
+                        <div class="move-box-column" id="moves"></div>
+                    </div>
+                    <button id="clear-solution">Очистить решение</button>
+                </div>
+
+                <div class="editor-buttons">
+                    <button id="prev-step">Назад</button>
+                    <button id="save-position">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>

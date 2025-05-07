@@ -1,30 +1,28 @@
 package org.madi.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.dto.ProfileUpdateDTO;
+import org.madi.demo.dto.TaskDTO;
 import org.madi.demo.dto.UserProfilePageDTO;
 import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
 import org.madi.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.madi.demo.entities.Lesson.LessonType.*;
@@ -32,25 +30,22 @@ import static org.madi.demo.entities.Lesson.LessonType.*;
 @Controller
 public class MainController {
 
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private FriendshipService friendshipService;
-
-	@Autowired
-	private RankService rankService;
-
-	@Autowired
-	private UserLanguageService userLanguageService;
-
-	@Autowired
-	private LessonService lessonService;
-
+	private final UserService userService;
+	private final FriendshipService friendshipService;
+	private final RankService rankService;
+	private final UserLanguageService userLanguageService;
+	private final LessonService lessonService;
 	private final ObjectMapper objectMapper;
+	private final TaskService taskService;
 
-	public MainController(ObjectMapper objectMapper) {
+	public MainController(UserService userService, FriendshipService friendshipService, RankService rankService, UserLanguageService userLanguageService, LessonService lessonService, ObjectMapper objectMapper, TaskService taskService) {
+		this.userService = userService;
+		this.friendshipService = friendshipService;
+		this.rankService = rankService;
+		this.userLanguageService = userLanguageService;
+		this.lessonService = lessonService;
 		this.objectMapper = objectMapper;
+		this.taskService = taskService;
 	}
 
 	@GetMapping("/")
@@ -104,6 +99,44 @@ public class MainController {
 		model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
 		model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
 		return "pages/education";
+	}
+
+	@GetMapping("/lesson/{lessonId}")
+	public String getLesson(
+			@PathVariable Long lessonId,
+			Model model,
+			Authentication authentication
+	) throws JsonProcessingException {
+		// Проверка прав администратора
+		boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		model.addAttribute("isAdmin", isAdmin);
+
+		// Получаем данные урока
+		LessonDTO lesson = lessonService.getLessonById(lessonId);
+		if (lesson == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found");
+		}
+		ObjectMapper mapper = new ObjectMapper();
+		String lessonJson = mapper.writeValueAsString(lesson);
+		System.out.println("lessonJson " + lessonJson);
+
+		List<LessonDTO> sameTypeLessons = lessonService.getLessonsByType(lesson.getLessonType());
+
+		List<TaskDTO> tasks = taskService.getTasksByLessonId(lessonId);
+		System.out.println("tasks len" + tasks.size());
+		for (var task : tasks) {
+			System.out.println("task есть " + task.getOrder());
+			System.out.println("json " + objectMapper.writeValueAsString(task));
+		}
+
+		model.addAttribute("currentLessonJson", lessonJson);
+		model.addAttribute("currentLesson", lesson);
+		model.addAttribute("sameTypeLessonsJson", objectMapper.writeValueAsString(sameTypeLessons));
+		model.addAttribute("tasksJson", objectMapper.writeValueAsString(tasks));
+		model.addAttribute("lessonType", lesson.getLessonType().name().toLowerCase());
+
+		return "pages/lesson";
 	}
 
 	@GetMapping("/profile")

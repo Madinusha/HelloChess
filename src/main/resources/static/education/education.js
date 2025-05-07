@@ -4,12 +4,12 @@ const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
 const profileData = document.getElementById("profile-data");
 const isAdmin = profileData.getAttribute("data-isAdmin");
 const lessonImages = [
-    'static/images/chance.png',
-    'static/images/Chess.jpg',
-    'static/images/versus-btn.png',
-    'static/images/white-flag.png',
-    'static/images/draw.png',
-    'static/images/find-opponent.png',
+    '/static/images/chance.png',
+    '/static/images/Chess.jpg',
+    '/static/images/versus-btn.png',
+    '/static/images/white-flag.png',
+    '/static/images/draw.png',
+    '/static/images/find-opponent.png',
 
     '/static/images/white/King.png',
     '/static/images/white/Queen.png',
@@ -275,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Клик по самой карточке
         console.log('Выбран урок:', lessonId);
+        window.location.href = "/lesson/" + lessonId;
     }
 
     function initAdminControls() {

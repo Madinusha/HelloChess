@@ -37,6 +37,25 @@ public class Chessboard {
 		initialize();
 	}
 
+
+	public Chessboard(Map<String, Map<String, Object>> clientData, boolean param) {
+		Map<Position, Piece> board = new HashMap<>();
+
+		for (Map.Entry<String, Map<String, Object>> entry : clientData.entrySet()) {
+			String positionStr = entry.getKey();
+			Map<String, Object> pieceData = entry.getValue();
+
+			Position position = new Position(positionStr);
+			Piece piece = createPiece(pieceData);
+
+			board.put(position, piece);
+		}
+		this.board = board;
+		this.motionList = new ArrayList<>();
+		this.eatenFigures = new ArrayList<>();
+		this.moveResults = new ArrayList<>();
+	}
+
 	public Map<Position, Piece> getChessboard() {
 		return board;
 	}
@@ -67,51 +86,27 @@ public class Chessboard {
 	}
 
 	public Chessboard(Chessboard newBoard)
-	{	board = newBoard.getChessboard();
+	{
+		board = newBoard.getChessboard();
 		motionList = newBoard.getMotionList();
 		eatenFigures = newBoard.getEatenFigures();
 		this.moveResults = new ArrayList<>();
 		initialize();
 	}
 
-//	public Chessboard copyChessboard(Chessboard originalBoard) {
-//		Chessboard copiedBoard = new Chessboard();
-//
-//		// Проходимся по каждой клетке на доске
-//		for (Map.Entry<Position, Piece> entry : originalBoard.getChessboard().entrySet()) {
-//			Position position = entry.getKey();
-//			Piece originalFigure = entry.getValue();
-//
-//			// Создаем новый объект фигуры и добавляем его на клетку в новой доске
-//			Piece copiedFigure = createCopyOfFigure(originalFigure);
-//			copiedBoard.getChessboard().put(position, copiedFigure);
-//		}
-//
-//		// Копируем список съеденных фигур
-//		copiedBoard.getEatenFigures().addAll(originalBoard.getEatenFigures());
-//		copiedBoard.moveResults = originalBoard.moveResults;
-//		copiedBoard.boardHistory = originalBoard.boardHistory;
-//
-//		return copiedBoard;
-//	}
-
 	public Chessboard copyChessboard(Chessboard originalBoard) {
-		// Создаем новую доску
 		Chessboard copiedBoard = new Chessboard();
 
-		// Глубокое копирование board (Map<Position, Piece>)
 		Map<Position, Piece> copiedBoardMap = new HashMap<>();
 		for (Map.Entry<Position, Piece> entry : originalBoard.getChessboard().entrySet()) {
 			Position position = entry.getKey();
 			Piece originalFigure = entry.getValue();
 
-			// Создаем глубокую копию фигуры
 			Piece copiedFigure = createCopyOfFigure(originalFigure);
 			copiedBoardMap.put(position, copiedFigure);
 		}
 		copiedBoard.setBoard(copiedBoardMap);
 
-		// Глубокое копирование eatenFigures (List<MutablePair<Integer, Piece>>)
 		List<MutablePair<Integer, Piece>> copiedEatenFigures = new ArrayList<>();
 		for (MutablePair<Integer, Piece> pair : originalBoard.getEatenFigures()) {
 			Piece copiedPiece = createCopyOfFigure(pair.getRight());
@@ -119,19 +114,16 @@ public class Chessboard {
 		}
 		copiedBoard.setEatenFigures(copiedEatenFigures);
 
-		// Глубокое копирование motionList (List<MutablePair<Position, Position>>)
 		List<MutablePair<Position, Position>> copiedMotionList = new ArrayList<>();
 		for (MutablePair<Position, Position> pair : originalBoard.getMotionList()) {
 			copiedMotionList.add(new MutablePair<>(pair.getLeft(), pair.getRight()));
 		}
 		copiedBoard.setMotionList(copiedMotionList);
 
-		// Глубокое копирование moveResults (List<Map<String, Object>>)
 		List<Map<String, Object>> copiedMoveResults = new ArrayList<>();
 		for (Map<String, Object> moveResult : originalBoard.getMoveResults()) {
 			Map<String, Object> copiedMoveResult = new HashMap<>();
 			for (Map.Entry<String, Object> entry : moveResult.entrySet()) {
-				// Если значение — сложная структура, нужно копировать её глубоко
 				if (entry.getValue() instanceof Piece) {
 					copiedMoveResult.put(entry.getKey(), createCopyOfFigure((Piece) entry.getValue()));
 				} else {
@@ -142,7 +134,6 @@ public class Chessboard {
 		}
 		copiedBoard.setMoveResults(copiedMoveResults);
 
-		// Глубокое копирование boardHistory (List<Map<Position, Piece>>)
 		List<Map<Position, Piece>> copiedBoardHistory = new ArrayList<>();
 		for (Map<Position, Piece> historyEntry : originalBoard.getBoardHistory()) {
 			Map<Position, Piece> copiedHistoryEntry = new HashMap<>();
@@ -153,7 +144,6 @@ public class Chessboard {
 		}
 		copiedBoard.setBoardHistory(copiedBoardHistory);
 
-		// Простое копирование примитивных полей
 		copiedBoard.setCurrentPlayerColor(originalBoard.getCurrentPlayerColor());
 		copiedBoard.setStatus(originalBoard.getStatus());
 
@@ -196,6 +186,36 @@ public class Chessboard {
 		if (originalFigure instanceof Queen) return new Queen(originalFigure.getColor());
 		else if (originalFigure instanceof Knight) return new Knight(originalFigure.getColor());
 		else if (originalFigure instanceof Bishop) return new Bishop(originalFigure.getColor());
+		else if (originalFigure instanceof Donut) return new Donut(originalFigure.getColor());
+
+		return null;
+	}
+
+	private Piece createPiece(Map<String, Object> pieceData) {
+		String pieceName = (String) pieceData.get("fileName");
+		String color = (String) pieceData.get("color");
+		if (pieceName.equals("Pawn")) {
+			Pawn newPawn = new Pawn(color);
+			boolean hasMoved = (boolean) pieceData.getOrDefault("hasMoved", false);
+			if (hasMoved) newPawn.setHasMoved();
+			return newPawn;
+		} else if (pieceName.equals("King")) {
+			King newKing = new King(color);
+			boolean hasMoved = (boolean) pieceData.getOrDefault("hasMoved", false);
+			if (hasMoved) newKing.setHasMoved();
+			boolean hasChecked = (boolean) pieceData.getOrDefault("hasChecked", false);
+			if (hasChecked) newKing.setHasChecked();
+			return newKing;
+		} else if (pieceName.equals("Rook")) {
+			Rook newRook = new Rook(color);
+			boolean hasMoved = (boolean) pieceData.getOrDefault("hasMoved", false);
+			if (hasMoved) newRook.setHasMoved();
+			return newRook;
+		} else
+		if (pieceName.equals("Queen")) return new Queen(color);
+		else if (pieceName.equals("Knight")) return new Knight(color);
+		else if (pieceName.equals("Bishop")) return new Bishop(color);
+		else if (pieceName.equals("Donut")) return new Donut(color);
 
 		return null;
 	}
@@ -362,6 +382,25 @@ public class Chessboard {
 		}
 		return possibleMoves;
 	}
+
+	public List<Position> getPossibleMovesForOnePiece(Position currentPosition, Chessboard board) {
+		List<Position> possibleMoves = new ArrayList<>();
+		Piece myfigure = board.getFigureAt(currentPosition);
+
+		// Проходимся по всем клеткам на доске
+		for (int row = 1; row <= 8; row++) {
+			for (int col = 1; col <= 8; col++) {
+				Position targetPosition = new Position(row, col);
+				// Проверяем, может ли текущая фигура совершить ход на целевую позицию
+				if (myfigure.isValidMove(currentPosition, targetPosition, board) && currentPosition != targetPosition) {
+
+					possibleMoves.add(targetPosition);
+				}
+			}
+		}
+		return possibleMoves;
+	}
+
 	public boolean hasPossibleMoves(String color, Chessboard board) {
 		for (Map.Entry<Position, Piece> entry : board.getChessboard().entrySet()) {
 			Position position = entry.getKey();

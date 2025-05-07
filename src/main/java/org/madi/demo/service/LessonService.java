@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.madi.demo.dto.CreateLessonDTO;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.entities.Lesson;
@@ -32,8 +33,10 @@ public class LessonService {
 		return mapToDTO(lesson);
 	}
 
-	public Optional<LessonDTO> getLessonById(Long id) {
-		return lessonRepository.findById(id).map(this::mapToDTO);
+	public LessonDTO getLessonById(Long id) {
+		return lessonRepository.findById(id)
+				.map(this::mapToDTO)
+				.orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
 	}
 
 	public List<LessonDTO> getAllLessons() {
