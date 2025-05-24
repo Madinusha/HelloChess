@@ -77,6 +77,35 @@ public class MainController {
 		return "pages/gameConstructor";
 	}
 
+	@GetMapping("/community")
+	public String community() {
+		return "pages/community";
+	}
+
+	@GetMapping("/challenge")
+	public String challenge(Model model, Authentication authentication) throws JsonProcessingException {
+		boolean isAdmin = false;
+
+		if (authentication != null && authentication.isAuthenticated()) {
+			isAdmin = authentication.getAuthorities().stream()
+					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		}
+
+		model.addAttribute("isAdmin", isAdmin);
+		List<LessonDTO> piece = lessonService.getLessonsByType(PIECE_TECHNIQUE);
+		List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
+		List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
+		for (var lesson : piece) {
+			System.out.println("lesson есть " + lesson.getTitle());
+			System.out.println("json " + objectMapper.writeValueAsString(piece));
+		}
+
+		model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
+		model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
+		model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
+		return "pages/challenge";
+	}
+
 	@GetMapping("/education")
 	public String education(Model model, Authentication authentication) throws JsonProcessingException {
 		boolean isAdmin = false;

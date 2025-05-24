@@ -48,6 +48,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// Обновляем кастомное заполнение
+function updateSliderFill() {
+    const negativeSlider = document.querySelector('.rating-slider.negative');
+    const positiveSlider = document.querySelector('.rating-slider.positive');
+
+    document.documentElement.style.setProperty('--negative-value', negativeSlider.value);
+    document.documentElement.style.setProperty('--positive-value', positiveSlider.value);
+}
+
+document.querySelectorAll('.rating-slider').forEach(slider => {
+    slider.addEventListener('input', function() {
+        const isNegative = this.classList.contains('negative');
+        const target = isNegative
+            ? document.querySelector('.range-negative')
+            : document.querySelector('.range-positive');
+        target.textContent = isNegative ? this.value : `+${this.value}`;
+
+        updateSliderFill();
+    });
+});
+
+// Инициализация
+updateSliderFill();
+
 document.getElementById('classical').addEventListener('click', () => {
     const timeControl = {
         minutes: 30,

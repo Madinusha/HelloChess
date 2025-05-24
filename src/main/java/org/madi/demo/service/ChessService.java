@@ -2,6 +2,7 @@ package org.madi.demo.service;
 
 import lombok.Getter;
 import org.madi.demo.entities.GameHistory;
+import org.madi.demo.entities.User;
 import org.madi.demo.model.*;
 import org.madi.demo.repository.GameHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class ChessService {
 	private final GameSessionService gameSessionService;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final GameHistoryRepository gameHistoryRepository;
+	private final UserService userService;
+	private final RatingService ratingService;
 	@Getter
 	private Chessboard chessboard = new Chessboard();
 
@@ -26,11 +29,14 @@ public class ChessService {
 	public ChessService(
 			GameSessionService gameSessionService,
 			SimpMessagingTemplate messagingTemplate,
-			GameHistoryRepository gameHistoryRepository
+			GameHistoryRepository gameHistoryRepository, UserService userService, RatingService ratingService
 	) {
 		this.gameSessionService = gameSessionService;
 		this.messagingTemplate = messagingTemplate;
 		this.gameHistoryRepository = gameHistoryRepository;
+		this.userService = userService;
+		this.ratingService = ratingService;
+
 		startNewGame();
 	}
 
@@ -88,6 +94,8 @@ public class ChessService {
 			System.out.println("белый и черный игроки: " + session.getPlayerWhite() + " " + session.getPlayerBlack());
 			throw new IllegalStateException("Нельзя сохранить игру без обоих игроков");
 		}
+
+
 		GameHistory history = new GameHistory();
 		history.setWhitePlayer(session.getPlayerWhite());
 		history.setBlackPlayer(session.getPlayerBlack());
@@ -98,7 +106,35 @@ public class ChessService {
 		history.setEndTime(session.getEndTime());
 		history.setPGN(session.getChessboard().getPGN());
 
+		updateRatingsAfterGame(session.getPlayerWhite(), session.getPlayerBlack(), session.getChessboard().getStatus());
 		gameHistoryRepository.save(history);
+
+
+	}
+
+	private void updateRatingsAfterGame(User white, User black, String result) {
+		int whiteRating = white.getRating();
+		int blackRating = black.getRating();
+
+		double whiteResult;
+		if ("WHITE".equals(result)) {
+			whiteResult = 1.0;
+		} else if ("BLACK".equals(result)) {
+			whiteResult = 0.0;
+		} else if ("DRAW".equals(result)) {
+			whiteResult = 0.5;
+		} else {
+			return;
+		}
+
+		int newWhiteRating = ratingService.calculateNewElo(whiteRating, blackRating, whiteResult);
+		int newBlackRating = ratingService.calculateNewElo(blackRating, whiteRating, 1.0 - whiteResult);
+
+		userService.updateRating(white, newWhiteRating);
+		userService.updateRating(black, newBlackRating);
+
+		System.out.println("Рейтинг " + white + " изменился: " + whiteRating + " → " + newWhiteRating);
+		System.out.println("Рейтинг " + black + " изменился: " + blackRating + " → " + newBlackRating);
 	}
 
 	public Map<String, Object> promotePawn(String sessionId, Position positionFrom, Position positionTo, String newPieceType) {

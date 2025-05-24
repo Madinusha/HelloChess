@@ -86,4 +86,18 @@ public class UserService {
 
 		userRepository.delete(user);
 	}
+
+	@Transactional
+	public void updateRating(User user, int newRating) {
+		user.setRating(newRating);
+		userRepository.save(user);
+	}
+
+	public List<User> findTop10ByOrderByRatingDesc() {
+		List<User> topUsers = userRepository.findTop10ByOrderByRatingDesc();
+
+		return topUsers.stream()
+				.filter(user -> !DELETED_USER_NICKNAME.equals(user.getNickname()))
+				.toList();
+	}
 }

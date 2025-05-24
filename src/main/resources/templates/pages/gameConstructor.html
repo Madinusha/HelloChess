@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет</title>
+    <title>HelloChess * Конструктор игры</title>
     <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <link rel="stylesheet" th:href="@{/static/gameConstructor/gameConstructor.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
@@ -56,26 +56,44 @@
                     </div>
                 </div>
             </div>
-                <div id="choose-opponent">
-                    <label for="friend-search" class="visually-hidden">Поиск соперника</label>
-                    <div class="search-container">
-                        <span class="at-symbol">@</span>
-                        <input
-                                type="search"
-                                id="friend-search"
-                                name="friend-search"
-                                placeholder="Найти соперника..."
-                                aria-label="Поиск по нику друга"
-                                class="search-input"
-                        >
-                        <button class="clear-btn" aria-label="Очистить поле">×</button>
+            <div id="choose-opponent">
+                <label for="friend-search" class="visually-hidden">Поиск соперника</label>
+                <div class="search-container">
+                    <span class="at-symbol">@</span>
+                    <input
+                            type="search"
+                            id="friend-search"
+                            name="friend-search"
+                            placeholder="Найти соперника..."
+                            aria-label="Поиск по нику друга"
+                            class="search-input"
+                    >
+                    <button class="clear-btn" aria-label="Очистить поле">×</button>
+                </div>
+            </div>
+
+            <div class="rating-range-container">
+                <div class="rating-range-display">Рейтинг соперника:</div>
+                <div class="rating-sliders">
+                    <div class="slider-wrapper">
+                        <input type="range" class="rating-slider negative" min="-500" max="0" value="-500">
+                    </div>
+                    <div class="rating-range-display">
+                        <span class="range-negative">-500</span>
+                        <span class="range-separator">/</span>
+                        <span class="range-positive">+500</span>
+                    </div>
+                    <div class="slider-wrapper">
+                        <input type="range" class="rating-slider positive" min="0" max="500" value="500">
                     </div>
                 </div>
-                <div id="choose-color">
-                    <img id="black" th:src="@{/static/images/black/King.png}" alt="Чёрные фигуры">
-                    <img id="random" th:src="@{/static/images/chance.png}" alt="Случайный выбор">
-                    <img id="white" th:src="@{/static/images/white/King.png}" alt="Белые фигуры">
-                </div>
+            </div>
+
+            <div id="choose-color">
+                <img id="black" th:src="@{/static/images/black/King.png}" alt="Чёрные фигуры">
+                <img id="random" th:src="@{/static/images/chance.png}" alt="Случайный выбор">
+                <img id="white" th:src="@{/static/images/white/King.png}" alt="Белые фигуры">
+            </div>
             <button id="create-game">Создать игру</button>
         </div>
     </div>

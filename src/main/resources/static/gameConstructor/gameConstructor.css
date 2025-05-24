@@ -39,6 +39,9 @@ body {
     --light-carrot: #d6585c;
     --white-gray: #f5f5f5;
     --dark-purple-rgb: 85, 58, 76;
+
+    --negative-value: -500;
+    --positive-value: 500;
 }
 
 .main {
@@ -116,7 +119,7 @@ body {
 }
 
 #game-constructor h1 {
-    margin: 0.1em;
+    margin: 0em;
     font-size: 1.2em;
 }
 
@@ -228,7 +231,7 @@ body {
     position: relative;
     display: inline-block;
     max-width: 300px;
-    margin: 1rem 0;
+    margin: 0.3rem 0;
 }
 
 .at-symbol {
@@ -294,6 +297,142 @@ body {
 .search-input::-webkit-search-cancel-button {
     display: none;
 }
+
+
+
+
+
+
+
+.rating-sliders {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    white-space: nowrap;
+}
+
+.slider-wrapper {
+    flex: 0 0 30%;
+    min-width: 0;
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.rating-slider {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: transparent;
+    outline: none;
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+}
+
+/* ÐŸÐ¾Ð»Ð·ÑƒÐ½Ð¾Ðº */
+.rating-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--dark-purple);
+    cursor: pointer;
+    border: 3px solid var(--beige);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.rating-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--dark-purple);
+    cursor: pointer;
+    border: 3px solid var(--beige);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* Ð¤Ð¾Ð½Ð¾Ð²Ð°Ñ Ð´Ð¾Ñ€Ð¾Ð¶ÐºÐ° */
+.slider-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: var(--dark-purple);
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Ð—Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð½Ð°Ñ Ñ‡Ð°ÑÑ‚ÑŒ */
+.slider-wrapper::after {
+    content: '';
+    position: absolute;
+    height: 4px;
+    border-radius: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: width 0.2s ease;
+    z-index: 1000;
+}
+
+.slider-wrapper.negative::after {
+    right: 0;
+    background: linear-gradient(to left, var(--light-purple), var(--dark-purple));
+    width: calc(100% * (1 - (var(--negative-value) / -500)));
+}
+
+.slider-wrapper.positive::after {
+    left: 0;
+    background: linear-gradient(to right, var(--light-purple), var(--dark-purple));
+    width: calc(100% * (var(--positive-value) / 500));
+}
+
+/* Ð¥Ð¾Ð²ÐµÑ€-ÑÑ„Ñ„ÐµÐºÑ‚Ñ‹ */
+.rating-slider:hover::-webkit-slider-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.rating-slider:hover::-moz-range-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ÐžÑÑ‚Ð°Ð»ÑŒÐ½Ñ‹Ðµ ÑÑ‚Ð¸Ð»Ð¸ */
+.rating-range-display {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 0.3em;
+    min-width: 6em;
+}
+
+.range-negative,
+.range-positive {
+    display: inline-block;
+    width: 3em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.range-separator {
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+}
+
+
+
+
+
+
+
+
 
 #choose-color {
     padding: 0.5em;
@@ -402,11 +541,10 @@ body {
     font-size: 0.8em;
     flex: 1;
     overflow-y: auto;
-    scrollbar-width: thin; /* Для Firefox */
+    scrollbar-width: thin; /* ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Firefox */
     scrollbar-color: var(--dark-purple) var(--white-gray);
 }
 
-/* Стили для WebKit-браузеров (Chrome, Safari) */
 .table-body::-webkit-scrollbar {
     width: 10px;
     background-color: var(--white-gray);
@@ -415,14 +553,14 @@ body {
 .table-body::-webkit-scrollbar-track {
     background: var(--light-beige);
     border-radius: 8px;
-    margin: 4px 0; /* Отступ сверху и снизу */
+    margin: 4px 0;
 }
 
 .table-body::-webkit-scrollbar-thumb {
     background: var(--dark-purple);
-    border-radius: 8px; /* Полное скругление */
-    border: 3px solid transparent; /* Прозрачная граница */
-    background-clip: content-box; /* Важно для правильного отображения */
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: content-box;
 }
 
 .table-body::-webkit-scrollbar-thumb:hover {
@@ -445,7 +583,7 @@ body {
 }
 
 .player-row:nth-child(even) {
-    background: var(--white-gray); /* Цвет для чётных строк */
+    background: var(--white-gray);
 }
 
 .player-row:hover {

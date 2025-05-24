@@ -193,4 +193,14 @@ public class UserController {
 
 		return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("/top")
+	public ResponseEntity<List<UserProfileDTO>> getTopPlayers() {
+		List<User> topUsers = userService.findTop10ByOrderByRatingDesc();
+		List<UserProfileDTO> dtos = topUsers.stream()
+				.map(user -> new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating()))
+				.collect(Collectors.toList());
+
+		return ResponseEntity.ok(dtos);
+	}
 }

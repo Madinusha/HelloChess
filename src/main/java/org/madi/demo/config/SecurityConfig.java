@@ -56,7 +56,6 @@ public class SecurityConfig {
 							"/index",
 							"/static/**",
 							"/images/**",
-//							"/api/users/profile",
 							"/favicon.ico"
 					).permitAll()
 					.requestMatchers("/game").authenticated()
@@ -75,6 +74,9 @@ public class SecurityConfig {
 			.logout(logout -> logout
 					.logoutSuccessUrl("/registration")
 					.permitAll()
+					.invalidateHttpSession(true)
+					.clearAuthentication(true)
+					.addLogoutHandler((request, response, authentication) -> {})
 			)
 			.csrf(csrf -> csrf
 					.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())

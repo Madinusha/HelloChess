@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelloChess Community</title>
+
+    <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer>
+    <link rel="stylesheet" th:href="@{/static/community/community.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.min.js"></script>
+
+    <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/community/community.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="community-container">
+    <div class="online-players">
+        <h2>Игроки онлайн</h2>
+        <div id="online-users-container">
+            <div class="loading">Загрузка игроков онлайн...</div>
+        </div>
+    </div>
+
+    <div class="top-players">
+        <h2>Лучшие игроки</h2>
+        <div id="top-players-container">
+            <div class="loading">Загрузка лучших игроков...</div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>
