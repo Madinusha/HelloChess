@@ -14,7 +14,15 @@
             <li class="navbar-item"><a th:onclick="|document.location.href='@{/gameConstructor}'|" class="navbar-link">ИГРА</a></li>
             <li class="navbar-item"><a th:onclick="|document.location.href='@{/education}'|" class="navbar-link">ОБУЧЕНИЕ</a></li>
             <li class="navbar-item"><a th:onclick="|document.location.href='@{/challenge}'|" class="navbar-link">ЗАДАЧИ</a></li>
-            <li class="navbar-item"><a th:onclick="|document.location.href='@{/community}'|" class="navbar-link">СООБЩЕСТВО</a></li>
+<!--            <li class="navbar-item"><a th:onclick="|document.location.href='@{/community}'|" class="navbar-link">СООБЩЕСТВО</a></li>-->
+            <li class="navbar-item dropdown">
+                <a class="navbar-link">СООБЩЕСТВО</a>
+                <ul class="dropdown-menu">
+                    <li><a th:href="@{/forum}" class="dropdown-item">Форум</a></li>
+                    <li><a th:href="@{/top-players}" class="dropdown-item">Лучшие игроки</a></li>
+                    <li><a th:href="@{/rating-distribution}" class="dropdown-item">Распределение рейтинга</a></li>
+                </ul>
+            </li>
         </ul>
     </nav>
     <div id="fast-nav">

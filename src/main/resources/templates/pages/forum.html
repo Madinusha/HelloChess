@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelloChess Forum</title>
+
+    <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer>
+    <link rel="stylesheet" th:href="@{/static/community/forum/forum.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.min.js"></script>
+
+    <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/community/forum/forum.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+
+<main class="forum-container">
+    <div id="profile-data"
+         th:attr="data-isAdmin=${isAdmin}">
+    </div>
+
+
+    <div class="forum-header">
+        <h1>Форум HelloChess</h1>
+        <div class="search-container">
+            <input type="text" placeholder="Поиск среди тем..." class="search-input">
+            <button class="search-button">Поиск</button>
+        </div>
+    </div>
+
+
+    <div class="main-topics-container slide-in">
+        <!-- Main topics will be loaded here dynamically -->
+    </div>
+<!--    <div class="admin-controls" th:if="${isAdmin}">-->
+<!--        <button class="create-main-topic-button" id="createMainTopicBtn">+ Создать новую тему</button>-->
+<!--    </div>-->
+
+    <div class="subtopics-container hidden">
+        <div class="subtopics-header">
+            <button class="back-button" onclick="goBackToMainTopics()">← Назад</button>
+            <button class="create-topic-button">+ Создать новый топик</button>
+        </div>
+        <h2 class="subtopic-title"></h2>
+        <div class="subtopics-list">
+            <!-- Subtopics will be loaded here dynamically -->
+        </div>
+    </div>
+</main>
+
+<div id="topicModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">Создать новую тему</h2>
+        <form id="topicForm">
+            <input type="hidden" id="topicId">
+            <input type="hidden" id="topicType">
+            <div class="form-group">
+                <label for="topicName">Название темы:</label>
+                <input type="text" id="topicName" required>
+            </div>
+            <div class="form-group">
+                <label for="topicDescription">Описание:</label>
+                <textarea id="topicDescription" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-button" onclick="closeModal()">Отмена</button>
+                <button type="submit" class="submit-button">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="confirmModal" class="modal hidden">
+    <div class="modal-content confirm-modal">
+        <h2>Подтверждение удаления <span class="confirm-topic" id="topicNameToDelete"></span></h2>
+        <p id="confirmMessage">Вы уверены, что хотите удалить топик с <span class="confirm-topic" id="subtopicsCount"></span> подтемами и <span class="confirm-topic" id="messagesCount"></span> сообщениями?</p>
+        <div class="form-actions">
+            <button type="button" class="cancel-button" onclick="closeModal()">Отмена</button>
+            <button type="button" class="delete-button" onclick="deleteTopic()">Удалить</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>

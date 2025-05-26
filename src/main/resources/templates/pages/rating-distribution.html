@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelloChess • Распределение рейтингов</title>
+    <link rel="stylesheet" th:href="@{/static/header/header.css}" defer>
+    <link rel="stylesheet" th:href="@{/static/community/rating-distribution/rating-distribution.css}" defer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script th:src="@{/static/header/header.js}" defer></script>
+    <script th:src="@{/static/community/rating-distribution/rating-distribution.js}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="rating-distribution-container">
+    <input type="hidden" id="currentUserRating" th:value="${currentUserRating}">
+    <input type="hidden" id="ratingData" th:value="${ratingData}">
+    <input type="hidden" id="averageRating" th:value="${averageRating}">
+    <h1>Распределение рейтингов игроков</h1>
+
+    <div class="chart-container">
+        <canvas id="ratingChart"></canvas>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Ваш рейтинг</h3>
+            <div class="stat-value" th:text="${currentUserRating}">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Средний рейтинг</h3>
+            <div class="stat-value" th:text="${averageRating}">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Всего игроков</h3>
+            <div class="stat-value" th:text="${totalPlayers}">0</div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>

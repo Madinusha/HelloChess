@@ -100,4 +100,5 @@ public class UserService {
 				.filter(user -> !DELETED_USER_NICKNAME.equals(user.getNickname()))
 				.toList();
 	}
+
 }

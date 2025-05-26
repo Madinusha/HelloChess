@@ -2,10 +2,7 @@ package org.madi.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
-import org.madi.demo.dto.LessonDTO;
-import org.madi.demo.dto.ProfileUpdateDTO;
-import org.madi.demo.dto.TaskDTO;
-import org.madi.demo.dto.UserProfilePageDTO;
+import org.madi.demo.dto.*;
 import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
@@ -37,8 +34,9 @@ public class MainController {
 	private final LessonService lessonService;
 	private final ObjectMapper objectMapper;
 	private final TaskService taskService;
+	private final RatingDistributionService ratingDistributionService;
 
-	public MainController(UserService userService, FriendshipService friendshipService, RankService rankService, UserLanguageService userLanguageService, LessonService lessonService, ObjectMapper objectMapper, TaskService taskService) {
+	public MainController(UserService userService, FriendshipService friendshipService, RankService rankService, UserLanguageService userLanguageService, LessonService lessonService, ObjectMapper objectMapper, TaskService taskService, RatingDistributionService ratingDistributionService) {
 		this.userService = userService;
 		this.friendshipService = friendshipService;
 		this.rankService = rankService;
@@ -46,6 +44,7 @@ public class MainController {
 		this.lessonService = lessonService;
 		this.objectMapper = objectMapper;
 		this.taskService = taskService;
+		this.ratingDistributionService = ratingDistributionService;
 	}
 
 	@GetMapping("/")
@@ -77,9 +76,42 @@ public class MainController {
 		return "pages/gameConstructor";
 	}
 
-	@GetMapping("/community")
+	@GetMapping("/top-players")
 	public String community() {
-		return "pages/community";
+		return "pages/top-players";
+	}
+
+	@GetMapping("/rating-distribution")
+	public String ratingDistribution(Model model, Authentication auth) throws JsonProcessingException {
+		RatingDistributionService.RatingDistributionData data = ratingDistributionService.getRatingDistributionData(auth);
+
+		// Преобразуем в JSON-строку
+		String jsonRatingData = objectMapper.writeValueAsString(data.getDistribution());
+
+		model.addAttribute("ratingData", jsonRatingData);
+		model.addAttribute("currentUserRating", data.getCurrentUserRating());
+		model.addAttribute("averageRating", data.getAverageRating());
+		model.addAttribute("totalPlayers", data.getTotalPlayers());
+
+		return "pages/rating-distribution";
+	}
+
+	@GetMapping("/discussion")
+	public String discussion() {
+		return "pages/discussion";
+	}
+
+	@GetMapping("/forum")
+	public String forum(Model model, Authentication authentication) {
+		boolean isAdmin = false;
+
+		if (authentication != null && authentication.isAuthenticated()) {
+			isAdmin = authentication.getAuthorities().stream()
+					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		}
+
+		model.addAttribute("isAdmin", isAdmin);
+		return "pages/forum";
 	}
 
 	@GetMapping("/challenge")

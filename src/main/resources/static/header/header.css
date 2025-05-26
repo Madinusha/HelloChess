@@ -166,3 +166,51 @@ button:focus  {
 #login:active {
     transform: scale(0.97);
 }
+
+/* Стили для выпадающего меню */
+.navbar-item.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--dark-purple);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    min-width: 200px;
+    z-index: 1000;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 10px 15px;
+    color: var(--light-beige);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-purple);
+    color: white;
+}
+
+/* Показываем меню при наведении */
+.navbar-item.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* Анимация для плавного появления */
+.dropdown-menu {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

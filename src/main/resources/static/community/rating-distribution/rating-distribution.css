@@ -1,0 +1,108 @@
+/* Regular */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'TeXGyreHeros';
+    src: url('../../fonts/TeXGyreHeros/dehinted-TeXGyreHeros-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'TeXGyreHeros Condensed';
+    src: url('../../fonts/TeXGyreHeros/dehinted-TeXGyreHerosCondensed-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+:root {
+    --dark-purple: #553A4C;
+    --light-purple: #957377;
+    --beige: #CBAC98;
+    --light-beige: #f2e6cf;
+    --carrot-red: #c73136;
+    --white-gray: #f5f5f5;
+}
+
+body {
+    background-color: #f5f5f5;
+    margin: 0;
+    color: var(--dark-purple);
+    font-family: 'TeXGyreHeros', sans-serif;
+    -webkit-user-select: none;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+h1 {
+    margin: 0px;
+}
+
+.rating-distribution-container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    margin-top: 0px;
+    padding: 1rem;
+    padding-top: 0;
+}
+
+.chart-container {
+    position: relative;
+    height: 500px;
+    margin: 0.5rem 0;
+    background-color: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+    gap: 1rem;
+}
+
+.stat-card {
+    flex: 1;
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+    color: var(--light-purple);
+    margin-top: 0;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--dark-purple);
+}
+
+@media (max-width: 768px) {
+    .rating-distribution-container {
+        width: 95%;
+    }
+
+    .stats-container {
+        flex-direction: column;
+    }
+}
