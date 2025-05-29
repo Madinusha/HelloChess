@@ -134,11 +134,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="message-footer">
                     <button class="reply-button" data-message-id="${msg.id}">↩ Ответить</button>
                     <a href="#${msg.id}" class="go-to-message">#</a>
+                    <button class="report-btn" title="Пожаловаться на автора">⚠️</button>
                     <div class="message-time">${msg.time}</div>
                 </div>
             `;
 
             container.appendChild(messageElement);
+            const reportBtn = container.querySelector('.report-btn');
+                reportBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                confirm(`Пожаловаться на автора "${pinnedMsg.sender}"?`);
+            });
         });
 
         document.querySelectorAll('.reply-button').forEach(btn => {

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | HelloChess</title>
+    <link rel="stylesheet" th:href="@{/static/header/header.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <link rel="stylesheet" th:href="@{/static/administration/administration.css?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}">
+    <script th:src="@{/static/header/header.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+    <script th:src="@{/static/administration/administration.js?v=__${#dates.format(#dates.createNow(), 'yyyyMMddHHmmss')}__}" defer></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="admin-container">
+    <!-- Блок с пользователями -->
+    <div class="admin-sidebar">
+        <div class="search-section">
+            <input type="text" id="user-search" placeholder="Поиск пользователей...">
+            <button id="search-btn">Найти</button>
+        </div>
+
+        <div class="search-results">
+            <h3>Результаты поиска</h3>
+            <div id="users-list" class="users-list"></div>
+        </div>
+
+        <div class="banned-users">
+            <h3>Забаненные пользователи</h3>
+            <div id="banned-list" class="users-list"></div>
+        </div>
+    </div>
+
+    <!-- Блок с жалобами -->
+    <div class="admin-main">
+        <div class="reports-header">
+            <h2>Жалобы</h2>
+            <div class="report-filters">
+                <button class="filter-btn active" data-type="all">Все</button>
+                <button class="filter-btn" data-type="account">На аккаунты</button>
+                <button class="filter-btn" data-type="message">На сообщения</button>
+            </div>
+        </div>
+        <div id="reports-list" class="reports-list"></div>
+    </div>
+
+    <!-- Новый sidebar для админов -->
+    <div class="admin-sidebar admin-sidebar-bottom">
+        <div class="search-section">
+            <input type="text" id="admin-search" placeholder="Поиск администратора...">
+            <button id="search-admin-btn">Найти</button>
+        </div>
+
+        <div class="search-results">
+            <h3>Результаты поиска</h3>
+            <div id="admins-found-list" class="users-list"></div>
+        </div>
+
+        <div class="banned-users">
+            <h3>Администраторы</h3>
+            <div id="admins-list" class="users-list"></div>
+        </div>
+    </div>
+</main>
+
+<div id="ban-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3>Подтверждение бана</h3>
+        <p id="ban-message">Вы действительно хотите забанить пользователя <span id="ban-username"></span>?</p>
+
+        <div class="ban-duration">
+            <label for="ban-time">Срок бана:</label>
+            <select id="ban-time">
+                <option value="5">5 минут</option>
+                <option value="30">30 минут</option>
+                <option value="60">1 час</option>
+                <option value="240">4 часа</option>
+                <option value="1440">1 день</option>
+                <option value="10080">1 неделя</option>
+                <option value="0" selected>Навсегда</option>
+            </select>
+        </div>
+
+        <div class="modal-buttons">
+            <button id="confirm-ban" class="action-btn ban-btn">Забанить</button>
+            <button id="cancel-ban" class="action-btn cancel-btn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>
+</body>
+</html>

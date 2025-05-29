@@ -32,6 +32,7 @@ const rating = profileData.getAttribute("data-rating");
 const creationDate = profileData.getAttribute("data-creation-date");
 const statusDetailed = profileData.getAttribute("data-status-detailed");
 const isMyProfile = profileData.getAttribute("data-is-my-profile") === "true";
+const isAdmin = profileData.getAttribute("data-isAdmin");
 
 const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
 const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
@@ -58,6 +59,12 @@ document.addEventListener("DOMContentLoaded", function() {
             dropdownNavbar.classList.remove('show');
         }
     });
+
+    if(isAdmin) {
+        document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = 'block';
+        });
+    }
 });
 
 document.getElementById('logout-btn').addEventListener('click', function() {
@@ -77,7 +84,6 @@ document.getElementById('logout-btn').addEventListener('click', function() {
 });
 
 document.getElementById('delete-account-btn').addEventListener('click', function() {
-    console.log("щас конфирм");
     document.getElementById('confirmDeleteModal').classList.remove('modal-hidden');
 });
 
@@ -126,9 +132,6 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', function()
     });
 });
 
-
-
-
 function loadProfileData() {
     // Статистика
     document.getElementById('total-games').textContent = mockData.stats.total;
@@ -140,6 +143,7 @@ function loadProfileData() {
         loadFriendsData('requests');
         loadFriendsData('suggestions');
         loadFriendsData('all');
+        loadGamesTab();
     }
 }
 
@@ -990,4 +994,141 @@ function updateViewMode() {
     const birthdateInput = document.getElementById('edit-birthdate');
     document.getElementById('birthdate-view').textContent =
         birthdateInput.value || 'Не указана';
+}
+
+
+const mockGameData = [
+    {
+        id: 1,
+        type: "Классика",
+        timeControl: "30 + 20",
+        opponentNickname: "prosto_erik",
+        game_src: "/static/images/game2.png",
+        opponentRating: 1654,
+        isFinished: false,
+        date: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 минут назад
+    },
+    {
+        id: 2,
+        type: "Классика",
+        timeControl: "15 + 0",
+        game_src: "/static/images/game4.png",
+        opponentNickname: "sonya",
+        opponentRating: 1432,
+        result: "Победа",
+        isFinished: true,
+        date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 часа назад
+    },
+    {
+        id: 3,
+        type: "Рапид",
+        timeControl: "10 + 3",
+        game_src: "/static/images/game3.png",
+        opponentNickname: "fed_ya",
+        opponentRating: 1203,
+        result: "Поражение",
+        isFinished: true,
+        date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 день назад
+    },
+    {
+        id: 4,
+        type: "Блиц",
+        timeControl: "3 + 2",
+        game_src: "/static/images/game1.png",
+        opponentNickname: "chessmaster34",
+        opponentRating: 1570,
+        result: "Ничья",
+        isFinished: true,
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 дня назад
+    }
+];
+
+function createGameElement(game) {
+    const gameEl = document.createElement("div");
+    gameEl.className = "game-item";
+
+    // Формируем время партии
+    const game_src = game.game_src || "/static/images/game3.png";
+    const timeControl = game.timeControl || "10 + 2";
+    const opponentNick = game.opponentNickname || "Гость";
+    const opponentRating = game.opponentRating || "1203";
+    const dateAgo = formatTimeAgo(game.date);
+    const gameType = game.type || "Классика";
+    const resultText = game.isFinished ? game.result : "Активная партия";
+    let resultClass = "";
+
+    switch (resultText) {
+        case "Победа":
+            resultClass = "result-win";
+            break;
+        case "Поражение":
+            resultClass = "result-loss";
+            break;
+        case "Ничья":
+            resultClass = "result-draw";
+            break;
+        default:
+            resultClass = "result-active";
+    }
+
+    gameEl.innerHTML = `
+        <div class="game-left">
+            <!-- Изображение доски -->
+            <img src=${game_src} alt="Доска" class="game-board-img" />
+        </div>
+        <div class="game-right">
+            <div class="game-top">
+                ${timeControl} • ${gameType}
+            </div>
+            <div class="game-middle">
+                <div class="game-player">
+                    <span>${nickname}</span>
+                    <span class="game-rating">${rating}</span>
+                </div>
+                <div class="game-versus">
+                    <button class="versus-btn"></button>
+                </div>
+                <div class="game-opponent">
+                    <span>${opponentNick}</span>
+                    <span class="game-rating">${opponentRating}</span>
+                </div>
+            </div>
+           <div class="game-bottom">
+               <div class="game-result ${resultClass}">${resultText}</div>
+               <div class="game-timestamp">${dateAgo}</div>
+           </div>
+        </div>
+    `;
+
+    // При клике можно добавить переход к партии
+    gameEl.addEventListener("click", () => {
+        alert(`Переход к партии с ${opponentNick}`);
+    });
+
+    return gameEl;
+}
+
+function formatTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "только что";
+    if (diffMins < 60) return `${diffMins} мин назад`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} ч назад`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} дн. назад`;
+}
+
+function loadGamesTab() {
+    const gamesContainer = document.querySelector("#games-tab .games-history");
+    if (!gamesContainer) return;
+
+    gamesContainer.innerHTML = ""; // Очищаем предыдущее содержимое
+
+    mockGameData.forEach(game => {
+        const gameElement = createGameElement(game);
+        gamesContainer.appendChild(gameElement);
+    });
 }

@@ -1065,3 +1065,127 @@ input[type="email"] {
     font-size: 0.8rem;
     white-space: nowrap;
 }
+
+
+
+
+
+
+
+
+
+
+.games-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.game-item {
+    display: flex;
+    align-items: stretch; /* Ð Ð°ÑÑ‚ÑÐ³Ð¸Ð²Ð°ÐµÐ¼ Ð¿Ð¾ Ð²Ñ‹ÑÐ¾Ñ‚Ðµ */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    max-height: 30vh;
+    transition: background-color 0.3s;
+}
+
+.game-item:hover {
+    background-color: #f0f0f0;
+}
+
+.game-left {
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+}
+
+.game-board-img {
+    /* width: 100%;
+    height: 100%; */
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+}
+
+.game-right {
+    flex: 1;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+}
+
+.game-top {
+    font-size: 1.2rem;
+    color: #666;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.game-middle {
+    display: flex;
+    width: 60%;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.game-player {
+    text-align: right;
+    margin-right: auto;
+    font-weight: bold;
+}
+
+.game-opponent {
+    text-align: left;
+    margin-left: auto;
+    font-weight: bold;
+}
+
+.game-versus {
+    margin: 0.2rem 0.5rem;
+    align-self: flex-start;
+    height: 1rem;
+}
+
+.game-rating {
+    color: #777;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.2rem;
+}
+
+.game-result {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-top: auto;
+}
+
+.result-win {
+    color: #4CAF50; /* Зелёный */
+}
+
+.result-loss {
+    color: var(--carrot-red);
+}
+
+.result-draw {
+    color: #777;
+}
+
+.result-active {
+    color: #FFA726;
+}
+
+.game-timestamp {
+    font-size: 0.8rem;
+    color: #aaa;
+    align-self: flex-end;
+}

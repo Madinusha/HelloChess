@@ -204,6 +204,20 @@ public class MainController {
 		return "pages/lesson";
 	}
 
+	@GetMapping("/administration")
+	public String administration(Model model, Authentication authentication) {
+		boolean isAdmin = false;
+
+		if (authentication != null && authentication.isAuthenticated()) {
+			isAdmin = authentication.getAuthorities().stream()
+					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		}
+		if (!isAdmin){
+			return "redirect:/gameConstructor";
+		}
+		return "pages/administration";
+	}
+
 	@GetMapping("/profile")
 	public String profile(
 			@RequestParam String nickname,
@@ -238,6 +252,9 @@ public class MainController {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		String formattedDate = currentUser.getCreatedAt().format(formatter);
 		profile.setCreationDate(formattedDate);
+
+		boolean isAdmin = currentUser.getRole().equals("ADMIN");
+		model.addAttribute("isAdmin", isAdmin);
 
 		List<UserLanguage> userLanguages = userLanguageService.findByUser(requestedUser);
 		model.addAttribute("userLanguages", userLanguages);

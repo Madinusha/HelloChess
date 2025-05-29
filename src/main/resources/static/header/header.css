@@ -167,7 +167,7 @@ button:focus  {
     transform: scale(0.97);
 }
 
-/* Стили для выпадающего меню */
+/* Ð¡Ñ‚Ð¸Ð»Ð¸ Ð´Ð»Ñ Ð²Ñ‹Ð¿Ð°Ð´Ð°ÑŽÑ‰ÐµÐ³Ð¾ Ð¼ÐµÐ½ÑŽ */
 .navbar-item.dropdown {
     position: relative;
 }
@@ -200,12 +200,12 @@ button:focus  {
     color: white;
 }
 
-/* Показываем меню при наведении */
+/* ÐŸÐ¾ÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÐ¼ Ð¼ÐµÐ½ÑŽ Ð¿Ñ€Ð¸ Ð½Ð°Ð²ÐµÐ´ÐµÐ½Ð¸Ð¸ */
 .navbar-item.dropdown:hover .dropdown-menu {
     display: block;
 }
 
-/* Анимация для плавного появления */
+/* ÐÐ½Ð¸Ð¼Ð°Ñ†Ð¸Ñ Ð´Ð»Ñ Ð¿Ð»Ð°Ð²Ð½Ð¾Ð³Ð¾ Ð¿Ð¾ÑÐ²Ð»ÐµÐ½Ð¸Ñ */
 .dropdown-menu {
     animation: fadeIn 0.3s ease-in-out;
 }
@@ -213,4 +213,117 @@ button:focus  {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* Ð¡Ñ‚Ð¸Ð»Ð¸ Ð´Ð»Ñ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ð¹ */
+.notifications-container {
+    position: relative;
+    display: inline-block;
+}
+
+.notifications-list {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: none;
+    padding: 0.5rem;
+}
+
+.notification {
+    padding: 0.8rem;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.notification:last-child {
+    border-bottom: none;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.notification-close {
+    cursor: pointer;
+    color: var(--carrot-red);
+    font-weight: bold;
+}
+
+.notification-content {
+    margin-bottom: 0.5rem;
+}
+
+.notification-username {
+    font-weight: bold;
+    color: var(--dark-purple);
+}
+
+.notification-rating {
+    color: var(--light-purple);
+    font-weight: bold;
+}
+
+.notification-time {
+    color: var(--beige);
+    font-weight: bold;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.notification-btn {
+    padding: 0.3rem 0.6rem;
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.notification-accept {
+    background-color: var(--dark-purple);
+    color: white;
+}
+
+.notification-decline {
+    background-color: var(--carrot-red);
+    color: white;
+}
+
+.notification-view {
+    background-color: var(--beige);
+    color: var(--dark-purple);
+}
+
+#versus-btn {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    background-color: var(--carrot-red);
+    color: white;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
 }
