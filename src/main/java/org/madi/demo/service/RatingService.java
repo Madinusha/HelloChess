@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RatingService {
 
-	private static final int K_FACTOR = 32; // можно изменить на 16 или 24 для опытных игроков
+	private static final int K_FACTOR = 32;
 
 	/**
 	 * Расчёт нового рейтинга по системе Эло

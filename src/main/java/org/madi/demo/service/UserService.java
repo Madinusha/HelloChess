@@ -1,7 +1,7 @@
 package org.madi.demo.service;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityNotFoundException;
+import org.madi.demo.dto.AdminPageUserDTO;
 import org.madi.demo.entities.User;
 import org.madi.demo.repository.FriendshipRepository;
 import org.madi.demo.repository.GameHistoryRepository;
@@ -11,7 +11,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,6 +97,18 @@ public class UserService {
 
 		return topUsers.stream()
 				.filter(user -> !DELETED_USER_NICKNAME.equals(user.getNickname()))
+				.toList();
+	}
+
+	public List<AdminPageUserDTO> findBannedUsers() {
+		return userRepository.findByIsBannedTrue().stream()
+				.map(user -> new AdminPageUserDTO(user.getId(), user.getUsername(), user.isBanned(), user.isAdmin()))
+				.toList();
+	}
+
+	public List<AdminPageUserDTO> findAdmins() {
+		return userRepository.findByIsAdminTrue().stream()
+				.map(user -> new AdminPageUserDTO(user.getId(), user.getUsername(), user.isBanned(), user.isAdmin()))
 				.toList();
 	}
 

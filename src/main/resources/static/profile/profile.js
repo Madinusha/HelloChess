@@ -973,14 +973,14 @@ document.getElementById('edit-telegram').addEventListener('input', function(e) {
     }
 });
 
-// Проверка Instagram (без @)
-document.getElementById('edit-instagram').addEventListener('input', function(e) {
+
+document.getElementById('edit-vk').addEventListener('input', function(e) {
     this.value = this.value.replace(/@/g, '').toLowerCase();
 });
 
 // Добавляем tooltips
 document.querySelector('.telegram-icon').setAttribute('data-tooltip', 'Введите ваш @username в Telegram');
-document.querySelector('.instagram-icon').setAttribute('data-tooltip', 'Введите ваш ник Instagram без @, только буквы/цифры');
+document.querySelector('.vk-icon').setAttribute('data-tooltip', 'Введите ваш ник Vk без @, только буквы/цифры');
 
 // Обновление режима просмотра при редактировании
 function updateViewMode() {

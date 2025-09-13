@@ -4,6 +4,7 @@ import org.madi.demo.dto.RatingDistribution;
 import org.madi.demo.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
@@ -26,4 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("SELECT AVG(u.rating) FROM User u")
 	Double getAverageRating();
+
+	List<User> findByIsBannedTrue();
+	List<User> findByIsAdminTrue();
+
+	@Query("SELECT u FROM User u WHERE LOWER(u.nickname) LIKE LOWER(concat('%', :query, '%'))")
+	List<User> searchByNickname(@Param("query") String query);
 }

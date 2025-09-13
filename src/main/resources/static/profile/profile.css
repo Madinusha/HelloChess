@@ -1014,8 +1014,8 @@ body {
     background: url('../images/telegram.png') center/contain no-repeat;
 }
 
-.instagram-icon {
-    background: url('../images/insta.png') center/contain no-repeat;
+.vk-icon {
+    background: url('../images/vk.png') center/contain no-repeat;
 }
 
 .about-input:valid {

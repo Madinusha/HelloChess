@@ -125,8 +125,8 @@
                             Telegram: <span th:text="${user.telegram} ?: 'не указан'"></span>
                         </li>
                         <li>
-                            <span class="social-icon instagram-icon"></span>
-                            Instagram: <span th:text="${user.instagram} ?: 'не указан'"></span>
+                            <span class="social-icon vk-icon"></span>
+                            VK: <span th:text="${user.vk} ?: 'не указан'"></span>
                         </li>
                     </ul>
                 </div>
@@ -206,30 +206,6 @@
                         <button id="add-language-btn" class="add-button" type="button">+ Добавить язык</button>
                     </div>
 
-<!--                    <div class="about-section">-->
-<!--                        <label class="about-label">Языки:</label>-->
-<!--                        <div id="languages-container">-->
-<!--                            <div th:each="lang, iter : ${userLanguages}" class="language-input-group">-->
-<!--                                <select name="languages" class="about-input">-->
-<!--                                    <option th:each="availLang : ${availableLanguages}"-->
-<!--                                            th:value="${availLang}"-->
-<!--                                            th:text="${availLang}"-->
-<!--                                            th:selected="${lang.language == availLang}">-->
-<!--                                    </option>-->
-<!--                                </select>-->
-<!--                                <select name="languageLevels" class="about-input">-->
-<!--                                    <option th:each="level : ${T(org.madi.demo.entities.UserLanguage.LanguageLevel).values()}"-->
-<!--                                            th:value="${level}"-->
-<!--                                            th:text="${level.displayName}"-->
-<!--                                            th:selected="${lang.level == level}">-->
-<!--                                    </option>-->
-<!--                                </select>-->
-<!--                                <button type="button" class="remove-language-btn">×</button>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <button id="add-language-btn" class="add-button" type="button">+ Добавить язык</button>-->
-<!--                    </div>-->
-
                     <!-- Контакты -->
                     <div class="about-section">
                         <label class="about-label">Контакты:</label>
@@ -246,11 +222,11 @@
 
                         <div class="contact-input-group">
                             <div class="social-input">
-                                <span class="social-icon instagram-icon"></span>
-                                <input type="text" id="edit-instagram" class="about-input" name="instagram" th:value="${user.instagram}"
+                                <span class="social-icon vk-icon"></span>
+                                <input type="text" id="edit-vk" class="about-input" name="vk" th:value="${user.vk}"
                                        placeholder="username"
                                        pattern="^[A-Za-z][A-Za-z0-9_.]{1,30}$"
-                                       title="Введите Instagram без @ и спецсимволов">
+                                       title="Введите Vk без @ и спецсимволов">
                             </div>
                         </div>
                     </div>

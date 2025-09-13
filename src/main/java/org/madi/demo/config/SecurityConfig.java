@@ -59,6 +59,7 @@ public class SecurityConfig {
 							"/favicon.ico"
 					).permitAll()
 					.requestMatchers("/game").authenticated()
+					.requestMatchers("/api/admin/**").hasRole("ADMIN")
 					.anyRequest().authenticated()
 			)
 			.formLogin(form -> form

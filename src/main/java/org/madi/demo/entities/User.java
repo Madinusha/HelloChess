@@ -71,7 +71,7 @@ public class User implements UserDetails {
 	private String telegram;
 
 	@Column
-	private String instagram;
+	private String vk;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "rank_id")
@@ -85,6 +85,18 @@ public class User implements UserDetails {
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserTaskProgress> taskProgresses = new ArrayList<>();
+
+	@Column(name = "is_admin", columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean isAdmin;
+
+	@Column(name = "is_banned", columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean isBanned;
+
+	@Column(name = "ban_reason")
+	private String banReason;
+
+	@Column(name = "ban_expires_at")
+	private LocalDateTime banExpiresAt;
 
 	public void addLanguage(String language, UserLanguage.LanguageLevel level) {
 		UserLanguage userLanguage = new UserLanguage();
@@ -126,6 +138,9 @@ public class User implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
+		if (isBanned) {
+			return banExpiresAt != null && banExpiresAt.isBefore(LocalDateTime.now());
+		}
 		return true;
 	}
 

@@ -34,15 +34,101 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
-    // Инициализация
-    renderBannedUsers();
-    renderAdmins();
-    renderReports('all');
+    const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+    let bannedUsers = [];
+    let admins = [];
+    let reports = [];
+
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const target = this.dataset.tab;
+
+            // Удаляем активный класс у всех кнопок и панелей
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            // Добавляем активный класс нужной вкладке и кнопке
+            this.classList.add('active');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+
+    // По умолчанию загружаем админов и жалобы
+    loadAdmins();
+    loadBannedUsers();
+    loadReports();
+
+    // Инициализация поиска и фильтрации
+    initSearch();
+    initFilters();
+
+    function initSearch() {
+        // Можно оставить пустой, если не используется
+    }
+    function initFilters() {
+        // Можно оставить пустой, если не используется
+    }
+
+    async function loadBannedUsers() {
+        try {
+            const response = await fetch('/api/admin/banned', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+            if (response.ok) {
+                bannedUsers = await response.json();
+                renderBannedUsers();
+                renderSearchResults(bannedUsers.filter(u => !u.isBanned));
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+
+    async function loadReports() {
+        try {
+            const response = await fetch('/api/reports', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                reports = data.content || [];
+                renderReports('all');
+            } else {
+                console.error('Server responded with status:', response.status);
+                reports = [];
+                renderReports('all');
+            }
+        } catch (error) {
+            console.error('Error loading reports:', error);
+        }
+    }
+
+    async function loadAdmins() {
+        try {
+            const response = await fetch('/api/admin/admins', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+            if (response.ok) {
+                admins = await response.json();
+                renderAdmins(admins);
+            }
+        } catch (error) {
+            console.error('Error loading admins:', error);
+        }
+    }
 
     // Поиск пользователей
     document.getElementById('search-btn').addEventListener('click', function() {
         const searchTerm = document.getElementById('user-search').value.toLowerCase();
-        const results = mockUsers.filter(user =>
+        const results = admins.filter(user =>
             user.username.toLowerCase().includes(searchTerm) && !user.banned
         );
         renderSearchResults(results);
@@ -59,44 +145,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('search-admin-btn').addEventListener('click', function() {
         const searchTerm = document.getElementById('admin-search').value.toLowerCase();
-        const results = mockUsers.filter(user =>
+        const results = admins.filter(user =>
             user.username.toLowerCase().includes(searchTerm)
         );
         renderAdminSearchResults(results);
     });
 
     // Функции рендеринга
-    function renderSearchResults(users) {
-        const container = document.getElementById('users-list');
-        container.innerHTML = '';
+   function renderSearchResults(users) {
+       const container = document.getElementById('users-list');
+       container.innerHTML = '';
+       if (users.length === 0) return;
 
-        if (users.length === 0) {
-            container.innerHTML = '<p>Пользователи не найдены</p>';
-            return;
-        }
+       users.forEach(user => {
+           const userEl = document.createElement('div');
+           userEl.className = 'user-item';
+           userEl.innerHTML = `
+               <span>${user.username}</span>
+               <div class="user-actions">
+                   <button class="action-btn ban-btn" data-id="${user.id}">Бан</button>
+               </div>
+           `;
+           container.appendChild(userEl);
+       });
 
-        users.forEach(user => {
-            const userEl = document.createElement('div');
-            userEl.className = 'user-item';
-            userEl.innerHTML = `
-                <span>${user.username}</span>
-                <div class="user-actions">
-                    <button class="action-btn ban-btn" data-id="${user.id}">Бан</button>
-                </div>
-            `;
-            container.appendChild(userEl);
-        });
-
-        // Обработчики для кнопок
-        addBanHandlers();
-        addAdminHandlers();
-    }
+       addBanHandlers();
+       addAdminHandlers();
+   }
 
     function renderBannedUsers() {
         const container = document.getElementById('banned-list');
         container.innerHTML = '';
 
-        const bannedUsers = mockUsers.filter(user => user.banned);
+//        const bannedUsers = mockUsers.filter(user => user.banned);
 
         if (bannedUsers.length === 0) {
             container.innerHTML = '<p>Нет забаненных пользователей</p>';
@@ -121,9 +202,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('reports-list');
         container.innerHTML = '';
 
-        let filteredReports = mockReports;
+        let filteredReports = reports;
         if (filterType !== 'all') {
-            filteredReports = mockReports.filter(report => report.type === filterType);
+            filteredReports = reports.filter(report => report.type === filterType);
         }
 
         if (filteredReports.length === 0) {
@@ -138,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
             reportEl.innerHTML = `
                 <div class="report-header">
                     <div class="report-user">
-                        <span class="report-username">${report.targetUser}</span>
+                        <span class="report-username">${report.reporterUsername}</span>
                         <span class="report-count">${report.count}</span>
                     </div>
                     <div class="report-actions-wrapper">
@@ -148,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 <div class="report-content">
-                    ${report.type === 'message'
+                    ${report.type === 'MESSAGE'
                         ? `<div class="report-message">${report.message}</div>`
                         : `<div class="report-profile-notice">Жалоба на профиль</div>
                            <a href="/profile/${report.targetUser}" class="report-profile-link">Перейти к профилю →</a>`}
@@ -180,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('admins-list');
         container.innerHTML = '';
 
-        const admins = mockUsers.filter(user => user.isAdmin);
+//        const admins = mockUsers.filter(user => user.isAdmin);
 
         if (admins.length === 0) {
             container.innerHTML = '<p>Нет администраторов</p>';
@@ -192,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
             adminEl.className = 'admin-item';
             adminEl.innerHTML = `
                 <div class="admin-header">
-                    <span>${user.username}</span>
+                    <span>${user.nickname}</span>
                     <div class="admin-actions">
                         <button class="action-btn remove-admin-btn" data-id="${user.id}">Убрать</button>
                     </div>
@@ -237,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Обработчик подтверждения бана
-        confirmBan.addEventListener('click', function() {
+        confirmBan.addEventListener('click', async function() {
             if (!currentUserToBan) return;
 
             const duration = parseInt(banTime.value);
@@ -255,27 +336,75 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const user = mockUsers.find(u => u.username === currentUserToBan || u.id == currentUserToBan);
             if (confirm(`Подтверждаете бан пользователя ${user.username} на ${durationText}?`)) {
-                // Здесь будет запрос на сервер
-                user.banned = true;
-                alert(`Пользователь ${user.username} забанен на ${durationText}`);
-                renderBannedUsers();
-                modal.style.display = 'none';
+                const actionDTO = {
+                    userId: user.id,
+                    action: "ban",
+                    banDuration: duration, // выбранное время
+                    banReason: "Нарушение правил сообщества" // можно добавить поле для ввода причины
+                };
+
+                try {
+                    const response = await fetch('/api/admin/actions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify(actionDTO)
+                    });
+
+                    if (response.ok) {
+                        user.banned = true;
+                        alert(`Пользователь ${user.username} забанен на ${durationText}`);
+                        renderBannedUsers();
+                        modal.style.display = 'none';
+                    } else {
+                        alert('Ошибка при выполнении действия');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Ошибка сети');
+                }
             }
         });
     }
 
     function addUnbanHandlers() {
         document.querySelectorAll('.unban-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', async function(e) {
                 e.stopPropagation();
                 const userId = this.dataset.id;
                 const user = mockUsers.find(u => u.id == userId);
+
                 if (confirm(`Разбанить пользователя ${user.username}?`)) {
-                    // Здесь будет запрос на сервер
-                    alert(`Пользователь ${user.username} разбанен`);
-                    // Обновляем интерфейс
-                    user.banned = false;
-                    renderBannedUsers();
+                    const actionDTO = {
+                        userId: userId,
+                        action: "unban"
+                    };
+
+                    try {
+                        const response = await fetch('/api/admin/actions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify(actionDTO)
+                        });
+
+                        if (response.ok) {
+                            alert(`Пользователь ${user.username} разбанен`);
+                            // Обновляем интерфейс
+                            user.banned = false;
+                            renderBannedUsers();
+                        } else {
+                            const error = await response.text();
+                            alert(`Ошибка: ${error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Ошибка сети');
+                    }
                 }
             });
         });
@@ -283,13 +412,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addAdminHandlers() {
         document.querySelectorAll('.admin-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', async function(e) {
                 e.stopPropagation();
                 const userId = this.dataset.id;
                 const user = mockUsers.find(u => u.id == userId);
+
                 if (confirm(`Назначить пользователя ${user.username} администратором?`)) {
-                    // Здесь будет запрос на сервер
-                    alert(`Пользователь ${user.username} теперь администратор`);
+                    const actionDTO = {
+                        userId: userId,
+                        action: "make_admin"
+                    };
+
+                    try {
+                        const response = await fetch('/api/admin/actions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify(actionDTO)
+                        });
+
+                        if (response.ok) {
+                            alert(`Пользователь ${user.username} теперь администратор`);
+                            // Обновляем интерфейс
+                            user.isAdmin = true;
+                            renderAdmins();
+                            renderAdminSearchResults(mockUsers.filter(u =>
+                                u.username.toLowerCase().includes(
+                                    document.getElementById('admin-search').value.toLowerCase()
+                                )
+                            ));
+                        } else {
+                            const error = await response.text();
+                            alert(`Ошибка: ${error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Ошибка сети');
+                    }
                 }
             });
         });
@@ -297,22 +458,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addResolveHandlers() {
         document.querySelectorAll('.resolve-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            btn.addEventListener('click', async function(e) {
                 e.stopPropagation();
                 const reportId = this.dataset.id;
+
                 if (confirm(`Пометить жалобу #${reportId} как решенную?`)) {
-                    // Здесь будет запрос на сервер
-                    alert(`Жалоба #${reportId} помечена как решенная`);
-                    // Обновляем интерфейс
-                    mockReports = mockReports.filter(r => r.id != reportId);
-                    renderReports(document.querySelector('.filter-btn.active').dataset.type);
+                    try {
+                        const response = await fetch(`/api/reports/${reportId}/resolve`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        });
+
+                        if (response.ok) {
+                            alert(`Жалоба #${reportId} помечена как решенная`);
+                            // Обновляем интерфейс
+                            mockReports = mockReports.filter(r => r.id != reportId);
+                            renderReports(document.querySelector('.filter-btn.active').dataset.type);
+                        } else {
+                            const error = await response.text();
+                            alert(`Ошибка: ${error}`);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Ошибка сети');
+                    }
                 }
             });
         });
     }
 
     // Функция рендеринга списка администраторов
-    function renderAdmins() {
+    function renderAdmins2() {
         const container = document.getElementById('admins-list');
         container.innerHTML = '';
 
@@ -339,15 +517,10 @@ document.addEventListener('DOMContentLoaded', function() {
         addBanHandlers();
     }
 
-    // Функция рендеринга результатов поиска администраторов
     function renderAdminSearchResults(users) {
         const container = document.getElementById('admins-found-list');
         container.innerHTML = '';
-
-        if (users.length === 0) {
-            container.innerHTML = '<p>Администраторы не найдены</p>';
-            return;
-        }
+        if (users.length === 0) return;
 
         users.forEach(user => {
             const userEl = document.createElement('div');
@@ -355,9 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
             userEl.innerHTML = `
                 <span>${user.username}</span>
                 <div class="user-actions">
-                    ${user.isAdmin
-                        ? '<button class="action-btn remove-admin-btn" data-id="${user.id}">Забрать права</button>'
-                        : '<button class="action-btn admin-btn" data-id="${user.id}">Назначить</button>'}
+                    ${user.isAdmin ? '<button class="action-btn remove-admin-btn" data-id="${user.id}">Забрать права</button>' : '<button class="action-btn admin-btn" data-id="${user.id}">Назначить</button>'}
                 </div>
             `;
             container.appendChild(userEl);
@@ -365,8 +536,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
         addAdminHandlers();
         addRemoveAdminHandlers();
-        addBanHandlers();
     }
+
+    // Функция рендеринга результатов поиска администраторов
+//    function renderAdminSearchResults(users) {
+//        const container = document.getElementById('admins-found-list');
+//        container.innerHTML = '';
+//
+//        if (users.length === 0) {
+//            container.innerHTML = '<p>Администраторы не найдены</p>';
+//            return;
+//        }
+//
+//        users.forEach(user => {
+//            const userEl = document.createElement('div');
+//            userEl.className = 'user-item';
+//            userEl.innerHTML = `
+//                <span>${user.username}</span>
+//                <div class="user-actions">
+//                    ${user.isAdmin
+//                        ? '<button class="action-btn remove-admin-btn" data-id="${user.id}">Забрать права</button>'
+//                        : '<button class="action-btn admin-btn" data-id="${user.id}">Назначить</button>'}
+//                </div>
+//            `;
+//            container.appendChild(userEl);
+//        });
+//
+//        addAdminHandlers();
+//        addRemoveAdminHandlers();
+//        addBanHandlers();
+//    }
 
     // Обработчик для кнопки "Убрать админство"
     function addRemoveAdminHandlers() {

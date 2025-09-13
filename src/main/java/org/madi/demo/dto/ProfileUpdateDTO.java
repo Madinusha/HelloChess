@@ -17,5 +17,5 @@ public class ProfileUpdateDTO {
 	private List<String> languages;
 	private List<String> languageLevels;
 	private String telegram;
-	private String instagram;
+	private String vk;
 }

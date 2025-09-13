@@ -278,7 +278,7 @@ public class MainController {
 		profileUpdateDTO.setGender(requestedUser.getGender() != null ? requestedUser.getGender().name() : null);
 		profileUpdateDTO.setRankId(requestedUser.getRank() != null ? requestedUser.getRank().getId() : null);
 		profileUpdateDTO.setTelegram(requestedUser.getTelegram());
-		profileUpdateDTO.setInstagram(requestedUser.getInstagram());
+		profileUpdateDTO.setVk(requestedUser.getVk());
 		profileUpdateDTO.setLanguages(userLanguages.stream()
 				.map(UserLanguage::getLanguage)
 				.toList());
@@ -306,7 +306,7 @@ public class MainController {
 		user.setBirthDate(updateDTO.getBirthDate());
 		user.setGender(User.Gender.valueOf(updateDTO.getGender()));
 		user.setTelegram(updateDTO.getTelegram());
-		user.setInstagram(updateDTO.getInstagram());
+		user.setVk(updateDTO.getVk());
 
 		// Обновляем разряд
 		if (updateDTO.getRankId() != null) {
