@@ -39,9 +39,11 @@ header {
     width: 100%;
     position: relative;
 }
-button:focus  {
+
+button:focus {
     outline: none;
 }
+
 .hidden-header, .hidden-header * {
     display: none !important;
 }
@@ -57,7 +59,8 @@ button:focus  {
     -webkit-background-clip: text;
     color: transparent;
 }
-#logo:focus  {
+
+#logo:focus {
     outline: none;
 }
 
@@ -65,6 +68,7 @@ button:focus  {
     display: flex;
     justify-content: center;
 }
+
 .navbar-list {
     list-style-type: none;
     display: flex;
@@ -72,19 +76,23 @@ button:focus  {
     padding: 0;
     margin: 0;
 }
-.navbar-link:focus  {
+
+.navbar-link:focus {
     outline: none;
     color: var(--carrot-red);
 }
+
 .navbar-link {
     text-decoration: none;
     -webkit-background-clip: text;
     font-size: 1em;
     color: var(--dark-purple);
 }
+
 .navbar-link:hover {
     color: var(--carrot-red);
 }
+
 .navbar-item {
     cursor: pointer;
 }
@@ -92,10 +100,15 @@ button:focus  {
 #fast-nav {
     margin-left: auto;
     margin-right: 1em;
-    display: flex;
     align-items: center;
     justify-content: center;
+    display: none; /* По умолчанию скрыт */
 }
+
+.logged-in #fast-nav {
+    display: flex; /* Показываем только для авторизованных */
+}
+
 #versus-btn {
     background: url("../images/versus-btn.png") center/cover no-repeat;
     filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
@@ -104,6 +117,7 @@ button:focus  {
     border: none;
     cursor: pointer;
 }
+
 #versus-btn:hover {
     filter: brightness(0) saturate(100%) invert(22%) sepia(24%) saturate(5857%) hue-rotate(336deg) brightness(109%) contrast(92%);
 }
@@ -118,6 +132,7 @@ button:focus  {
     height: 100%;
     display: none;
 }
+
 #profile-box-nickname {
     font-size: 1.2em;
     -webkit-background-clip: border-box;
@@ -127,9 +142,11 @@ button:focus  {
     font-family: 'TeXGyreHeros', sans-serif;
     cursor: pointer;
 }
+
 #profile-box:active #profile-box-nickname {
     color: black;
 }
+
 #profile-box-avatar {
     background: url("../images/profile-box-avatar.png") center/cover no-repeat;
     filter: brightness(0) saturate(100%) invert(23%) sepia(28%) saturate(530%) hue-rotate(267deg) brightness(96%) contrast(91%);
@@ -137,20 +154,24 @@ button:focus  {
     height: 1.5em;
     border-radius: 50%;
 }
+
 #profile-box:hover #profile-box-nickname {
     color: var(--carrot-red);
 }
+
 #profile-box:hover #profile-box-avatar {
     filter: brightness(0) saturate(100%) invert(22%) sepia(24%) saturate(5857%) hue-rotate(336deg) brightness(109%) contrast(92%);
 }
+
 #profile-box:active #profile-box-nickname {
     color: var(--dark-purple);
 }
+
 #profile-box:active #profile-box-avatar {
     filter: brightness(0) saturate(100%) invert(21%) sepia(5%) saturate(3189%) hue-rotate(267deg) brightness(100%) contrast(84%);
 }
 
-#login{
+#login {
     background: linear-gradient(100deg, var(--dark-purple), var(--carrot-red));
     border-radius: 7px;
     border: none;
@@ -159,15 +180,21 @@ button:focus  {
     height: 70%;
     cursor: pointer;
     margin-right: 0.5em;
+    padding: 0.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
 }
-#login:hover{
+
+#login:hover {
     background: var(--carrot-red);
 }
+
 #login:active {
     transform: scale(0.97);
 }
 
-/* Ð¡Ñ‚Ð¸Ð»Ð¸ Ð´Ð»Ñ Ð²Ñ‹Ð¿Ð°Ð´Ð°ÑŽÑ‰ÐµÐ³Ð¾ Ð¼ÐµÐ½ÑŽ */
 .navbar-item.dropdown {
     position: relative;
 }
@@ -179,7 +206,7 @@ button:focus  {
     left: 0;
     background-color: var(--dark-purple);
     border-radius: 0 0 4px 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     min-width: 200px;
     z-index: 1000;
     padding: 0;
@@ -200,24 +227,25 @@ button:focus  {
     color: white;
 }
 
-/* ÐŸÐ¾ÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÐ¼ Ð¼ÐµÐ½ÑŽ Ð¿Ñ€Ð¸ Ð½Ð°Ð²ÐµÐ´ÐµÐ½Ð¸Ð¸ */
 .navbar-item.dropdown:hover .dropdown-menu {
     display: block;
 }
 
-/* ÐÐ½Ð¸Ð¼Ð°Ñ†Ð¸Ñ Ð´Ð»Ñ Ð¿Ð»Ð°Ð²Ð½Ð¾Ð³Ð¾ Ð¿Ð¾ÑÐ²Ð»ÐµÐ½Ð¸Ñ */
 .dropdown-menu {
     animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-
-
-/* Ð¡Ñ‚Ð¸Ð»Ð¸ Ð´Ð»Ñ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ð¹ */
 .notifications-container {
     position: relative;
     display: inline-block;
@@ -232,7 +260,7 @@ button:focus  {
     overflow-y: auto;
     background-color: white;
     border-radius: 0.5rem;
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.2);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
     z-index: 1000;
     display: none;
     padding: 0.5rem;
@@ -326,4 +354,143 @@ button:focus  {
     justify-content: center;
     font-size: 0.7rem;
     font-weight: bold;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.mobile-menu-toggle span {
+    width: 100%;
+    height: 2px;
+    background-color: var(--dark-purple);
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+/* Единый стиль для header-right на всех устройствах */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    height: 70%;
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+    .header {
+        padding: 0 1em;
+        height: auto;
+        min-height: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+        flex: 0 0 auto;
+    }
+
+    #logo {
+        margin: 0;
+        padding: 0.5em 0;
+        flex: 1;
+        text-align: center;
+        position: static;
+        transform: none;
+        left: auto;
+    }
+
+    /* В мобильной версии fast-nav всегда скрыт */
+    #fast-nav {
+        display: none !important;
+    }
+
+    .navbar {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--white-gray);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        padding: 1em;
+    }
+
+    .navbar.active {
+        display: block;
+    }
+
+    .navbar-list {
+        flex-direction: column;
+        gap: 1.2em;
+        align-items: flex-start;
+    }
+
+    .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        background-color: var(--light-purple);
+        margin-top: 0.5em;
+        border-radius: 4px;
+        animation: none;
+        display: none;
+    }
+
+    .navbar-item.dropdown:hover .dropdown-menu,
+    .navbar-item.dropdown.active .dropdown-menu {
+        display: block;
+    }
+
+    #profile-box {
+        display: none;
+    }
+
+    .notifications-container {
+        position: relative;
+    }
+
+    .notifications-list {
+        right: 0;
+        left: auto;
+        width: 280px;
+    }
+
+    /* Сохраняем одинаковые размеры кнопок в мобильной версии */
+    #versus-btn {
+        width: 1.5em;
+        height: 1.5em;
+    }
+
+    #profile-box-avatar {
+        width: 1.5em;
+        height: 1.5em;
+    }
+
+    #profile-box-nickname {
+        font-size: 1em;
+        margin-right: 0.5em;
+    }
+}
+
+/* Десктопная версия */
+@media (min-width: 769px) {
+    .mobile-menu-toggle {
+        display: none;
+    }
+
+    .navbar {
+        display: flex;
+    }
 }

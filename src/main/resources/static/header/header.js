@@ -71,24 +71,35 @@ function goToProfile() {
 function showLoginButton() {
     document.getElementById("login").style.display = "block";
     document.getElementById("profile-box").style.display = "none";
+
+    // Убираем класс logged-in
+    document.querySelector('header').classList.remove('logged-in');
 }
 
 function displayUserProfileBtn(user) {
-    // Пример отображения информации о пользователе
     const profileBox = document.getElementById("profile-box");
     const profileBoxNickname = document.getElementById("profile-box-nickname");
-    const profileBoxAvatar = document.getElementById("profile-box-avatar");
-    profileBoxNickname.textContent = `${user.nickname}`; // Отображаем имя пользователя
+    profileBoxNickname.textContent = `${user.nickname}`;
     profileBox.style.display = "flex";
 
     const login = document.getElementById("login");
     login.style.display = "none";
 
+    // Добавляем класс logged-in для отображения fast-nav на десктопе
+    document.querySelector('header').classList.add('logged-in');
+
     initNotifications();
 }
 
 function initNotifications() {
+    // Не инициализируем уведомления на мобильных устройствах
+    if (window.innerWidth <= 768) {
+        return;
+    }
+
     const versusBtn = document.getElementById("versus-btn");
+    if (!versusBtn) return;
+
     notificationBadge = document.createElement("div");
     notificationBadge.className = "notification-badge";
     notificationBadge.style.display = "none";
@@ -106,7 +117,6 @@ function initNotifications() {
         });
     }, 1000);
 }
-
 function toggleNotifications() {
     const list = document.getElementById("notifications-list");
     list.style.display = list.style.display === "block" ? "none" : "block";
@@ -222,22 +232,33 @@ function updateBadge() {
         notificationBadge.style.display = "none";
     }
 }
-//
-//addNotification({
-//    type: "invite",
-//    username: "prosto_erik",
-//    rating: 1654,
-//    timeControl: "10 + 2"
-//});
-//
-//addNotification({
-//    type: "decline",
-//    username: "sonya"
-//});
-//
-//addNotification({
-//    type: "game_start",
-//    username: "prosto_erik",
-//    rating: 1654,
-//    timeControl: "15 + 0"
-//});
+
+const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+const mobileNavbar = document.getElementById("mobile-navbar");
+
+if (mobileMenuToggle && mobileNavbar) {
+    mobileMenuToggle.addEventListener("click", () => {
+        mobileNavbar.classList.toggle("active");
+        const spans = mobileMenuToggle.querySelectorAll("span");
+        if (mobileNavbar.classList.contains("active")) {
+            spans[0].style.transform = "rotate(45deg) translate(5px, 5px)";
+            spans[1].style.opacity = "0";
+            spans[2].style.transform = "rotate(-45deg) translate(5px, -5px)";
+        } else {
+            spans[0].style.transform = "none";
+            spans[1].style.opacity = "1";
+            spans[2].style.transform = "none";
+        }
+    });
+
+    // Закрытие меню при клике вне его
+    document.addEventListener("click", (e) => {
+        if (!mobileNavbar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+            mobileNavbar.classList.remove("active");
+            const spans = mobileMenuToggle.querySelectorAll("span");
+            spans[0].style.transform = "none";
+            spans[1].style.opacity = "1";
+            spans[2].style.transform = "none";
+        }
+    });
+}

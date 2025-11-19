@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Header</title>
@@ -8,8 +8,17 @@
 <header class="header" th:fragment="header">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <!-- Бургер-кнопка (слева) -->
+    <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
     <a href="/" id="logo">HelloChess</a>
-    <nav class="navbar">
+
+    <nav class="navbar" id="mobile-navbar">
         <ul class="navbar-list">
             <li class="navbar-item"><a th:onclick="|document.location.href='@{/gameConstructor}'|" class="navbar-link">ИГРА</a></li>
             <li class="navbar-item"><a th:onclick="|document.location.href='@{/education}'|" class="navbar-link">ОБУЧЕНИЕ</a></li>
@@ -27,18 +36,22 @@
             </li>
         </ul>
     </nav>
-    <div id="fast-nav">
-        <button id="versus-btn"></button>
-    </div>
-    <div id="notifications-container" class="notifications-container">
-        <div id="notifications-list" class="notifications-list"></div>
-    </div>
-    <button id="login" th:onclick="|document.location.href='@{/registration}'|">SIGN IN</button>
-        <div id="profile-box" th:onclick="goToProfile()">
-        <button id="profile-box-nickname"></button>
-        <div id="profile-box-avatar"></div>
-    </div>
 
+    <div class="header-right">
+        <div id="fast-nav" class="fast-nav">
+            <button id="versus-btn"></button>
+        </div>
+
+        <div id="notifications-container" class="notifications-container">
+            <div id="notifications-list" class="notifications-list"></div>
+        </div>
+
+        <button id="login" th:onclick="|document.location.href='@{/registration}'|">Войти</button>
+        <div id="profile-box" th:onclick="goToProfile()">
+            <button id="profile-box-nickname"></button>
+            <div id="profile-box-avatar"></div>
+        </div>
+    </div>
 </header>
 </body>
 </html>
