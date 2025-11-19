@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.madi.demo.enums.LessonType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -72,12 +73,6 @@ public class Lesson {
 		this.title = title;
 		this.description = description;
 		this.lessonType = lessonType;
-	}
-
-	public enum LessonType {
-		PIECE_TECHNIQUE,
-		ADVANCED_LEVEL,
-		TACTICS
 	}
 }
 

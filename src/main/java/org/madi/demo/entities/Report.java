@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.madi.demo.enums.ReportStatus;
+import org.madi.demo.enums.ReportType;
 
 import java.time.LocalDateTime;
 
@@ -15,13 +17,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Report {
-	public enum ReportType {
-		MESSAGE, ACCOUNT, GAME, OTHER
-	}
-
-	public enum ReportStatus {
-		PENDING, RESOLVED, REJECTED
-	}
     /**
      * id
      */

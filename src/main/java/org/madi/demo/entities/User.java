@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.madi.demo.enums.LanguageLevel;
+import org.madi.demo.enums.Sex;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -146,7 +148,7 @@ public class User implements UserDetails {
 	@Column(name = "ban_expires_at")
 	private LocalDateTime banExpiresAt;
 
-	public void addLanguage(String language, UserLanguage.LanguageLevel level) {
+	public void addLanguage(String language, LanguageLevel level) {
 		UserLanguage userLanguage = new UserLanguage();
 		userLanguage.setUser(this);
 		userLanguage.setLanguage(language);
@@ -200,9 +202,5 @@ public class User implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
-	}
-
-	public enum Sex {
-		MALE, FEMALE
 	}
 }

@@ -63,5 +63,4 @@ public class GameHistory {
      */
 	@Column(name = "end_time")
 	private LocalDateTime endTime;
-
 }

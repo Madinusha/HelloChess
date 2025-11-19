@@ -2,6 +2,7 @@ package org.madi.demo.repository;
 
 import org.madi.demo.entities.Friendship;
 import org.madi.demo.entities.User;
+import org.madi.demo.enums.FriendshipStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,20 +14,20 @@ import java.util.List;
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
-	List<Friendship> findByFriendAndStatus(User friend, Friendship.FriendshipStatus status);
+	List<Friendship> findByFriendAndStatus(User friend, FriendshipStatus status);
 
 	@Query("SELECT f FROM Friendship f WHERE f.user.id = :userId AND f.status = 'ACCEPTED'")
 	List<Friendship> findAcceptedFriends(@Param("userId") Long userId);
 
 	boolean existsByUserAndFriend(User user, User friend);
 
-	List<Friendship> findByUserAndStatus(User user, Friendship.FriendshipStatus status);
+	List<Friendship> findByUserAndStatus(User user, FriendshipStatus status);
 
 	Friendship findByUserAndFriend(User user, User friend);
 
-	Friendship findByUserAndFriendAndStatus(User user, User friend, Friendship.FriendshipStatus status);
+	Friendship findByUserAndFriendAndStatus(User user, User friend, FriendshipStatus status);
 
-	boolean existsByUserAndFriendAndStatus(User user, User friend, Friendship.FriendshipStatus status);
+	boolean existsByUserAndFriendAndStatus(User user, User friend, FriendshipStatus status);
 
 	@Query("SELECT f FROM Friendship f WHERE " +
 			"(f.user = :user1 AND f.friend = :user2) OR " +
@@ -41,7 +42,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 	void deleteFriendshipBetweenUsers(
 			@Param("user1") User user1,
 			@Param("user2") User user2,
-			@Param("status") Friendship.FriendshipStatus status);
+			@Param("status") FriendshipStatus status);
 
 	@Modifying
 	@Query("DELETE FROM Friendship f WHERE f.user.id = :userId OR f.friend.id = :userId")

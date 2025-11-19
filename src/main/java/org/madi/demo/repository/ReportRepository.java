@@ -1,8 +1,8 @@
 package org.madi.demo.repository;
 
 import org.madi.demo.entities.Report;
-import org.madi.demo.entities.Report.ReportStatus;
-import org.madi.demo.entities.Report.ReportType;
+import org.madi.demo.enums.ReportStatus;
+import org.madi.demo.enums.ReportType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

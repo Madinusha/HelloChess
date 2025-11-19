@@ -5,6 +5,8 @@ import org.madi.demo.dto.*;
 import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
+import org.madi.demo.enums.LanguageLevel;
+import org.madi.demo.enums.Sex;
 import org.madi.demo.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -19,7 +21,7 @@ import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static org.madi.demo.entities.Lesson.LessonType.*;
+import static org.madi.demo.enums.LessonType.*;
 
 @Controller
 public class MainController {
@@ -230,12 +232,7 @@ public class MainController {
 		System.out.println("currentUser: " + currentUser.getNickname());
 		System.out.println("requestedUser: " + requestedUser.getNickname());
 
-		if (requestedUser == null) {
-			model.addAttribute("error", "Пользователь не найден");
-			return "error";
-		}
-		boolean isMyProfile = currentUser != null &&
-				currentUser.getNickname().equals(nickname);
+        boolean isMyProfile = currentUser.getNickname().equals(nickname);
 
 		String friendshipStatusDetailed = friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
 		System.out.println("friendshipStatusDetailed " + friendshipStatusDetailed);
@@ -259,8 +256,8 @@ public class MainController {
 		// Получаем все доступные языки для выпадающего списка
 		List<String> availableLanguages = Arrays.asList("Русский", "Английский", "Немецкий", "Французский", "Испанский");
 		model.addAttribute("availableLanguages", availableLanguages);
-		List<String> languageLevels = Arrays.stream(UserLanguage.LanguageLevel.values())
-				.map(UserLanguage.LanguageLevel::getDisplayName)
+		List<String> languageLevels = Arrays.stream(LanguageLevel.values())
+				.map(LanguageLevel::getDisplayName)
 				.toList();
 		model.addAttribute("languageLevels", languageLevels);
 
@@ -272,7 +269,7 @@ public class MainController {
 		ProfileUpdateDTO profileUpdateDTO = new ProfileUpdateDTO();
 		profileUpdateDTO.setBio(requestedUser.getBio());
 		profileUpdateDTO.setBirthDate(requestedUser.getBirthDate());
-		profileUpdateDTO.setGender(requestedUser.getSex() != null ? requestedUser.getSex().name() : null);
+		profileUpdateDTO.setSex(requestedUser.getSex() != null ? Sex.valueOf(requestedUser.getSex().name()) : null);
 		profileUpdateDTO.setRankId(requestedUser.getRank() != null ? requestedUser.getRank().getId() : null);
 		profileUpdateDTO.setTelegram(requestedUser.getTelegram());
 		profileUpdateDTO.setVk(requestedUser.getVk());
@@ -301,7 +298,7 @@ public class MainController {
 		// Обновляем основные поля
 		user.setBio(updateDTO.getBio());
 		user.setBirthDate(updateDTO.getBirthDate());
-		user.setSex(User.Sex.valueOf(updateDTO.getGender()));
+		user.setSex(Sex.valueOf(String.valueOf(updateDTO.getSex())));
 		user.setTelegram(updateDTO.getTelegram());
 		user.setVk(updateDTO.getVk());
 
@@ -314,8 +311,8 @@ public class MainController {
 		}
 
 		// Обновляем языки
-		List<UserLanguage.LanguageLevel> levels = updateDTO.getLanguageLevels().stream()
-				.map(UserLanguage.LanguageLevel::fromDisplayName)
+		List<LanguageLevel> levels = updateDTO.getLanguageLevels().stream()
+				.map(LanguageLevel::fromDisplayName)
 				.toList();
 
 		// Обновляем языки

@@ -4,13 +4,12 @@ import jakarta.persistence.EntityNotFoundException;
 import org.madi.demo.dto.CreateLessonDTO;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.entities.Lesson;
-import org.madi.demo.entities.User;
+import org.madi.demo.enums.LessonType;
 import org.madi.demo.repository.LessonRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,7 +44,7 @@ public class LessonService {
 				.collect(Collectors.toList());
 	}
 
-	public List<LessonDTO> getLessonsByType(Lesson.LessonType lessonType) {
+	public List<LessonDTO> getLessonsByType(LessonType lessonType) {
 		return lessonRepository.findByLessonType(lessonType).stream()
 				.map(this::mapToDTO)
 				.collect(Collectors.toList());

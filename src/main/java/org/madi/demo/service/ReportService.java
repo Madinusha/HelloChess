@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.madi.demo.enums.ReportStatus.PENDING;
+import static org.madi.demo.enums.ReportStatus.RESOLVED;
+
 @Service
 public class ReportService {
 
@@ -44,7 +47,7 @@ public class ReportService {
 		List<Report> similarReports = reportRepository.findByTargetUsernameAndTypeAndStatus(
 				dto.getTargetUsername(),
 				dto.getType(),
-				Report.ReportStatus.PENDING
+				PENDING
 		);
 
 		if (!similarReports.isEmpty()) {
@@ -74,7 +77,7 @@ public class ReportService {
 
 	@Transactional(readOnly = true)
 	public List<ReportDTO> getPendingReports() {
-		return reportRepository.findByStatus(Report.ReportStatus.PENDING).stream()
+		return reportRepository.findByStatus(PENDING).stream()
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
 	}
@@ -84,7 +87,7 @@ public class ReportService {
 		Report report = reportRepository.findById(reportId)
 				.orElseThrow(() -> new EntityNotFoundException("Report not found"));
 
-		report.setStatus(Report.ReportStatus.RESOLVED);
+		report.setStatus(RESOLVED);
 		report.setResolvedAt(LocalDateTime.now());
 		report.setResolvedBy(resolvedBy);
 		report.setResolutionComment(dto.getResolutionComment());

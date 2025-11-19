@@ -3,6 +3,7 @@ package org.madi.demo.service;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
+import org.madi.demo.enums.LanguageLevel;
 import org.madi.demo.repository.UserLanguageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,7 @@ public class UserLanguageService {
 		return userLanguageRepository.findByUser(user);
 	}
 
-	public void addLanguage(User user, String language, UserLanguage.LanguageLevel level) {
+	public void addLanguage(User user, String language, LanguageLevel level) {
 		UserLanguage userLanguage = new UserLanguage();
 		userLanguage.setUser(user);
 		userLanguage.setLanguage(language);
@@ -31,7 +32,7 @@ public class UserLanguageService {
 	}
 
 	@Transactional
-	public void updateUserLanguages(User user, List<String> languages, List<UserLanguage.LanguageLevel> levels) {
+	public void updateUserLanguages(User user, List<String> languages, List<LanguageLevel> levels) {
 		// Удаляем старые языки
 		userLanguageRepository.deleteByUser(user);
 

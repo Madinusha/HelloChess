@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.madi.demo.enums.LanguageLevel;
 
 /**
  * Язык пользователя и его уровень
@@ -39,29 +40,5 @@ public class UserLanguage {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "level", nullable = false)
 	private LanguageLevel level;
-
-
-	@Getter
-    public enum LanguageLevel {
-		NATIVE("родной"),
-		ADVANCED("продвинутый"),
-		INTERMEDIATE("средний"),
-		BEGINNER("начальный");
-
-		private final String displayName;
-
-		LanguageLevel(String displayName) {
-			this.displayName = displayName;
-		}
-
-        public static LanguageLevel fromDisplayName(String displayName) {
-			for (LanguageLevel level : values()) {
-				if (level.getDisplayName().equalsIgnoreCase(displayName)) {
-					return level;
-				}
-			}
-			throw new IllegalArgumentException("Unknown language level: " + displayName);
-		}
-	}
 }
 

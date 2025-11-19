@@ -104,7 +104,7 @@
 
                 <div class="about-section">
                     <h3 class="about-title">Пол:</h3>
-                    <p id="gender-view" th:text="${user.gender ?: 'Не указан'}"></p>
+                    <p id="gender-view" th:text="${user.sex ?: 'Не указан'}"></p>
                 </div>
 
                 <div class="about-section">
@@ -165,7 +165,7 @@
 
                     <div class="about-section">
                         <label class="about-label">Пол:</label>
-                        <select name="gender" class="about-input" th:field="*{gender}">
+                        <select name="gender" class="about-input" th:field="*{sex}">
                             <option value="">-- Не указан --</option>
                             <option value="MALE">Мужской</option>
                             <option value="FEMALE">Женский</option>
@@ -193,7 +193,7 @@
                                     </option>
                                 </select>
                                 <select name="languageLevels" class="level-select about-input">
-                                    <option th:each="level : ${T(org.madi.demo.entities.UserLanguage.LanguageLevel).values()}"
+                                    <option th:each="level : ${T(org.madi.demo.enums.LanguageLevel).values()}"
                                             th:value="${level}"
                                             th:text="${level.displayName}"
                                             th:selected="${lang.level == level}">

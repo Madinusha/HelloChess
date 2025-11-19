@@ -2,7 +2,7 @@ package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.madi.demo.entities.Friendship;
-import org.madi.demo.entities.Friendship.FriendshipStatus;
+import org.madi.demo.enums.FriendshipStatus;
 import org.madi.demo.repository.FriendshipRepository;
 import org.springframework.stereotype.Service;
 import org.madi.demo.entities.User;
@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.madi.demo.enums.FriendshipStatus.ACCEPTED;
+import static org.madi.demo.enums.FriendshipStatus.PENDING;
 
 @Service
 public class FriendshipService {
@@ -29,13 +32,13 @@ public class FriendshipService {
 		// Получаем друзей, где текущий пользователь инициатор
 		List<Friendship> outgoingFriendships = friendshipRepository.findByUserAndStatus(
 				user,
-				Friendship.FriendshipStatus.ACCEPTED
+				ACCEPTED
 		);
 
 		// Получаем друзей, где текущий пользователь получатель
 		List<Friendship> incomingFriendships = friendshipRepository.findByFriendAndStatus(
 				user,
-				Friendship.FriendshipStatus.ACCEPTED
+				ACCEPTED
 		);
 
 		// Объединяем и преобразуем
@@ -55,7 +58,7 @@ public class FriendshipService {
 	}
 
 	public List<FriendDTO> getPendingRequests(User user) {
-		return friendshipRepository.findByFriendAndStatus(user, Friendship.FriendshipStatus.PENDING)
+		return friendshipRepository.findByFriendAndStatus(user, PENDING)
 				.stream()
 				.map(friendship -> {
 					FriendDTO dto = new FriendDTO();
@@ -67,7 +70,7 @@ public class FriendshipService {
 	}
 
 	public List<FriendDTO> getOutgoingRequests(User user) {
-		return friendshipRepository.findByUserAndStatus(user, Friendship.FriendshipStatus.PENDING).stream()
+		return friendshipRepository.findByUserAndStatus(user, PENDING).stream()
 				.map(friendship -> {
 					FriendDTO dto = new FriendDTO();
 					dto.setNickname(friendship.getFriend().getNickname());
@@ -86,7 +89,7 @@ public class FriendshipService {
 		Friendship friendship = new Friendship();
 		friendship.setUser(sender);
 		friendship.setFriend(receiver);
-		friendship.setStatus(Friendship.FriendshipStatus.PENDING);
+		friendship.setStatus(PENDING);
 		friendship.setCreatedAt(LocalDateTime.now());
 		friendshipRepository.save(friendship);
 	}
@@ -103,11 +106,11 @@ public class FriendshipService {
 			throw new EntityNotFoundException("Запрос дружбы не найден");
 		}
 
-		if (request.getStatus() != Friendship.FriendshipStatus.PENDING) {
+		if (request.getStatus() != PENDING) {
 			throw new IllegalStateException("Невозможно принять уже обработанный запрос");
 		}
 
-		request.setStatus(Friendship.FriendshipStatus.ACCEPTED);
+		request.setStatus(ACCEPTED);
 		friendshipRepository.save(request);
 	}
 
@@ -121,7 +124,7 @@ public class FriendshipService {
 		friendshipRepository.deleteFriendshipBetweenUsers(
 				sender,
 				currentUser,
-				Friendship.FriendshipStatus.PENDING
+				PENDING
 		);
 	}
 
@@ -133,10 +136,10 @@ public class FriendshipService {
 		}
 
 		Friendship friendship1 = friendshipRepository.findByUserAndFriendAndStatus(
-				currentUser, friend, Friendship.FriendshipStatus.ACCEPTED);
+				currentUser, friend, ACCEPTED);
 
 		Friendship friendship2 = friendshipRepository.findByUserAndFriendAndStatus(
-				friend, currentUser, Friendship.FriendshipStatus.ACCEPTED);
+				friend, currentUser, ACCEPTED);
 
 		if (friendship1 == null && friendship2 == null) {
 			throw new IllegalStateException("Пользователь '" + friendNickname + "' не является вашим другом");
@@ -155,21 +158,21 @@ public class FriendshipService {
 			return "me";
 		}
 
-		boolean isFriend = friendshipRepository.existsByUserAndFriendAndStatus(currentUser, otherUser, FriendshipStatus.ACCEPTED) ||
-				friendshipRepository.existsByUserAndFriendAndStatus(otherUser, currentUser, FriendshipStatus.ACCEPTED);
+		boolean isFriend = friendshipRepository.existsByUserAndFriendAndStatus(currentUser, otherUser, ACCEPTED) ||
+				friendshipRepository.existsByUserAndFriendAndStatus(otherUser, currentUser, ACCEPTED);
 
 		if (isFriend) {
 			return "friend";
 		}
 
 		// Проверяем исходящий запрос (текущий пользователь отправил запрос другому)
-		boolean isOutgoing = friendshipRepository.existsByUserAndFriendAndStatus(currentUser, otherUser, FriendshipStatus.PENDING);
+		boolean isOutgoing = friendshipRepository.existsByUserAndFriendAndStatus(currentUser, otherUser, PENDING);
 		if (isOutgoing) {
 			return "pending_outgoing";
 		}
 
 		// Проверяем входящий запрос (другой пользователь отправил запрос текущему)
-		boolean isIncoming = friendshipRepository.existsByUserAndFriendAndStatus(otherUser, currentUser, FriendshipStatus.PENDING);
+		boolean isIncoming = friendshipRepository.existsByUserAndFriendAndStatus(otherUser, currentUser, PENDING);
 		if (isIncoming) {
 			return "pending_incoming";
 		}

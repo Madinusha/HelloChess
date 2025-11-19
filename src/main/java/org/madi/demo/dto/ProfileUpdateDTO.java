@@ -2,7 +2,7 @@ package org.madi.demo.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.madi.demo.entities.UserLanguage;
+import org.madi.demo.enums.Sex;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +13,7 @@ public class ProfileUpdateDTO {
 	private String bio;
 	private LocalDate birthDate;
 	private Long rankId;
-	private String gender;
+	private Sex sex;
 	private List<String> languages;
 	private List<String> languageLevels;
 	private String telegram;

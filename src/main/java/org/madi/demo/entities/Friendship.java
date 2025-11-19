@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.madi.demo.enums.FriendshipStatus;
 
 import java.time.LocalDateTime;
 
@@ -45,8 +46,4 @@ public class Friendship {
      */
     @Column(name = "created_at")
 	private LocalDateTime createdAt;
-
-	public enum FriendshipStatus {
-		PENDING, ACCEPTED, DECLINED
-	}
 }
