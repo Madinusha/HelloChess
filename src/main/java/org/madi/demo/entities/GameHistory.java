@@ -6,40 +6,62 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
+/**
+ * История шахматных партий
+ */
+@Entity
+@Table(name = "game_history")
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-@Table(name = "game_history")
 public class GameHistory {
+    /**
+     * id
+     */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+    /**
+     * Игрок белыми
+     */
 	@ManyToOne
 	@JoinColumn(name = "white_player_id")
 	private User whitePlayer;
-
+    /**
+     * Игрок черными
+     */
 	@ManyToOne
 	@JoinColumn(name = "black_player_id")
 	private User blackPlayer;
-
-	@Column(nullable = false)
+    /**
+     * Запись партии ф формате pgn
+     */
+	@Column(name = "PGN", nullable = false)
 	private String PGN;
-
-	@Column(nullable = false)
+    /**
+     * Результат партии
+     */
+	@Column(name = "result", nullable = false)
 	private String result;
-
-	@Column(nullable = false)
+    /**
+     * Стартовое время партии (минуты)
+     */
+	@Column(name = "initial_time_minutes", nullable = false)
 	private int initialTimeMinutes;
-
-	@Column(nullable = false)
+    /**
+     * Стартовое время партии (добавочные секунды)
+     */
+	@Column(name = "initial_time_increment", nullable = false)
 	private int initialTimeIncrement;
-
-	@Column(nullable = false)
+    /**
+     * Время начала партии
+     */
+	@Column(name = "start_time", nullable = false)
 	private LocalDateTime startTime;
-
-	@Column
+    /**
+     * Время окончания партии
+     */
+	@Column(name = "end_time")
 	private LocalDateTime endTime;
 
 }

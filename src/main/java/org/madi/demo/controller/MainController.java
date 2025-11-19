@@ -1,13 +1,11 @@
 package org.madi.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.*;
 import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
 import org.madi.demo.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -20,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.madi.demo.entities.Lesson.LessonType.*;
 
@@ -275,7 +272,7 @@ public class MainController {
 		ProfileUpdateDTO profileUpdateDTO = new ProfileUpdateDTO();
 		profileUpdateDTO.setBio(requestedUser.getBio());
 		profileUpdateDTO.setBirthDate(requestedUser.getBirthDate());
-		profileUpdateDTO.setGender(requestedUser.getGender() != null ? requestedUser.getGender().name() : null);
+		profileUpdateDTO.setGender(requestedUser.getSex() != null ? requestedUser.getSex().name() : null);
 		profileUpdateDTO.setRankId(requestedUser.getRank() != null ? requestedUser.getRank().getId() : null);
 		profileUpdateDTO.setTelegram(requestedUser.getTelegram());
 		profileUpdateDTO.setVk(requestedUser.getVk());
@@ -304,7 +301,7 @@ public class MainController {
 		// Обновляем основные поля
 		user.setBio(updateDTO.getBio());
 		user.setBirthDate(updateDTO.getBirthDate());
-		user.setGender(User.Gender.valueOf(updateDTO.getGender()));
+		user.setSex(User.Sex.valueOf(updateDTO.getGender()));
 		user.setTelegram(updateDTO.getTelegram());
 		user.setVk(updateDTO.getVk());
 

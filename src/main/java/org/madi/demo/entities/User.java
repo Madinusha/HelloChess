@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+
+/**
+ * Пользователи
+ */
 @Entity
 @Table(name = "users")
 @Getter
@@ -24,77 +28,121 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
+    /**
+     * id
+     */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
 	private Long id;
-
-	@Column(nullable = false, unique = true)
+    /**
+     * Никнейм
+     */
+	@Column(name = "nickname", nullable = false, unique = true)
 	private String nickname;
-
-	@Column(nullable = false)
+    /**
+     * email
+     */
+	@Column(name = "email", nullable = false)
 	private String email;
-
-	@Column(nullable = false)
+    /**
+     * Пароль
+     */
+	@Column(name = "password", nullable = false)
 	private String password;
-
-	@Column(nullable = false)
+    /**
+     * Роль
+     */
+	@Column(name = "role", nullable = false)
 	private String role;
-
-	@Column(columnDefinition = "INTEGER DEFAULT 0")
+    /**
+     * Шахматный рейтинг
+     */
+	@Column(name = "rating", columnDefinition = "INTEGER DEFAULT 0")
 	private int rating = 0;
-
-	// Отправленные запросы дружбы
+    /**
+     *  Отправленные запросы дружбы
+     */
 	@JsonIgnore
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Friendship> sentFriendships = new ArrayList<>();
-
-	// Полученные запросы дружбы
+    /**
+     * Полученные запросы дружбы
+     */
 	@JsonIgnore
 	@OneToMany(mappedBy = "friend", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Friendship> receivedFriendships = new ArrayList<>();
-
+    /**
+     * Дата и время оздания профиля
+     */
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
-	private LocalDateTime createdAt;
-
-	@Column(columnDefinition = "TEXT")
-	private String bio;
-
+    private LocalDateTime createdAt;
+    /**
+     * Описание профиля
+     */
+	@Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+    /**
+     * День рождения
+     */
 	@Column(name = "birth_date")
 	private LocalDate birthDate;
-
+    /**
+     * Пол
+     */
 	@Enumerated(EnumType.STRING)
-	@Column
-	private Gender gender; // enum: MALE, FEMALE
-
-	@Column
+	@Column(name = "sex")
+	private Sex sex;
+    /**
+     * Аккаунт Телеграм
+     */
+	@Column(name = "telegram")
 	private String telegram;
-
-	@Column
+    /**
+     * Аккаунт ВК
+     */
+	@Column(name = "vk")
 	private String vk;
-
+    /**
+     * Уровень в шахматах
+     */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "rank_id")
 	private Rank rank;
-
+    /**
+     * Языки, которые знает пользователь
+     */
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<UserLanguage> languages = new ArrayList<>();
-
+    /**
+     * Список прогресса в уроках
+     */
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserLessonProgress> lessonProgresses = new ArrayList<>();
-
+    /**
+     * Список прогресса в заданиях
+     */
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<UserTaskProgress> taskProgresses = new ArrayList<>();
-
+    /**
+     * Является ли админом
+     */
 	@Column(name = "is_admin", columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean isAdmin;
-
+    /**
+     * Заблокирован ли пользователь
+     */
 	@Column(name = "is_banned", columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean isBanned;
-
+    /**
+     * Причина блока
+     */
 	@Column(name = "ban_reason")
 	private String banReason;
-
+    /**
+     * Время, когда истекает бан
+     */
 	@Column(name = "ban_expires_at")
 	private LocalDateTime banExpiresAt;
 
@@ -154,7 +202,7 @@ public class User implements UserDetails {
 		return true;
 	}
 
-	public enum Gender {
+	public enum Sex {
 		MALE, FEMALE
 	}
 }

@@ -7,28 +7,44 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Таблица дружеских отношений пользователей
+ */
 @Entity
 @Table(name = "friendships")
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class Friendship {
+    /**
+     * id записи дружбы
+     */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+    /**
+     * Тот, кто отправил запрос
+     */
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	private User user; // Тот, кто отправил запрос
-
+	private User user;
+    /**
+     *  Тот, кому отправили запрос
+     */
 	@ManyToOne
 	@JoinColumn(name = "friend_id")
-	private User friend; // Тот, кому отправили запрос
-
+	private User friend;
+    /**
+     * Статус дружбы
+     */
 	@Enumerated(EnumType.STRING)
-	private FriendshipStatus status; // Статус
-
-	private LocalDateTime createdAt; // Дата создания запроса
+    @Column(name = "status")
+	private FriendshipStatus status;
+    /**
+     * Дата создания запроса
+     */
+    @Column(name = "created_at")
+	private LocalDateTime createdAt;
 
 	public enum FriendshipStatus {
 		PENDING, ACCEPTED, DECLINED

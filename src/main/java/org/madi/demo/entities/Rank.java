@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Уровни в шахматах
+ */
 @Entity
 @Table(name = "ranks")
 @Getter
@@ -13,16 +16,25 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Rank {
+    /**
+     * id
+     */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@Column(nullable = false, unique = true)
+    /**
+     * Сокращенное название
+     */
+	@Column(name = "name", nullable = false, unique = true)
 	private String name;
-
-	@Column(nullable = false)
+    /**
+     * Полное название
+     */
+	@Column(name = "full_name", nullable = false)
 	private String fullName;
-
-	@Column(nullable = false)
+    /**
+     * Номер уровня
+     */
+	@Column(name = "level", nullable = false)
 	private int level;
 }
