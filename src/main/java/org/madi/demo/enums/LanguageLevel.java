@@ -15,12 +15,32 @@ public enum LanguageLevel {
         this.displayName = displayName;
     }
 
-    public static LanguageLevel fromDisplayName(String displayName) {
-        for (LanguageLevel level : values()) {
-            if (level.getDisplayName().equalsIgnoreCase(displayName)) {
-                return level;
-            }
+    public static LanguageLevel fromDisplayName(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
         }
-        throw new IllegalArgumentException("Unknown language level: " + displayName);
+
+        try {
+            return LanguageLevel.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e1) {
+
+            for (LanguageLevel level : values()) {
+                if (level.getDisplayName().equalsIgnoreCase(value)) {
+                    return level;
+                }
+            }
+
+            String upperValue = value.toUpperCase();
+            if (upperValue.equals("РОДНОЙ")) return NATIVE;
+            if (upperValue.equals("ПРОДВИНУТЫЙ")) return ADVANCED;
+            if (upperValue.equals("СРЕДНИЙ")) return INTERMEDIATE;
+            if (upperValue.equals("НАЧАЛЬНЫЙ")) return BEGINNER;
+
+            throw new IllegalArgumentException("Unknown language level: " + value);
+        }
+    }
+
+    public static LanguageLevel fromString(String value) {
+        return fromDisplayName(value);
     }
 }
