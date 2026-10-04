@@ -29,3 +29,6 @@ logging:
         session: DEBUG
         security: DEBUG
         web: DEBUG
+
+server:
+  port: ${SERVER_PORT:8080}
