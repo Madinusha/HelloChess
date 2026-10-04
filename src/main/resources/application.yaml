@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: HelloChess
+  mvc:
+    static-path-pattern: /static/**
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    # properties:
+    #   hibernate:
+    #     dialect: org.hibernate.dialect.PostgreSQLDialect
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+logging:
+  level:
+    org:
+      madi:
+        demo: DEBUG
+      springframework:
+        session: DEBUG
+        security: DEBUG
+        web: DEBUG
