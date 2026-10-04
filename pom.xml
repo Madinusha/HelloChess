@@ -48,6 +48,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-jdbc</artifactId>
+        </dependency>
 
         <!-- Database — версия из BOM -->
         <dependency>
@@ -93,6 +97,34 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <java>
+                        <!-- Использовать стиль Google Java Format, вариант AOSP — отступ в 4 пробела, более читаемый -->
+                        <googleJavaFormat>
+                            <version>1.23.0</version>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
+                        <!-- Дополнительные правила: удаление неиспользуемых импортов, удаление лишних пробелов, добавление пустой строки в конце файла -->
+                        <removeUnusedImports/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- Автоматическое форматирование при выполнении mvn compile -->
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

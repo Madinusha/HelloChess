@@ -1,6 +1,7 @@
 package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.madi.demo.entities.Lesson;
 import org.madi.demo.entities.Task;
 import org.madi.demo.entities.User;
@@ -16,20 +17,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProgressService {
 
     private final UserLessonProgressRepository lessonProgressRepository;
     private final UserTaskProgressRepository taskProgressRepository;
     private final LessonRepository lessonRepository;
-
-    public ProgressService(
-            UserLessonProgressRepository lessonProgressRepo,
-            UserTaskProgressRepository taskProgressRepo,
-            LessonRepository lessonRepository) {
-        this.lessonProgressRepository = lessonProgressRepo;
-        this.taskProgressRepository = taskProgressRepo;
-        this.lessonRepository = lessonRepository;
-    }
 
     @Transactional
     public void updateTaskProgress(User user, Task task, int stars) {

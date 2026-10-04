@@ -1,12 +1,12 @@
 package org.madi.demo.service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.AdminPageUserDTO;
 import org.madi.demo.entities.User;
 import org.madi.demo.repository.FriendshipRepository;
 import org.madi.demo.repository.GameHistoryRepository;
 import org.madi.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -15,15 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class UserService {
+
     private final String DELETED_USER_NICKNAME = "Deleted_User";
 
-    @Autowired private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired private GameHistoryRepository gameHistoryRepository;
+    private final GameHistoryRepository gameHistoryRepository;
 
-    @Autowired private FriendshipRepository friendshipRepository;
+    private final FriendshipRepository friendshipRepository;
 
     @PostConstruct
     public void init() {
@@ -56,7 +58,6 @@ public class UserService {
     }
 
     // Метод для инициализации удаленного пользователя
-    @Transactional
     public void ensureDeletedUserExists() {
         if (!userRepository.existsByNickname(DELETED_USER_NICKNAME)) {
             User deletedUser = new User();

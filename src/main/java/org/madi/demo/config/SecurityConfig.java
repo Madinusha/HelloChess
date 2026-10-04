@@ -1,7 +1,9 @@
 package org.madi.demo.config;
 
+import lombok.RequiredArgsConstructor;
 import org.madi.demo.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,88 +19,82 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-	@Autowired
-	private CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		return config.getAuthenticationManager();
-	}
+    @Value("${app.security.remember-me-key}")
+    private String rememberMeKey;
 
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth
-				.userDetailsService(customUserDetailsService)
-				.passwordEncoder(passwordEncoder);
-	}
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
+        return config.getAuthenticationManager();
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-			.sessionManagement(session -> session
-					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-			)
-			.authorizeHttpRequests(auth -> auth
-					.requestMatchers(
-							"/",
-							"/registration",
-							"/login",
-							"/api/users/register",
-							"/api/users/login",
-							"/index",
-							"/static/**",
-							"/images/**",
-							"/favicon.ico"
-					).permitAll()
-					.requestMatchers("/game").authenticated()
-					.requestMatchers("/api/admin/**").hasRole("ADMIN")
-					.anyRequest().authenticated()
-			)
-			.formLogin(form -> form
-					.loginPage("/registration")
-					.defaultSuccessUrl("/gameConstructor")
-					.failureUrl("/login?error=true")
-					.permitAll()
-			)
-			.rememberMe(remember -> remember
-					.key("uniqueAndSecretKey") // Секретный ключ
-					.tokenValiditySeconds(86400) // 1 день
-			)
-			.logout(logout -> logout
-					.logoutSuccessUrl("/registration")
-					.permitAll()
-					.invalidateHttpSession(true)
-					.clearAuthentication(true)
-					.addLogoutHandler((request, response, authentication) -> {})
-			)
-			.csrf(csrf -> csrf
-					.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-					.ignoringRequestMatchers("/ws/**") // Разрешить WebSocket без CSRF
-			)
-			.exceptionHandling(ex -> ex
-					.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
-			);
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
+    }
 
-		return http.build();
-	}
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .authorizeHttpRequests(
+                        auth ->
+                                auth.requestMatchers(
+                                                "/",
+                                                "/registration",
+                                                "/login",
+                                                "/api/users/register",
+                                                "/api/users/login",
+                                                "/index",
+                                                "/static/**",
+                                                "/images/**",
+                                                "/favicon.ico")
+                                        .permitAll()
+                                        .requestMatchers("/game")
+                                        .authenticated()
+                                        .requestMatchers("/api/admin/**")
+                                        .hasRole("ADMIN")
+                                        .anyRequest()
+                                        .authenticated())
+                .formLogin(
+                        form ->
+                                form.loginPage("/registration")
+                                        .defaultSuccessUrl("/gameConstructor")
+                                        .failureUrl("/login?error=true")
+                                        .permitAll())
+                .rememberMe(
+                        remember ->
+                                remember.key(rememberMeKey).tokenValiditySeconds(86400) // 1 день
+                        )
+                .logout(
+                        logout ->
+                                logout.logoutSuccessUrl("/registration")
+                                        .permitAll()
+                                        .invalidateHttpSession(true)
+                                        .clearAuthentication(true)
+                                        .addLogoutHandler(
+                                                (request, response, authentication) -> {}))
+                .csrf(
+                        csrf ->
+                                csrf.csrfTokenRepository(
+                                                CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                        .ignoringRequestMatchers(
+                                                "/ws/**") // Разрешить WebSocket без CSRF
+                        )
+                .exceptionHandling(
+                        ex ->
+                                ex.authenticationEntryPoint(
+                                        new LoginUrlAuthenticationEntryPoint("/login")));
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-				.authorizeHttpRequests(auth -> auth
-								.requestMatchers("/game").authenticated()
-				)
-				.formLogin(form -> form
-						.loginPage("/login")
-						.permitAll()
-				);
-		return http.build();
-	}
+        return http.build();
+    }
 }

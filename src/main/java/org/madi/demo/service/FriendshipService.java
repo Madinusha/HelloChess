@@ -1,13 +1,13 @@
 package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.FriendDTO;
 import org.madi.demo.entities.Friendship;
 import org.madi.demo.entities.User;
 import org.madi.demo.enums.FriendshipStatus;
 import org.madi.demo.repository.FriendshipRepository;
 import org.madi.demo.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +19,13 @@ import java.util.stream.Stream;
 import static org.madi.demo.enums.FriendshipStatus.ACCEPTED;
 import static org.madi.demo.enums.FriendshipStatus.PENDING;
 
+@RequiredArgsConstructor
 @Service
 public class FriendshipService {
 
-    @Autowired private FriendshipRepository friendshipRepository;
+    private final FriendshipRepository friendshipRepository;
 
-    @Autowired private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public List<FriendDTO> getUserFriends(User user) {
         // Получаем друзей, где текущий пользователь инициатор

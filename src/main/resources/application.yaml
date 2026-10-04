@@ -15,6 +15,10 @@ spring:
     # properties:
     #   hibernate:
     #     dialect: org.hibernate.dialect.PostgreSQLDialect
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
@@ -32,3 +36,7 @@ logging:
 
 server:
   port: ${SERVER_PORT:8080}
+
+app:
+  security:
+    remember-me-key: ${REMEMBER_ME_KEY:changeMeInProduction}
