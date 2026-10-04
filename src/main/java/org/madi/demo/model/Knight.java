@@ -1,7 +1,5 @@
 package org.madi.demo.model;
 
-import lombok.experimental.SuperBuilder;
-
 public class Knight extends Piece {
 
 	public Knight(String color) {

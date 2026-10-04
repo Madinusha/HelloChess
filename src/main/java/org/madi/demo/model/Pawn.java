@@ -1,9 +1,9 @@
 package org.madi.demo.model;
 
-import org.apache.commons.lang3.tuple.MutablePair;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 @Getter
 @Setter

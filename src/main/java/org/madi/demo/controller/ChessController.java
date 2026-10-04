@@ -5,26 +5,36 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.madi.demo.dto.*;
+import org.madi.demo.dto.ChatDTO;
+import org.madi.demo.dto.GameStatusDTO;
+import org.madi.demo.dto.UserProfileDTO;
 import org.madi.demo.entities.User;
-import org.madi.demo.model.*;
+import org.madi.demo.model.Chessboard;
+import org.madi.demo.model.GameSession;
+import org.madi.demo.model.GameTimer;
+import org.madi.demo.model.Piece;
 import org.madi.demo.model.Position;
 import org.madi.demo.service.ChessService;
 import org.madi.demo.service.GameSessionService;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
-import java.util.*;
-
-import org.springframework.http.ResponseEntity;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/game")

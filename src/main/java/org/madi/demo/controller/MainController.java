@@ -1,27 +1,43 @@
 package org.madi.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.madi.demo.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.madi.demo.dto.LessonDTO;
+import org.madi.demo.dto.ProfileUpdateDTO;
+import org.madi.demo.dto.TaskDTO;
+import org.madi.demo.dto.UserProfilePageDTO;
 import org.madi.demo.entities.Rank;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
 import org.madi.demo.enums.LanguageLevel;
 import org.madi.demo.enums.Sex;
-import org.madi.demo.service.*;
+import org.madi.demo.service.FriendshipService;
+import org.madi.demo.service.LessonService;
+import org.madi.demo.service.RankService;
+import org.madi.demo.service.RatingDistributionService;
+import org.madi.demo.service.TaskService;
+import org.madi.demo.service.UserLanguageService;
+import org.madi.demo.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.security.Principal;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.madi.demo.enums.LessonType.*;
+import static org.madi.demo.enums.LessonType.ADVANCED_LEVEL;
+import static org.madi.demo.enums.LessonType.PIECE_TECHNIQUE;
+import static org.madi.demo.enums.LessonType.TACTICS;
 
 @Controller
 public class MainController {

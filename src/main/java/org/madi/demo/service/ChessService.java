@@ -3,15 +3,15 @@ package org.madi.demo.service;
 import lombok.Getter;
 import org.madi.demo.entities.GameHistory;
 import org.madi.demo.entities.User;
-import org.madi.demo.model.*;
+import org.madi.demo.model.Chessboard;
+import org.madi.demo.model.GameSession;
+import org.madi.demo.model.Position;
 import org.madi.demo.repository.GameHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

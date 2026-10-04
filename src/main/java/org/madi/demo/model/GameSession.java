@@ -3,11 +3,14 @@ package org.madi.demo.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.madi.demo.entities.User;
 import org.apache.commons.lang3.tuple.Pair;
+import org.madi.demo.entities.User;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Getter
 @Setter

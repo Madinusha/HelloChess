@@ -1,6 +1,7 @@
 package org.madi.demo.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data

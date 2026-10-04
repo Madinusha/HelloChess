@@ -3,8 +3,6 @@ package org.madi.demo.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.madi.demo.controller.ChessController;
 import org.madi.demo.model.Chessboard;
 import org.madi.demo.model.Piece;
 import org.madi.demo.model.Position;

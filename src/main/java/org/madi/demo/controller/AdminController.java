@@ -2,7 +2,6 @@ package org.madi.demo.controller;
 
 import org.madi.demo.dto.AdminActionDTO;
 import org.madi.demo.dto.AdminPageUserDTO;
-import org.madi.demo.dto.FriendDTO;
 import org.madi.demo.entities.User;
 import org.madi.demo.service.AdminService;
 import org.madi.demo.service.UserService;
@@ -13,7 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;

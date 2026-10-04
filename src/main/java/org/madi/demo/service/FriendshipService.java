@@ -1,14 +1,14 @@
 package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.madi.demo.dto.FriendDTO;
 import org.madi.demo.entities.Friendship;
+import org.madi.demo.entities.User;
 import org.madi.demo.enums.FriendshipStatus;
 import org.madi.demo.repository.FriendshipRepository;
-import org.springframework.stereotype.Service;
-import org.madi.demo.entities.User;
-import org.madi.demo.dto.FriendDTO;
 import org.madi.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;

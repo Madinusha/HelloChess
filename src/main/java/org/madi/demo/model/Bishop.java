@@ -1,7 +1,5 @@
 package org.madi.demo.model;
 
-import lombok.experimental.SuperBuilder;
-
 public class Bishop extends Piece{ // Офицер
 
 	public Bishop(String color) {

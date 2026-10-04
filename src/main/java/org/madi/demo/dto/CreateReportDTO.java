@@ -1,10 +1,10 @@
 
 package org.madi.demo.dto;
 
-import lombok.Data;
-import org.madi.demo.enums.ReportType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import org.madi.demo.enums.ReportType;
 
 @Data
 public class CreateReportDTO {

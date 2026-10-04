@@ -1,8 +1,14 @@
 package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.madi.demo.entities.*;
-import org.madi.demo.repository.*;
+import org.madi.demo.entities.Lesson;
+import org.madi.demo.entities.Task;
+import org.madi.demo.entities.User;
+import org.madi.demo.entities.UserLessonProgress;
+import org.madi.demo.entities.UserTaskProgress;
+import org.madi.demo.repository.LessonRepository;
+import org.madi.demo.repository.UserLessonProgressRepository;
+import org.madi.demo.repository.UserTaskProgressRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

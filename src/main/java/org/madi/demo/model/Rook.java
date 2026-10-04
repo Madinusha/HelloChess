@@ -2,7 +2,6 @@ package org.madi.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 public class Rook extends Piece { // Ладья

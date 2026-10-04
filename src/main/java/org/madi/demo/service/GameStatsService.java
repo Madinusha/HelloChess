@@ -1,6 +1,5 @@
 package org.madi.demo.service;
 
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.ColorStatsDTO;
 import org.madi.demo.dto.UserGameStatsDTO;
