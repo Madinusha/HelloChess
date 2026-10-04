@@ -20,45 +20,41 @@ import java.util.List;
 @RequestMapping("/api/lessons")
 public class LessonController {
 
-	private final LessonService lessonService;
-	private final UserRepository userRepository;
+    private final LessonService lessonService;
+    private final UserRepository userRepository;
 
-	public LessonController(LessonService lessonService, UserRepository userRepository) {
-		this.lessonService = lessonService;
-		this.userRepository = userRepository;
-	}
+    public LessonController(LessonService lessonService, UserRepository userRepository) {
+        this.lessonService = lessonService;
+        this.userRepository = userRepository;
+    }
 
-	@PostMapping
-	public ResponseEntity<LessonDTO> createLesson(
-			@RequestBody CreateLessonDTO dto
-	) {
-		LessonDTO createdLesson = lessonService.createLesson(dto);
-		return ResponseEntity.ok(createdLesson);
-	}
+    @PostMapping
+    public ResponseEntity<LessonDTO> createLesson(@RequestBody CreateLessonDTO dto) {
+        LessonDTO createdLesson = lessonService.createLesson(dto);
+        return ResponseEntity.ok(createdLesson);
+    }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<LessonDTO> updateLesson(
-			@PathVariable Long id,
-			@RequestBody CreateLessonDTO dto
-	) {
-		LessonDTO updated = lessonService.updateLesson(id, dto);
-		return ResponseEntity.ok(updated);
-	}
+    @PutMapping("/{id}")
+    public ResponseEntity<LessonDTO> updateLesson(
+            @PathVariable Long id, @RequestBody CreateLessonDTO dto) {
+        LessonDTO updated = lessonService.updateLesson(id, dto);
+        return ResponseEntity.ok(updated);
+    }
 
-	@GetMapping("/{id}")
-	public ResponseEntity<LessonDTO> getLesson(@PathVariable Long id) {
-		LessonDTO lesson = lessonService.getLessonById(id);
-		return ResponseEntity.ok(lesson);
-	}
+    @GetMapping("/{id}")
+    public ResponseEntity<LessonDTO> getLesson(@PathVariable Long id) {
+        LessonDTO lesson = lessonService.getLessonById(id);
+        return ResponseEntity.ok(lesson);
+    }
 
-	@GetMapping
-	public ResponseEntity<List<LessonDTO>> getAllLessons() {
-		return ResponseEntity.ok(lessonService.getAllLessons());
-	}
+    @GetMapping
+    public ResponseEntity<List<LessonDTO>> getAllLessons() {
+        return ResponseEntity.ok(lessonService.getAllLessons());
+    }
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteLesson(@PathVariable Long id) {
-		lessonService.deleteLesson(id);
-		return ResponseEntity.noContent().build();
-	}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLesson(@PathVariable Long id) {
+        lessonService.deleteLesson(id);
+        return ResponseEntity.noContent().build();
+    }
 }

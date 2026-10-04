@@ -12,7 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Long> {
-	List<Lesson> findByLessonType(LessonType lessonType);
-	@Query("SELECT l FROM Lesson l LEFT JOIN FETCH l.tasks WHERE l.id = :lessonId")
-	Optional<Lesson> findByIdWithTasks(@Param("lessonId") Long lessonId);
+    List<Lesson> findByLessonType(LessonType lessonType);
+
+    @Query("SELECT l FROM Lesson l LEFT JOIN FETCH l.tasks WHERE l.id = :lessonId")
+    Optional<Lesson> findByIdWithTasks(@Param("lessonId") Long lessonId);
 }

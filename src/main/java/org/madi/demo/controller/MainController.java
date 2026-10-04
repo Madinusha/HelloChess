@@ -42,305 +42,315 @@ import static org.madi.demo.enums.LessonType.TACTICS;
 @Controller
 public class MainController {
 
-	private final UserService userService;
-	private final FriendshipService friendshipService;
-	private final RankService rankService;
-	private final UserLanguageService userLanguageService;
-	private final LessonService lessonService;
-	private final ObjectMapper objectMapper;
-	private final TaskService taskService;
-	private final RatingDistributionService ratingDistributionService;
+    private final UserService userService;
+    private final FriendshipService friendshipService;
+    private final RankService rankService;
+    private final UserLanguageService userLanguageService;
+    private final LessonService lessonService;
+    private final ObjectMapper objectMapper;
+    private final TaskService taskService;
+    private final RatingDistributionService ratingDistributionService;
 
-	public MainController(UserService userService, FriendshipService friendshipService, RankService rankService, UserLanguageService userLanguageService, LessonService lessonService, ObjectMapper objectMapper, TaskService taskService, RatingDistributionService ratingDistributionService) {
-		this.userService = userService;
-		this.friendshipService = friendshipService;
-		this.rankService = rankService;
-		this.userLanguageService = userLanguageService;
-		this.lessonService = lessonService;
-		this.objectMapper = objectMapper;
-		this.taskService = taskService;
-		this.ratingDistributionService = ratingDistributionService;
-	}
+    public MainController(
+            UserService userService,
+            FriendshipService friendshipService,
+            RankService rankService,
+            UserLanguageService userLanguageService,
+            LessonService lessonService,
+            ObjectMapper objectMapper,
+            TaskService taskService,
+            RatingDistributionService ratingDistributionService) {
+        this.userService = userService;
+        this.friendshipService = friendshipService;
+        this.rankService = rankService;
+        this.userLanguageService = userLanguageService;
+        this.lessonService = lessonService;
+        this.objectMapper = objectMapper;
+        this.taskService = taskService;
+        this.ratingDistributionService = ratingDistributionService;
+    }
 
-	@GetMapping("/")
-	public String index() {
-		return "index";
-	}
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
 
-	@GetMapping("/game")
-	public String game(
-			@RequestParam String sessionId,
-			Model model,
-			Principal principal  // Добавьте этот параметр
-	) {
-		model.addAttribute("username", principal != null ? principal.getName() : "Guest");
-		return "pages/game";
-	}
+    @GetMapping("/game")
+    public String game(
+            @RequestParam String sessionId,
+            Model model,
+            Principal principal // Добавьте этот параметр
+            ) {
+        model.addAttribute("username", principal != null ? principal.getName() : "Guest");
+        return "pages/game";
+    }
 
-	@GetMapping("/registration")
-	public String registration() {
-		return "pages/registration";
-	}
-	@GetMapping("/login")
-	public String login() {
-		return "pages/registration";
-	}
+    @GetMapping("/registration")
+    public String registration() {
+        return "pages/registration";
+    }
 
-	@GetMapping("/gameConstructor")
-	public String gameConstructor() {
-		return "pages/gameConstructor";
-	}
+    @GetMapping("/login")
+    public String login() {
+        return "pages/registration";
+    }
 
-	@GetMapping("/top-players")
-	public String community() {
-		return "pages/top-players";
-	}
+    @GetMapping("/gameConstructor")
+    public String gameConstructor() {
+        return "pages/gameConstructor";
+    }
 
-	@GetMapping("/rating-distribution")
-	public String ratingDistribution(Model model, Authentication auth) throws JsonProcessingException {
-		RatingDistributionService.RatingDistributionData data = ratingDistributionService.getRatingDistributionData(auth);
+    @GetMapping("/top-players")
+    public String community() {
+        return "pages/top-players";
+    }
 
-		// Преобразуем в JSON-строку
-		String jsonRatingData = objectMapper.writeValueAsString(data.getDistribution());
+    @GetMapping("/rating-distribution")
+    public String ratingDistribution(Model model, Authentication auth)
+            throws JsonProcessingException {
+        RatingDistributionService.RatingDistributionData data =
+                ratingDistributionService.getRatingDistributionData(auth);
 
-		model.addAttribute("ratingData", jsonRatingData);
-		model.addAttribute("currentUserRating", data.getCurrentUserRating());
-		model.addAttribute("averageRating", data.getAverageRating());
-		model.addAttribute("totalPlayers", data.getTotalPlayers());
+        // Преобразуем в JSON-строку
+        String jsonRatingData = objectMapper.writeValueAsString(data.getDistribution());
 
-		return "pages/rating-distribution";
-	}
+        model.addAttribute("ratingData", jsonRatingData);
+        model.addAttribute("currentUserRating", data.getCurrentUserRating());
+        model.addAttribute("averageRating", data.getAverageRating());
+        model.addAttribute("totalPlayers", data.getTotalPlayers());
 
-	@GetMapping("/discussion")
-	public String discussion() {
-		return "pages/discussion";
-	}
+        return "pages/rating-distribution";
+    }
 
-	@GetMapping("/forum")
-	public String forum(Model model, Authentication authentication) {
-		boolean isAdmin = false;
+    @GetMapping("/discussion")
+    public String discussion() {
+        return "pages/discussion";
+    }
 
-		if (authentication != null && authentication.isAuthenticated()) {
-			isAdmin = authentication.getAuthorities().stream()
-					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-		}
+    @GetMapping("/forum")
+    public String forum(Model model, Authentication authentication) {
+        boolean isAdmin = false;
 
-		model.addAttribute("isAdmin", isAdmin);
-		return "pages/forum";
-	}
+        if (authentication != null && authentication.isAuthenticated()) {
+            isAdmin =
+                    authentication.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
 
-	@GetMapping("/challenge")
-	public String challenge(Model model, Authentication authentication) throws JsonProcessingException {
-		boolean isAdmin = false;
+        model.addAttribute("isAdmin", isAdmin);
+        return "pages/forum";
+    }
 
-		if (authentication != null && authentication.isAuthenticated()) {
-			isAdmin = authentication.getAuthorities().stream()
-					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-		}
+    @GetMapping("/challenge")
+    public String challenge(Model model, Authentication authentication)
+            throws JsonProcessingException {
+        boolean isAdmin = false;
 
-		model.addAttribute("isAdmin", isAdmin);
-		List<LessonDTO> piece = lessonService.getLessonsByType(PIECE_TECHNIQUE);
-		List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
-		List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
-		for (var lesson : piece) {
-			System.out.println("lesson есть " + lesson.getTitle());
-			System.out.println("json " + objectMapper.writeValueAsString(piece));
-		}
+        if (authentication != null && authentication.isAuthenticated()) {
+            isAdmin =
+                    authentication.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
 
-		model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
-		model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
-		model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
-		return "pages/challenge";
-	}
+        model.addAttribute("isAdmin", isAdmin);
+        List<LessonDTO> piece = lessonService.getLessonsByType(PIECE_TECHNIQUE);
+        List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
+        List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
+        for (var lesson : piece) {
+            System.out.println("lesson есть " + lesson.getTitle());
+            System.out.println("json " + objectMapper.writeValueAsString(piece));
+        }
 
-	@GetMapping("/education")
-	public String education(Model model, Authentication authentication) throws JsonProcessingException {
-		boolean isAdmin = false;
+        model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
+        model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
+        model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
+        return "pages/challenge";
+    }
 
-		if (authentication != null && authentication.isAuthenticated()) {
-			isAdmin = authentication.getAuthorities().stream()
-					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-		}
+    @GetMapping("/education")
+    public String education(Model model, Authentication authentication)
+            throws JsonProcessingException {
+        boolean isAdmin = false;
 
-		model.addAttribute("isAdmin", isAdmin);
-		List<LessonDTO> piece = lessonService.getLessonsByType(PIECE_TECHNIQUE);
-		List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
-		List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
-		for (var lesson : piece) {
-			System.out.println("lesson есть " + lesson.getTitle());
-			System.out.println("json " + objectMapper.writeValueAsString(piece));
-		}
+        if (authentication != null && authentication.isAuthenticated()) {
+            isAdmin =
+                    authentication.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
 
-		model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
-		model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
-		model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
-		return "pages/education";
-	}
+        model.addAttribute("isAdmin", isAdmin);
+        List<LessonDTO> piece = lessonService.getLessonsByType(PIECE_TECHNIQUE);
+        List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
+        List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
+        for (var lesson : piece) {
+            System.out.println("lesson есть " + lesson.getTitle());
+            System.out.println("json " + objectMapper.writeValueAsString(piece));
+        }
 
-	@GetMapping("/lesson/{lessonId}")
-	public String getLesson(
-			@PathVariable Long lessonId,
-			Model model,
-			Authentication authentication
-	) throws JsonProcessingException {
-		User user = null;
-		if (authentication != null && authentication.isAuthenticated()) {
-			user = (User) authentication.getPrincipal();
-		}
+        model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
+        model.addAttribute("tacticsLessonsJson", objectMapper.writeValueAsString(tactics));
+        model.addAttribute("advancedLessonsJson", objectMapper.writeValueAsString(advanced));
+        return "pages/education";
+    }
 
-		boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
-				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-		model.addAttribute("isAdmin", isAdmin);
+    @GetMapping("/lesson/{lessonId}")
+    public String getLesson(@PathVariable Long lessonId, Model model, Authentication authentication)
+            throws JsonProcessingException {
+        User user = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            user = (User) authentication.getPrincipal();
+        }
 
+        boolean isAdmin =
+                authentication != null
+                        && authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        model.addAttribute("isAdmin", isAdmin);
 
-		LessonDTO lesson = lessonService.getLessonById(lessonId);
-		if (lesson == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found");
-		}
-		ObjectMapper mapper = new ObjectMapper();
-		String lessonJson = mapper.writeValueAsString(lesson);
-		System.out.println("lessonJson " + lessonJson);
+        LessonDTO lesson = lessonService.getLessonById(lessonId);
+        if (lesson == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found");
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        String lessonJson = mapper.writeValueAsString(lesson);
+        System.out.println("lessonJson " + lessonJson);
 
-		List<LessonDTO> sameTypeLessons = lessonService.getLessonsByType(lesson.getLessonType());
+        List<LessonDTO> sameTypeLessons = lessonService.getLessonsByType(lesson.getLessonType());
 
-		List<TaskDTO> tasks = taskService.getTasksByLessonId(lessonId);
-		System.out.println("tasks len" + tasks.size());
-		for (var task : tasks) {
-			System.out.println("task есть " + task.getOrder());
-			System.out.println("json " + objectMapper.writeValueAsString(task));
-		}
-		model.addAttribute("userId", user != null ? user.getId() : null);
-		model.addAttribute("currentLessonJson", lessonJson);
-		model.addAttribute("currentLesson", lesson);
-		model.addAttribute("sameTypeLessonsJson", objectMapper.writeValueAsString(sameTypeLessons));
-		model.addAttribute("tasksJson", objectMapper.writeValueAsString(tasks));
-		model.addAttribute("lessonType", lesson.getLessonType().name().toLowerCase());
+        List<TaskDTO> tasks = taskService.getTasksByLessonId(lessonId);
+        System.out.println("tasks len" + tasks.size());
+        for (var task : tasks) {
+            System.out.println("task есть " + task.getOrder());
+            System.out.println("json " + objectMapper.writeValueAsString(task));
+        }
+        model.addAttribute("userId", user != null ? user.getId() : null);
+        model.addAttribute("currentLessonJson", lessonJson);
+        model.addAttribute("currentLesson", lesson);
+        model.addAttribute("sameTypeLessonsJson", objectMapper.writeValueAsString(sameTypeLessons));
+        model.addAttribute("tasksJson", objectMapper.writeValueAsString(tasks));
+        model.addAttribute("lessonType", lesson.getLessonType().name().toLowerCase());
 
-		return "pages/lesson";
-	}
+        return "pages/lesson";
+    }
 
-	@GetMapping("/administration")
-	public String administration(Model model, Authentication authentication) {
-		boolean isAdmin = false;
+    @GetMapping("/administration")
+    public String administration(Model model, Authentication authentication) {
+        boolean isAdmin = false;
 
-		if (authentication != null && authentication.isAuthenticated()) {
-			isAdmin = authentication.getAuthorities().stream()
-					.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-		}
-		if (!isAdmin){
-			return "redirect:/gameConstructor";
-		}
-		return "pages/administration";
-	}
+        if (authentication != null && authentication.isAuthenticated()) {
+            isAdmin =
+                    authentication.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+        if (!isAdmin) {
+            return "redirect:/gameConstructor";
+        }
+        return "pages/administration";
+    }
 
-	@GetMapping("/profile")
-	public String profile(
-			@RequestParam String nickname,
-			Model model,
-			Principal principal
-	) {
-		if (principal == null) {
-			return "redirect:/registration";
-		}
+    @GetMapping("/profile")
+    public String profile(@RequestParam String nickname, Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/registration";
+        }
 
-		User currentUser = userService.findUserByNickname(principal.getName());
-		User requestedUser = userService.findUserByNickname(nickname);
-		System.out.println("currentUser: " + currentUser.getNickname());
-		System.out.println("requestedUser: " + requestedUser.getNickname());
+        User currentUser = userService.findUserByNickname(principal.getName());
+        User requestedUser = userService.findUserByNickname(nickname);
+        System.out.println("currentUser: " + currentUser.getNickname());
+        System.out.println("requestedUser: " + requestedUser.getNickname());
 
         boolean isMyProfile = currentUser.getNickname().equals(nickname);
 
-		String friendshipStatusDetailed = friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
-		System.out.println("friendshipStatusDetailed " + friendshipStatusDetailed);
+        String friendshipStatusDetailed =
+                friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
+        System.out.println("friendshipStatusDetailed " + friendshipStatusDetailed);
 
-		UserProfilePageDTO profile = new UserProfilePageDTO();
-		profile.setNickname(requestedUser.getNickname());
-		profile.setRating(requestedUser.getRating());
-		profile.setEmail(requestedUser.getEmail());
-		profile.setStatusDetailed(friendshipStatusDetailed);
+        UserProfilePageDTO profile = new UserProfilePageDTO();
+        profile.setNickname(requestedUser.getNickname());
+        profile.setRating(requestedUser.getRating());
+        profile.setEmail(requestedUser.getEmail());
+        profile.setStatusDetailed(friendshipStatusDetailed);
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		String formattedDate = currentUser.getCreatedAt().format(formatter);
-		profile.setCreationDate(formattedDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String formattedDate = currentUser.getCreatedAt().format(formatter);
+        profile.setCreationDate(formattedDate);
 
-		boolean isAdmin = currentUser.getRole().equals("ADMIN");
-		model.addAttribute("isAdmin", isAdmin);
+        boolean isAdmin = currentUser.getRole().equals("ADMIN");
+        model.addAttribute("isAdmin", isAdmin);
 
-		List<UserLanguage> userLanguages = userLanguageService.findByUser(requestedUser);
-		model.addAttribute("userLanguages", userLanguages);
+        List<UserLanguage> userLanguages = userLanguageService.findByUser(requestedUser);
+        model.addAttribute("userLanguages", userLanguages);
 
-		// Получаем все доступные языки для выпадающего списка
-		List<String> availableLanguages = Arrays.asList("Русский", "Английский", "Немецкий", "Французский", "Испанский");
-		model.addAttribute("availableLanguages", availableLanguages);
-		List<String> languageLevels = Arrays.stream(LanguageLevel.values())
-				.map(LanguageLevel::getDisplayName)
-				.toList();
-		model.addAttribute("languageLevels", languageLevels);
+        // Получаем все доступные языки для выпадающего списка
+        List<String> availableLanguages =
+                Arrays.asList("Русский", "Английский", "Немецкий", "Французский", "Испанский");
+        model.addAttribute("availableLanguages", availableLanguages);
+        List<String> languageLevels =
+                Arrays.stream(LanguageLevel.values()).map(LanguageLevel::getDisplayName).toList();
+        model.addAttribute("languageLevels", languageLevels);
 
-		model.addAttribute("user", requestedUser);
-		model.addAttribute("profile", profile);
-		model.addAttribute("isMyProfile", isMyProfile);
-		model.addAttribute("allRanks", rankService.getAllRanksSorted());
+        model.addAttribute("user", requestedUser);
+        model.addAttribute("profile", profile);
+        model.addAttribute("isMyProfile", isMyProfile);
+        model.addAttribute("allRanks", rankService.getAllRanksSorted());
 
-		ProfileUpdateDTO profileUpdateDTO = new ProfileUpdateDTO();
-		profileUpdateDTO.setBio(requestedUser.getBio());
-		profileUpdateDTO.setBirthDate(requestedUser.getBirthDate());
-		profileUpdateDTO.setSex(requestedUser.getSex() != null ? Sex.valueOf(requestedUser.getSex().name()) : null);
-		profileUpdateDTO.setRankId(requestedUser.getRank() != null ? requestedUser.getRank().getId() : null);
-		profileUpdateDTO.setTelegram(requestedUser.getTelegram());
-		profileUpdateDTO.setVk(requestedUser.getVk());
-		profileUpdateDTO.setLanguages(userLanguages.stream()
-				.map(UserLanguage::getLanguage)
-				.toList());
-		profileUpdateDTO.setLanguageLevels(
-				userLanguages.stream()
-						.map(userLang -> userLang.getLevel().getDisplayName()) // Получаем displayName уровня
-						.toList()
-		);
+        ProfileUpdateDTO profileUpdateDTO = new ProfileUpdateDTO();
+        profileUpdateDTO.setBio(requestedUser.getBio());
+        profileUpdateDTO.setBirthDate(requestedUser.getBirthDate());
+        profileUpdateDTO.setSex(
+                requestedUser.getSex() != null ? Sex.valueOf(requestedUser.getSex().name()) : null);
+        profileUpdateDTO.setRankId(
+                requestedUser.getRank() != null ? requestedUser.getRank().getId() : null);
+        profileUpdateDTO.setTelegram(requestedUser.getTelegram());
+        profileUpdateDTO.setVk(requestedUser.getVk());
+        profileUpdateDTO.setLanguages(
+                userLanguages.stream().map(UserLanguage::getLanguage).toList());
+        profileUpdateDTO.setLanguageLevels(
+                userLanguages.stream()
+                        .map(
+                                userLang ->
+                                        userLang.getLevel()
+                                                .getDisplayName()) // Получаем displayName уровня
+                        .toList());
 
-		model.addAttribute("profileUpdateDTO", profileUpdateDTO);
+        model.addAttribute("profileUpdateDTO", profileUpdateDTO);
 
-		return "pages/profile";
-	}
+        return "pages/profile";
+    }
 
-	@PostMapping("/profile/update")
-	public String updateProfile(
-			@ModelAttribute ProfileUpdateDTO updateDTO,
-			Principal principal,
-			RedirectAttributes redirectAttributes) {
+    @PostMapping("/profile/update")
+    public String updateProfile(
+            @ModelAttribute ProfileUpdateDTO updateDTO,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
 
-		User user = userService.findUserByNickname(principal.getName());
+        User user = userService.findUserByNickname(principal.getName());
 
-		// Обновляем основные поля
-		user.setBio(updateDTO.getBio());
-		user.setBirthDate(updateDTO.getBirthDate());
-		user.setSex(Sex.valueOf(String.valueOf(updateDTO.getSex())));
-		user.setTelegram(updateDTO.getTelegram());
-		user.setVk(updateDTO.getVk());
+        // Обновляем основные поля
+        user.setBio(updateDTO.getBio());
+        user.setBirthDate(updateDTO.getBirthDate());
+        user.setSex(Sex.valueOf(String.valueOf(updateDTO.getSex())));
+        user.setTelegram(updateDTO.getTelegram());
+        user.setVk(updateDTO.getVk());
 
-		// Обновляем разряд
-		if (updateDTO.getRankId() != null) {
-			Rank rank = rankService.findById(updateDTO.getRankId());
-			user.setRank(rank);
-		} else {
-			user.setRank(null);
-		}
+        // Обновляем разряд
+        if (updateDTO.getRankId() != null) {
+            Rank rank = rankService.findById(updateDTO.getRankId());
+            user.setRank(rank);
+        } else {
+            user.setRank(null);
+        }
 
-		// Обновляем языки
-		List<LanguageLevel> levels = updateDTO.getLanguageLevels().stream()
-				.map(LanguageLevel::fromDisplayName)
-				.toList();
+        // Обновляем языки
+        List<LanguageLevel> levels =
+                updateDTO.getLanguageLevels().stream().map(LanguageLevel::fromDisplayName).toList();
 
-		// Обновляем языки
-		userLanguageService.updateUserLanguages(
-				user,
-				updateDTO.getLanguages(),
-				levels
-		);
+        // Обновляем языки
+        userLanguageService.updateUserLanguages(user, updateDTO.getLanguages(), levels);
 
-		userService.saveUser(user);
+        userService.saveUser(user);
 
-		redirectAttributes.addFlashAttribute("success", "Профиль успешно обновлен");
-		return "redirect:/profile?nickname=" + user.getNickname();
-	}
+        redirectAttributes.addFlashAttribute("success", "Профиль успешно обновлен");
+        return "redirect:/profile?nickname=" + user.getNickname();
+    }
 }

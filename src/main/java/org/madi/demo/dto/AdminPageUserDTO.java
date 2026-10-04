@@ -8,9 +8,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AdminPageUserDTO {
-	private Long userId;
-	private String nickname;
-	private boolean isBanned;
-	private boolean isAdmin;
-
+    private Long userId;
+    private String nickname;
+    private boolean isBanned;
+    private boolean isAdmin;
 }

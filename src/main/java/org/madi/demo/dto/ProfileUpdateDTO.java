@@ -10,12 +10,12 @@ import java.util.List;
 @Getter
 @Setter
 public class ProfileUpdateDTO {
-	private String bio;
-	private LocalDate birthDate;
-	private Long rankId;
-	private Sex sex;
-	private List<String> languages;
-	private List<String> languageLevels;
-	private String telegram;
-	private String vk;
+    private String bio;
+    private LocalDate birthDate;
+    private Long rankId;
+    private Sex sex;
+    private List<String> languages;
+    private List<String> languageLevels;
+    private String telegram;
+    private String vk;
 }

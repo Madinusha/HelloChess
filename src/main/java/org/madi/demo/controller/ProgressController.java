@@ -22,30 +22,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProgressController {
 
-	private final ProgressService progressService;
-	private final UserRepository userRepository;
-	private final TaskRepository taskRepository;
+    private final ProgressService progressService;
+    private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-	@PostMapping("/task")
-	public ResponseEntity<Void> saveTaskProgress(
-			@RequestParam Long userId,
-			@RequestParam Long taskId,
-			@RequestParam int stars) {
+    @PostMapping("/task")
+    public ResponseEntity<Void> saveTaskProgress(
+            @RequestParam Long userId, @RequestParam Long taskId, @RequestParam int stars) {
 
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-		Task task = taskRepository.findById(taskId)
-				.orElseThrow(() -> new EntityNotFoundException("Task not found"));
+        Task task =
+                taskRepository
+                        .findById(taskId)
+                        .orElseThrow(() -> new EntityNotFoundException("Task not found"));
 
-		progressService.updateTaskProgress(user, task, stars);
+        progressService.updateTaskProgress(user, task, stars);
 
-		return ResponseEntity.ok().build();
-	}
+        return ResponseEntity.ok().build();
+    }
 
-	@GetMapping("/lesson-progress")
-	public List<UserLessonProgress> getLessonProgress(@RequestParam Long userId) {
-		return progressService.getAllLessonProgresses(userRepository.findById(userId)
-				.orElseThrow(() -> new EntityNotFoundException("User not found")));
-	}
+    @GetMapping("/lesson-progress")
+    public List<UserLessonProgress> getLessonProgress(@RequestParam Long userId) {
+        return progressService.getAllLessonProgresses(
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found")));
+    }
 }

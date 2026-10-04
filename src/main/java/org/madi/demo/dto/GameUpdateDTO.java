@@ -9,8 +9,8 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class GameUpdateDTO {
-	private Map<String, Object> moveResult;
-//	private Chessboard chessboard;
-	private ChessController.MoveRequest lastMove;       // Последний ход (например, "e2-e4")
-	private String currentPlayer = "WHITE"; 	// Текущий игрок ("WHITE" или "BLACK")
+    private Map<String, Object> moveResult;
+    //	private Chessboard chessboard;
+    private ChessController.MoveRequest lastMove; // Последний ход (например, "e2-e4")
+    private String currentPlayer = "WHITE"; // Текущий игрок ("WHITE" или "BLACK")
 }

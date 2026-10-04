@@ -41,170 +41,167 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
 
-	@Autowired
-	private UserService userService;
+    @Autowired private UserService userService;
 
-	@Autowired
-	private FriendshipService friendshipService;
+    @Autowired private FriendshipService friendshipService;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired private PasswordEncoder passwordEncoder;
 
-	@PostMapping("/register")
-	public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistrationDTO userDTO) {
-		User user = new User();
-		user.setNickname(userDTO.getNickname());
-		user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Кодируем пароль
-		user.setEmail(userDTO.getEmail());
-		user.setRole("user");
-		userService.saveUser(user);
-		return ResponseEntity.ok("Пользователь успешно зарегистрирован");
-	}
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistrationDTO userDTO) {
+        User user = new User();
+        user.setNickname(userDTO.getNickname());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Кодируем пароль
+        user.setEmail(userDTO.getEmail());
+        user.setRole("user");
+        userService.saveUser(user);
+        return ResponseEntity.ok("Пользователь успешно зарегистрирован");
+    }
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+    @Autowired private AuthenticationManager authenticationManager;
 
-	@PostMapping("/login")
-	public ResponseEntity<String> loginUser(
-			@Valid @RequestBody UserLoginDTO userDTO,
-			HttpServletRequest request
-	) {
-		try {
-			// Аутентификация через Spring Security
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(
-							userDTO.getNickname(),
-							userDTO.getPassword()
-					)
-			);
-			// Установка контекста безопасности
-			SecurityContextHolder.getContext().setAuthentication(authentication);
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(
+            @Valid @RequestBody UserLoginDTO userDTO, HttpServletRequest request) {
+        try {
+            // Аутентификация через Spring Security
+            Authentication authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    userDTO.getNickname(), userDTO.getPassword()));
+            // Установка контекста безопасности
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-			// Сохранение контекста в сессии
-			HttpSession session = request.getSession();
-			session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-			session.setAttribute("user", authentication.getPrincipal());
+            // Сохранение контекста в сессии
+            HttpSession session = request.getSession();
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            session.setAttribute("user", authentication.getPrincipal());
 
-			return ResponseEntity.ok("Вход выполнен успешно");
-		} catch (BadCredentialsException e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
-		}
-	}
+            return ResponseEntity.ok("Вход выполнен успешно");
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверный логин или пароль");
+        }
+    }
 
-	@GetMapping("/profile")
-	public ResponseEntity<UserProfileDTO> getProfile() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDTO> getProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		if (authentication == null || !authentication.isAuthenticated()) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.cacheControl(CacheControl.noStore())
-					.build();
-		}
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .cacheControl(CacheControl.noStore())
+                    .build();
+        }
 
-		// Получаем пользователя из базы данных
-		User user = userService.findUserByNickname(authentication.getName());
+        // Получаем пользователя из базы данных
+        User user = userService.findUserByNickname(authentication.getName());
 
-		if (user == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.cacheControl(CacheControl.noStore())
-					.build();
-		}
-		return ResponseEntity.ok()
-				.cacheControl(CacheControl.noStore()) // Основной случай успешного ответа
-				.body(new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating()));
-	}
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .cacheControl(CacheControl.noStore())
+                    .build();
+        }
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore()) // Основной случай успешного ответа
+                .body(new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating()));
+    }
 
-	@PostMapping("/logout")
-	public String logout(HttpServletRequest request) throws ServletException {
-		request.logout();
-		return "redirect:/registration";
-	}
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) throws ServletException {
+        request.logout();
+        return "redirect:/registration";
+    }
 
-	@PostMapping("/delete")
-	public ResponseEntity<?> deleteAccount(
-			@RequestBody DeleteAccountRequest request,
-			Principal principal,
-			HttpServletRequest servletRequest
-	) {
-		User user = userService.findUserByNickname(principal.getName());
-		if (user == null) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Пользователь не авторизован");
-		}
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteAccount(
+            @RequestBody DeleteAccountRequest request,
+            Principal principal,
+            HttpServletRequest servletRequest) {
+        User user = userService.findUserByNickname(principal.getName());
+        if (user == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Пользователь не авторизован");
+        }
 
-		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный пароль");
-		}
-		userService.deleteUser(user);
-		try {
-			servletRequest.logout();
-		} catch (ServletException e) {
-			System.err.println("Error during logout: " + e.getMessage());
-		}
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный пароль");
+        }
+        userService.deleteUser(user);
+        try {
+            servletRequest.logout();
+        } catch (ServletException e) {
+            System.err.println("Error during logout: " + e.getMessage());
+        }
 
-		return ResponseEntity.ok().build();
-	}
+        return ResponseEntity.ok().build();
+    }
 
-	@Data
-	private static class DeleteAccountRequest {
-		private String password;
-	}
+    @Data
+    private static class DeleteAccountRequest {
+        private String password;
+    }
 
-	@GetMapping("/{nickname}")
-	public User getUserByNickname(@PathVariable String nickname) {
-		return userService.findUserByNickname(nickname);
-	}
+    @GetMapping("/{nickname}")
+    public User getUserByNickname(@PathVariable String nickname) {
+        return userService.findUserByNickname(nickname);
+    }
 
-	@GetMapping("/{nickname}/creation-date")
-	public ResponseEntity<String> getCreationDate(@PathVariable String nickname) {
-		User user = userService.findUserByNickname(nickname);
-		if (user == null) {
-			return ResponseEntity.notFound().build();
-		}
+    @GetMapping("/{nickname}/creation-date")
+    public ResponseEntity<String> getCreationDate(@PathVariable String nickname) {
+        User user = userService.findUserByNickname(nickname);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		String formattedDate = user.getCreatedAt().format(formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String formattedDate = user.getCreatedAt().format(formatter);
 
-		return ResponseEntity.ok(formattedDate);
-	}
+        return ResponseEntity.ok(formattedDate);
+    }
 
-	@GetMapping("/profile/{nickname}")
-	public ResponseEntity<Map<String, Object>> getUserProfile(
-			@PathVariable String nickname,
-			Principal principal) {
-		User currentUser = userService.findUserByNickname(principal.getName());
-		User requestedUser = userService.findUserByNickname(nickname);
-		if (requestedUser == null) {
-			return ResponseEntity.notFound().build();
-		}
+    @GetMapping("/profile/{nickname}")
+    public ResponseEntity<Map<String, Object>> getUserProfile(
+            @PathVariable String nickname, Principal principal) {
+        User currentUser = userService.findUserByNickname(principal.getName());
+        User requestedUser = userService.findUserByNickname(nickname);
+        if (requestedUser == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-		boolean isMyProfile = currentUser != null &&
-				currentUser.getNickname().equals(nickname);
+        boolean isMyProfile = currentUser != null && currentUser.getNickname().equals(nickname);
 
-		String friendshipStatusDetailed = friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
+        String friendshipStatusDetailed =
+                friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
 
-		UserProfilePageDTO profile = new UserProfilePageDTO();
-		profile.setNickname(requestedUser.getNickname());
-		profile.setRating(requestedUser.getRating());
-		profile.setStatusDetailed(friendshipStatusDetailed);
+        UserProfilePageDTO profile = new UserProfilePageDTO();
+        profile.setNickname(requestedUser.getNickname());
+        profile.setRating(requestedUser.getRating());
+        profile.setStatusDetailed(friendshipStatusDetailed);
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		String formattedDate = currentUser.getCreatedAt().format(formatter);
-		profile.setCreationDate(formattedDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String formattedDate = currentUser.getCreatedAt().format(formatter);
+        profile.setCreationDate(formattedDate);
 
-		Map<String, Object> response = new HashMap<>();
-		response.put("profile", profile);
-		response.put("isMyProfile", isMyProfile);
+        Map<String, Object> response = new HashMap<>();
+        response.put("profile", profile);
+        response.put("isMyProfile", isMyProfile);
 
-		return ResponseEntity.ok(response);
-	}
+        return ResponseEntity.ok(response);
+    }
 
-	@GetMapping("/top")
-	public ResponseEntity<List<UserProfileDTO>> getTopPlayers() {
-		List<User> topUsers = userService.findTop10ByOrderByRatingDesc();
-		List<UserProfileDTO> dtos = topUsers.stream()
-				.map(user -> new UserProfileDTO(user.getNickname(), user.getEmail(), user.getRating()))
-				.collect(Collectors.toList());
+    @GetMapping("/top")
+    public ResponseEntity<List<UserProfileDTO>> getTopPlayers() {
+        List<User> topUsers = userService.findTop10ByOrderByRatingDesc();
+        List<UserProfileDTO> dtos =
+                topUsers.stream()
+                        .map(
+                                user ->
+                                        new UserProfileDTO(
+                                                user.getNickname(),
+                                                user.getEmail(),
+                                                user.getRating()))
+                        .collect(Collectors.toList());
 
-		return ResponseEntity.ok(dtos);
-	}
+        return ResponseEntity.ok(dtos);
+    }
 }

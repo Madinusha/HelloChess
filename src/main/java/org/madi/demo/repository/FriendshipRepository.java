@@ -14,37 +14,39 @@ import java.util.List;
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
-	List<Friendship> findByFriendAndStatus(User friend, FriendshipStatus status);
+    List<Friendship> findByFriendAndStatus(User friend, FriendshipStatus status);
 
-	@Query("SELECT f FROM Friendship f WHERE f.user.id = :userId AND f.status = 'ACCEPTED'")
-	List<Friendship> findAcceptedFriends(@Param("userId") Long userId);
+    @Query("SELECT f FROM Friendship f WHERE f.user.id = :userId AND f.status = 'ACCEPTED'")
+    List<Friendship> findAcceptedFriends(@Param("userId") Long userId);
 
-	boolean existsByUserAndFriend(User user, User friend);
+    boolean existsByUserAndFriend(User user, User friend);
 
-	List<Friendship> findByUserAndStatus(User user, FriendshipStatus status);
+    List<Friendship> findByUserAndStatus(User user, FriendshipStatus status);
 
-	Friendship findByUserAndFriend(User user, User friend);
+    Friendship findByUserAndFriend(User user, User friend);
 
-	Friendship findByUserAndFriendAndStatus(User user, User friend, FriendshipStatus status);
+    Friendship findByUserAndFriendAndStatus(User user, User friend, FriendshipStatus status);
 
-	boolean existsByUserAndFriendAndStatus(User user, User friend, FriendshipStatus status);
+    boolean existsByUserAndFriendAndStatus(User user, User friend, FriendshipStatus status);
 
-	@Query("SELECT f FROM Friendship f WHERE " +
-			"(f.user = :user1 AND f.friend = :user2) OR " +
-			"(f.user = :user2 AND f.friend = :user1)")
-	List<Friendship> findAnyBetweenUsers(@Param("user1") User user1, @Param("user2") User user2);
+    @Query(
+            "SELECT f FROM Friendship f WHERE "
+                    + "(f.user = :user1 AND f.friend = :user2) OR "
+                    + "(f.user = :user2 AND f.friend = :user1)")
+    List<Friendship> findAnyBetweenUsers(@Param("user1") User user1, @Param("user2") User user2);
 
-	@Modifying
-	@Query("DELETE FROM Friendship f WHERE " +
-			"((f.user = :user1 AND f.friend = :user2) OR " +
-			"(f.user = :user2 AND f.friend = :user1)) AND " +
-			"f.status = :status")
-	void deleteFriendshipBetweenUsers(
-			@Param("user1") User user1,
-			@Param("user2") User user2,
-			@Param("status") FriendshipStatus status);
+    @Modifying
+    @Query(
+            "DELETE FROM Friendship f WHERE "
+                    + "((f.user = :user1 AND f.friend = :user2) OR "
+                    + "(f.user = :user2 AND f.friend = :user1)) AND "
+                    + "f.status = :status")
+    void deleteFriendshipBetweenUsers(
+            @Param("user1") User user1,
+            @Param("user2") User user2,
+            @Param("status") FriendshipStatus status);
 
-	@Modifying
-	@Query("DELETE FROM Friendship f WHERE f.user.id = :userId OR f.friend.id = :userId")
-	void deleteByUserIdOrFriendId(@Param("userId") Long userId);
+    @Modifying
+    @Query("DELETE FROM Friendship f WHERE f.user.id = :userId OR f.friend.id = :userId")
+    void deleteByUserIdOrFriendId(@Param("userId") Long userId);
 }

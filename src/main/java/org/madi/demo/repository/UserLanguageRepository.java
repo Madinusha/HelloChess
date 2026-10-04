@@ -9,7 +9,9 @@ import java.util.List;
 
 @Repository
 public interface UserLanguageRepository extends JpaRepository<UserLanguage, Long> {
-	List<UserLanguage> findByUser(User user);
-	void deleteByUserAndLanguage(User user, String language);
-	void deleteByUser(User user);
+    List<UserLanguage> findByUser(User user);
+
+    void deleteByUserAndLanguage(User user, String language);
+
+    void deleteByUser(User user);
 }

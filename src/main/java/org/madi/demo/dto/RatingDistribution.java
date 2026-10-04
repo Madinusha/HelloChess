@@ -6,14 +6,14 @@ import lombok.Setter;
 @Setter
 @Getter
 public class RatingDistribution {
-	private String range;
-	private long count;
-	private double percentage;
+    private String range;
+    private long count;
+    private double percentage;
 
-	public RatingDistribution() {}
+    public RatingDistribution() {}
 
-	public RatingDistribution(String range, long count) {
-		this.range = range;
-		this.count = count;
-	}
+    public RatingDistribution(String range, long count) {
+        this.range = range;
+        this.count = count;
+    }
 }

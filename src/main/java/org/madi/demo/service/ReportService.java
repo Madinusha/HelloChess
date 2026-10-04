@@ -23,114 +23,117 @@ import static org.madi.demo.enums.ReportStatus.RESOLVED;
 @Service
 public class ReportService {
 
-	private final ReportRepository reportRepository;
-	private final UserRepository userRepository;
-	private final AdminService adminService;
+    private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
+    private final AdminService adminService;
 
-	public ReportService(ReportRepository reportRepository,
-						 UserRepository userRepository,
-						 AdminService adminService) {
-		this.reportRepository = reportRepository;
-		this.userRepository = userRepository;
-		this.adminService = adminService;
-	}
+    public ReportService(
+            ReportRepository reportRepository,
+            UserRepository userRepository,
+            AdminService adminService) {
+        this.reportRepository = reportRepository;
+        this.userRepository = userRepository;
+        this.adminService = adminService;
+    }
 
-	@Transactional
-	public ReportDTO createReport(CreateReportDTO dto, User reporter) {
-		Report report = new Report();
-		report.setType(dto.getType());
-		report.setReporter(reporter);
-		report.setTargetUsername(dto.getTargetUsername());
-		report.setMessage(dto.getMessage());
+    @Transactional
+    public ReportDTO createReport(CreateReportDTO dto, User reporter) {
+        Report report = new Report();
+        report.setType(dto.getType());
+        report.setReporter(reporter);
+        report.setTargetUsername(dto.getTargetUsername());
+        report.setMessage(dto.getMessage());
 
-		// Проверяем существование похожих жалоб
-		List<Report> similarReports = reportRepository.findByTargetUsernameAndTypeAndStatus(
-				dto.getTargetUsername(),
-				dto.getType(),
-				PENDING
-		);
+        // Проверяем существование похожих жалоб
+        List<Report> similarReports =
+                reportRepository.findByTargetUsernameAndTypeAndStatus(
+                        dto.getTargetUsername(), dto.getType(), PENDING);
 
-		if (!similarReports.isEmpty()) {
-			// Увеличиваем счетчик существующей жалобы
-			Report existing = similarReports.get(0);
-			existing.setCount(existing.getCount() + 1);
-			reportRepository.save(existing);
-			return convertToDTO(existing);
-		}
+        if (!similarReports.isEmpty()) {
+            // Увеличиваем счетчик существующей жалобы
+            Report existing = similarReports.get(0);
+            existing.setCount(existing.getCount() + 1);
+            reportRepository.save(existing);
+            return convertToDTO(existing);
+        }
 
-		report = reportRepository.save(report);
-		return convertToDTO(report);
-	}
+        report = reportRepository.save(report);
+        return convertToDTO(report);
+    }
 
-	@Transactional(readOnly = true)
-	public List<ReportDTO> getAllReports() {
-		return reportRepository.findAll().stream()
-				.map(this::convertToDTO)
-				.collect(Collectors.toList());
-	}
+    @Transactional(readOnly = true)
+    public List<ReportDTO> getAllReports() {
+        return reportRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-	@Transactional(readOnly = true)
-	public Page<ReportDTO> getReports(Pageable pageable) {
-		return reportRepository.findAll(pageable)
-				.map(this::convertToDTO);
-	}
+    @Transactional(readOnly = true)
+    public Page<ReportDTO> getReports(Pageable pageable) {
+        return reportRepository.findAll(pageable).map(this::convertToDTO);
+    }
 
-	@Transactional(readOnly = true)
-	public List<ReportDTO> getPendingReports() {
-		return reportRepository.findByStatus(PENDING).stream()
-				.map(this::convertToDTO)
-				.collect(Collectors.toList());
-	}
+    @Transactional(readOnly = true)
+    public List<ReportDTO> getPendingReports() {
+        return reportRepository.findByStatus(PENDING).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-	@Transactional
-	public ReportDTO resolveReport(Long reportId, ResolveReportDTO dto, User resolvedBy) {
-		Report report = reportRepository.findById(reportId)
-				.orElseThrow(() -> new EntityNotFoundException("Report not found"));
+    @Transactional
+    public ReportDTO resolveReport(Long reportId, ResolveReportDTO dto, User resolvedBy) {
+        Report report =
+                reportRepository
+                        .findById(reportId)
+                        .orElseThrow(() -> new EntityNotFoundException("Report not found"));
 
-		report.setStatus(RESOLVED);
-		report.setResolvedAt(LocalDateTime.now());
-		report.setResolvedBy(resolvedBy);
-		report.setResolutionComment(dto.getResolutionComment());
+        report.setStatus(RESOLVED);
+        report.setResolvedAt(LocalDateTime.now());
+        report.setResolvedBy(resolvedBy);
+        report.setResolutionComment(dto.getResolutionComment());
 
-		if (dto.isBanUser()) {
-			User targetUser = userRepository.findByNickname(report.getTargetUsername());
-			if (targetUser == null) {
-				throw new EntityNotFoundException("Report not found");
-			}
-//					.orElseThrow(() -> new EntityNotFoundException("User not found"));
-			adminService.banUser(targetUser.getId(), dto.getBanDurationMinutes(),
-					"Banned due to report #" + reportId);
-		}
+        if (dto.isBanUser()) {
+            User targetUser = userRepository.findByNickname(report.getTargetUsername());
+            if (targetUser == null) {
+                throw new EntityNotFoundException("Report not found");
+            }
+            //					.orElseThrow(() -> new EntityNotFoundException("User not found"));
+            adminService.banUser(
+                    targetUser.getId(),
+                    dto.getBanDurationMinutes(),
+                    "Banned due to report #" + reportId);
+        }
 
-		report = reportRepository.save(report);
-		return convertToDTO(report);
-	}
+        report = reportRepository.save(report);
+        return convertToDTO(report);
+    }
 
-	@Transactional(readOnly = true)
-	public ReportDTO getReportById(Long id) {
-		return reportRepository.findById(id)
-				.map(this::convertToDTO)
-				.orElseThrow(() -> new EntityNotFoundException("Report not found"));
-	}
+    @Transactional(readOnly = true)
+    public ReportDTO getReportById(Long id) {
+        return reportRepository
+                .findById(id)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Report not found"));
+    }
 
-	@Transactional(readOnly = true)
-	public List<ReportDTO> getReportsByUser(String username) {
-		return reportRepository.findByTargetUsername(username).stream()
-				.map(this::convertToDTO)
-				.collect(Collectors.toList());
-	}
+    @Transactional(readOnly = true)
+    public List<ReportDTO> getReportsByUser(String username) {
+        return reportRepository.findByTargetUsername(username).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-	private ReportDTO convertToDTO(Report report) {
-		ReportDTO dto = new ReportDTO();
-		dto.setId(report.getId());
-		dto.setType(report.getType());
-		dto.setReporterUsername(report.getReporter().getNickname());
-		dto.setTargetUsername(report.getTargetUsername());
-		dto.setMessage(report.getMessage());
-		dto.setCount(report.getCount());
-		dto.setCreatedAt(report.getCreatedAt());
-		dto.setStatus(report.getStatus().name());
-		dto.setResolutionComment(report.getResolutionComment());
-		return dto;
-	}
+    private ReportDTO convertToDTO(Report report) {
+        ReportDTO dto = new ReportDTO();
+        dto.setId(report.getId());
+        dto.setType(report.getType());
+        dto.setReporterUsername(report.getReporter().getNickname());
+        dto.setTargetUsername(report.getTargetUsername());
+        dto.setMessage(report.getMessage());
+        dto.setCount(report.getCount());
+        dto.setCreatedAt(report.getCreatedAt());
+        dto.setStatus(report.getStatus().name());
+        dto.setResolutionComment(report.getResolutionComment());
+        return dto;
+    }
 }

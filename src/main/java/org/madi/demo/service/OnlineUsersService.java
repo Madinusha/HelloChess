@@ -10,34 +10,33 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OnlineUsersService {
-	private final Set<String> onlineUsers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<String> onlineUsers = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-	private final Set<String> activeCommunityUsers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<String> activeCommunityUsers =
+            Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-	public void userLoggedIn(String username) {
-		onlineUsers.add(username);
-	}
+    public void userLoggedIn(String username) {
+        onlineUsers.add(username);
+    }
 
-	public void userLoggedOut(String username) {
-		onlineUsers.remove(username);
-		activeCommunityUsers.remove(username);
-	}
+    public void userLoggedOut(String username) {
+        onlineUsers.remove(username);
+        activeCommunityUsers.remove(username);
+    }
 
-	public void userConnected(String username) {
-		activeCommunityUsers.add(username);
-	}
+    public void userConnected(String username) {
+        activeCommunityUsers.add(username);
+    }
 
-	public void userDisconnected(String username) {
-		activeCommunityUsers.remove(username);
-	}
+    public void userDisconnected(String username) {
+        activeCommunityUsers.remove(username);
+    }
 
-	public List<String> getOnlineUsers() {
-		return new ArrayList<>(onlineUsers);
-	}
+    public List<String> getOnlineUsers() {
+        return new ArrayList<>(onlineUsers);
+    }
 
-	public List<String> getActiveCommunityUsers() {
-		return new ArrayList<>(activeCommunityUsers);
-	}
-
-
+    public List<String> getActiveCommunityUsers() {
+        return new ArrayList<>(activeCommunityUsers);
+    }
 }

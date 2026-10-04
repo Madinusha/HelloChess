@@ -9,15 +9,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserRegistrationDTO {
-	@NotNull
-	@Size(min = 3, max = 20)
-	private String nickname;
+    @NotNull
+    @Size(min = 3, max = 20)
+    private String nickname;
 
-	@NotNull
-	@Size(min = 8)
-	private String password;
+    @NotNull
+    @Size(min = 8)
+    private String password;
 
-	@NotNull
-	@Email
-	private String email;
+    @NotNull @Email private String email;
 }

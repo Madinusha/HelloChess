@@ -9,8 +9,8 @@ import org.madi.demo.enums.LessonType;
 @Setter
 @NoArgsConstructor
 public class CreateLessonDTO {
-	private String title;
-	private String description;
-	private LessonType lessonType;
-	private String image;
+    private String title;
+    private String description;
+    private LessonType lessonType;
+    private String image;
 }

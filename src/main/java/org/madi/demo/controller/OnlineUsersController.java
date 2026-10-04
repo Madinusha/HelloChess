@@ -18,44 +18,44 @@ import java.util.List;
 
 @Controller
 public class OnlineUsersController {
-	private static final Logger log = LoggerFactory.getLogger(OnlineUsersController.class);
+    private static final Logger log = LoggerFactory.getLogger(OnlineUsersController.class);
 
-	private final OnlineUsersService onlineUsersService;
-	private final SimpMessagingTemplate messagingTemplate;
+    private final OnlineUsersService onlineUsersService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-	@Autowired
-	public OnlineUsersController(OnlineUsersService onlineUsersService,
-								 SimpMessagingTemplate messagingTemplate) {
-		this.onlineUsersService = onlineUsersService;
-		this.messagingTemplate = messagingTemplate;
-	}
+    @Autowired
+    public OnlineUsersController(
+            OnlineUsersService onlineUsersService, SimpMessagingTemplate messagingTemplate) {
+        this.onlineUsersService = onlineUsersService;
+        this.messagingTemplate = messagingTemplate;
+    }
 
-	@MessageMapping("/user/online")
-	@SendTo("/topic/online")
-	public List<String> handleOnlineRequest(Principal principal) {
-		if (principal != null) {
-			String username = principal.getName();
-			onlineUsersService.userLoggedIn(username);
-			onlineUsersService.userConnected(username);
-			log.info("User {} requested online list", username);
-		}
-		return onlineUsersService.getOnlineUsers();
-	}
+    @MessageMapping("/user/online")
+    @SendTo("/topic/online")
+    public List<String> handleOnlineRequest(Principal principal) {
+        if (principal != null) {
+            String username = principal.getName();
+            onlineUsersService.userLoggedIn(username);
+            onlineUsersService.userConnected(username);
+            log.info("User {} requested online list", username);
+        }
+        return onlineUsersService.getOnlineUsers();
+    }
 
-	@GetMapping("/api/user-online/list")
-	@ResponseBody
-	public List<String> getOnlineUsers() {
-		return onlineUsersService.getOnlineUsers();
-	}
+    @GetMapping("/api/user-online/list")
+    @ResponseBody
+    public List<String> getOnlineUsers() {
+        return onlineUsersService.getOnlineUsers();
+    }
 
-	@EventListener
-	public void handleWebSocketDisconnect(SessionDisconnectEvent event) {
-		if (event.getUser() != null) {
-			String username = event.getUser().getName();
-			onlineUsersService.userDisconnected(username);
+    @EventListener
+    public void handleWebSocketDisconnect(SessionDisconnectEvent event) {
+        if (event.getUser() != null) {
+            String username = event.getUser().getName();
+            onlineUsersService.userDisconnected(username);
 
-			// Не удаляем из общего списка, только из активных на странице
-			messagingTemplate.convertAndSend("/topic/online", onlineUsersService.getOnlineUsers());
-		}
-	}
+            // Не удаляем из общего списка, только из активных на странице
+            messagingTemplate.convertAndSend("/topic/online", onlineUsersService.getOnlineUsers());
+        }
+    }
 }

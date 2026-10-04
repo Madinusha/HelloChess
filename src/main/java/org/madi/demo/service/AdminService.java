@@ -12,53 +12,61 @@ import java.time.LocalDateTime;
 @Transactional
 public class AdminService {
 
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	@Autowired
-	public AdminService(UserRepository userRepository) {
-		this.userRepository = userRepository;
-	}
+    @Autowired
+    public AdminService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
-	public void banUser(Long userId, Integer durationMinutes, String reason) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+    public void banUser(Long userId, Integer durationMinutes, String reason) {
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
-		user.setBanned(true);
-		user.setBanReason(reason);
+        user.setBanned(true);
+        user.setBanReason(reason);
 
-		if (durationMinutes != null && durationMinutes > 0) {
-			user.setBanExpiresAt(LocalDateTime.now().plusMinutes(durationMinutes));
-		} else {
-			user.setBanExpiresAt(null); // навсегда
-		}
+        if (durationMinutes != null && durationMinutes > 0) {
+            user.setBanExpiresAt(LocalDateTime.now().plusMinutes(durationMinutes));
+        } else {
+            user.setBanExpiresAt(null); // навсегда
+        }
 
-		userRepository.save(user);
-	}
+        userRepository.save(user);
+    }
 
-	public void unbanUser(Long userId) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+    public void unbanUser(Long userId) {
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
-		user.setBanned(false);
-		user.setBanReason(null);
-		user.setBanExpiresAt(null);
+        user.setBanned(false);
+        user.setBanReason(null);
+        user.setBanExpiresAt(null);
 
-		userRepository.save(user);
-	}
+        userRepository.save(user);
+    }
 
-	public void makeAdmin(Long userId) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+    public void makeAdmin(Long userId) {
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
-		user.setRole("ADMIN");
-		userRepository.save(user);
-	}
+        user.setRole("ADMIN");
+        userRepository.save(user);
+    }
 
-	public void removeAdmin(Long userId) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+    public void removeAdmin(Long userId) {
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
 
-		user.setRole("USER");
-		userRepository.save(user);
-	}
+        user.setRole("USER");
+        userRepository.save(user);
+    }
 }

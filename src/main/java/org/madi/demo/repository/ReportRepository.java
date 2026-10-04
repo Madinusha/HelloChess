@@ -14,21 +14,23 @@ import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-	List<Report> findByStatus(ReportStatus status);
+    List<Report> findByStatus(ReportStatus status);
 
-	List<Report> findByType(ReportType type);
+    List<Report> findByType(ReportType type);
 
-	List<Report> findByTargetUsername(String username);
+    List<Report> findByTargetUsername(String username);
 
-	@Query("SELECT r FROM Report r WHERE r.createdAt BETWEEN :start AND :end")
-	List<Report> findBetweenDates(@Param("start") LocalDateTime start,
-								  @Param("end") LocalDateTime end);
+    @Query("SELECT r FROM Report r WHERE r.createdAt BETWEEN :start AND :end")
+    List<Report> findBetweenDates(
+            @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-	@Query("SELECT r.targetUsername, COUNT(r) as count FROM Report r " +
-			"WHERE r.status = 'PENDING' GROUP BY r.targetUsername ORDER BY count DESC")
-	Page<Object[]> findMostReportedUsers(Pageable pageable);
+    @Query(
+            "SELECT r.targetUsername, COUNT(r) as count FROM Report r "
+                    + "WHERE r.status = 'PENDING' GROUP BY r.targetUsername ORDER BY count DESC")
+    Page<Object[]> findMostReportedUsers(Pageable pageable);
 
-	long countByStatus(ReportStatus status);
+    long countByStatus(ReportStatus status);
 
-	List<Report> findByTargetUsernameAndTypeAndStatus(String username, ReportType type, ReportStatus status);
+    List<Report> findByTargetUsernameAndTypeAndStatus(
+            String username, ReportType type, ReportStatus status);
 }

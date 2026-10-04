@@ -11,28 +11,24 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-	@Override
-	public void configureMessageBroker(MessageBrokerRegistry config) {
-		// Включаем брокер для:
-		config.enableSimpleBroker(
-				"/topic",
-				"/queue"
-		);
-		config.setApplicationDestinationPrefixes("/app");
-		config.setUserDestinationPrefix("/user");
-	}
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        // Включаем брокер для:
+        config.enableSimpleBroker("/topic", "/queue");
+        config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
+    }
 
-	@Override
-	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/ws")
-				.setAllowedOriginPatterns("*")
-				.withSockJS();
-	}
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+    }
 
-	@Override
-	public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-		registration.setSendTimeLimit(15 * 1000)
-				.setSendBufferSizeLimit(512 * 1024)
-				.setTimeToFirstMessage(30 * 1000);
-	}
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration
+                .setSendTimeLimit(15 * 1000)
+                .setSendBufferSizeLimit(512 * 1024)
+                .setTimeToFirstMessage(30 * 1000);
+    }
 }

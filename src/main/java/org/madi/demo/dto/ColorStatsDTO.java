@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ColorStatsDTO {
-	private long whiteGames;
-	private long blackGames;
+    private long whiteGames;
+    private long blackGames;
 }

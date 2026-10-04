@@ -5,9 +5,8 @@ import lombok.Data;
 
 @Data
 public class ResolveReportDTO {
-	@NotBlank
-	private String resolutionComment;
+    @NotBlank private String resolutionComment;
 
-	private boolean banUser;
-	private Integer banDurationMinutes;
+    private boolean banUser;
+    private Integer banDurationMinutes;
 }

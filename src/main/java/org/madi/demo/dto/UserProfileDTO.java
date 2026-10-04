@@ -13,13 +13,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserProfileDTO {
-	@NotBlank(message = "Имя пользователя не может быть пустым.")
-	@Size(min = 3, max = 20, message = "Никнейм должен содержать 3-20 символов.")
-	private String nickname;
+    @NotBlank(message = "Имя пользователя не может быть пустым.")
+    @Size(min = 3, max = 20, message = "Никнейм должен содержать 3-20 символов.")
+    private String nickname;
 
-	@NotBlank(message = "Email не может быть пустым.")
-	@Email(message = "Неверный формат email.")
-	private String email;
+    @NotBlank(message = "Email не может быть пустым.")
+    @Email(message = "Неверный формат email.")
+    private String email;
 
-	private int rating;
+    private int rating;
 }

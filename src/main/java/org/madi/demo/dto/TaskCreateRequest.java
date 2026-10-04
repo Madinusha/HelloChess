@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class TaskCreateRequest {
-	private String description;
-	@Valid
-	private ChessTaskData chessData;
+    private String description;
+    @Valid private ChessTaskData chessData;
 }

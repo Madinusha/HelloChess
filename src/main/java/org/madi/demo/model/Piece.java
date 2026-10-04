@@ -9,12 +9,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public abstract class Piece {
-	@JsonProperty("color")
-	private String color; // Цвет фигуры ("white" или "black")
+    @JsonProperty("color")
+    private String color; // Цвет фигуры ("white" или "black")
 
-	public String getFileName() {
-		return (getClass().getSimpleName());
-	}
-	public abstract boolean isValidMove(Position from, Position to, Chessboard board);
-	public abstract String getShortName();
+    public String getFileName() {
+        return (getClass().getSimpleName());
+    }
+
+    public abstract boolean isValidMove(Position from, Position to, Chessboard board);
+
+    public abstract String getShortName();
 }

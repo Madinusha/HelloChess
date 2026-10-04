@@ -11,6 +11,6 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 public class ChessTaskData {
-	private Map<String, Object> initialFen;
-	private List<String> solutionMoves;
+    private Map<String, Object> initialFen;
+    private List<String> solutionMoves;
 }

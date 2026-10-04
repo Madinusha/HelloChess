@@ -12,39 +12,41 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Position {
 
-	@JsonProperty("col")
-	private char col;
-	@JsonProperty("row")
-	private int row;
+    @JsonProperty("col")
+    private char col;
 
-	public Position(int col, int row) {
-		this.row = row;
-		this.col = (char)('a' + col - 1);
-	}
-	public Position(String pos) {
-		col = pos.charAt(0);
-		row = Character.getNumericValue(pos.charAt(1));
-	}
+    @JsonProperty("row")
+    private int row;
 
-	public int getColAsNumber() {
-		return col - 'a' + 1;
-	}
+    public Position(int col, int row) {
+        this.row = row;
+        this.col = (char) ('a' + col - 1);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null || getClass() != obj.getClass()) return false;
-		Position position = (Position) obj;
-		return row == position.row && col == position.col;
-	}
+    public Position(String pos) {
+        col = pos.charAt(0);
+        row = Character.getNumericValue(pos.charAt(1));
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(row, col);
-	}
+    public int getColAsNumber() {
+        return col - 'a' + 1;
+    }
 
-	@Override
-	public String toString() {
-		return col + "" + row;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Position position = (Position) obj;
+        return row == position.row && col == position.col;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, col);
+    }
+
+    @Override
+    public String toString() {
+        return col + "" + row;
+    }
 }

@@ -9,14 +9,14 @@ import org.madi.demo.model.GameSession;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateGameRequest {
-	private GameSession.PieceColor playerColor;
-	private TimeControl timeControl;
+    private GameSession.PieceColor playerColor;
+    private TimeControl timeControl;
 
-	@Data
-	@AllArgsConstructor
-	@NoArgsConstructor
-	public static class TimeControl {
-		private int minutes;
-		private int increment;
-	}
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TimeControl {
+        private int minutes;
+        private int increment;
+    }
 }

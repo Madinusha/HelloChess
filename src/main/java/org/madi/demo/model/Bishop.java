@@ -1,28 +1,29 @@
 package org.madi.demo.model;
 
-public class Bishop extends Piece{ // Офицер
+public class Bishop extends Piece { // Офицер
 
-	public Bishop(String color) {
-		super(color);
-	}
-	@Override
-	public boolean isValidMove(Position from, Position to, Chessboard board) {
-		int rowDifference = Math.abs(to.getRow() - from.getRow());
-		int colDifference = Math.abs(to.getCol() - from.getCol());
+    public Bishop(String color) {
+        super(color);
+    }
 
-		if (rowDifference == colDifference){
-			return !board.areFiguresBetween(from, to);
-		}
-		return false;
-	}
-	@Override
-	public String toString()
-	{
-		return (getColor().equals("white")) ? "♗" : "♝";
-	}
+    @Override
+    public boolean isValidMove(Position from, Position to, Chessboard board) {
+        int rowDifference = Math.abs(to.getRow() - from.getRow());
+        int colDifference = Math.abs(to.getCol() - from.getCol());
 
-	@Override
-	public String getShortName() {
-		return "B";
-	}
+        if (rowDifference == colDifference) {
+            return !board.areFiguresBetween(from, to);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return (getColor().equals("white")) ? "♗" : "♝";
+    }
+
+    @Override
+    public String getShortName() {
+        return "B";
+    }
 }

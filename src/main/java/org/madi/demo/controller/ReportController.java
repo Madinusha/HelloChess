@@ -23,42 +23,43 @@ import java.util.List;
 @RequestMapping("/api/reports")
 public class ReportController {
 
-	private final ReportService reportService;
+    private final ReportService reportService;
 
-	public ReportController(ReportService reportService) {
-		this.reportService = reportService;
-	}
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
+    }
 
-	@PostMapping
-	public ReportDTO createReport(@RequestBody @Valid CreateReportDTO dto,
-								  @AuthenticationPrincipal User reporter) {
-		return reportService.createReport(dto, reporter);
-	}
+    @PostMapping
+    public ReportDTO createReport(
+            @RequestBody @Valid CreateReportDTO dto, @AuthenticationPrincipal User reporter) {
+        return reportService.createReport(dto, reporter);
+    }
 
-	@GetMapping
-	public Page<ReportDTO> getAllReports(@PageableDefault(size = 20) Pageable pageable) {
-		return reportService.getReports(pageable);
-	}
+    @GetMapping
+    public Page<ReportDTO> getAllReports(@PageableDefault(size = 20) Pageable pageable) {
+        return reportService.getReports(pageable);
+    }
 
-	@GetMapping("/pending")
-	public List<ReportDTO> getPendingReports() {
-		return reportService.getPendingReports();
-	}
+    @GetMapping("/pending")
+    public List<ReportDTO> getPendingReports() {
+        return reportService.getPendingReports();
+    }
 
-	@GetMapping("/user/{username}")
-	public List<ReportDTO> getReportsByUser(@PathVariable String username) {
-		return reportService.getReportsByUser(username);
-	}
+    @GetMapping("/user/{username}")
+    public List<ReportDTO> getReportsByUser(@PathVariable String username) {
+        return reportService.getReportsByUser(username);
+    }
 
-	@GetMapping("/{id}")
-	public ReportDTO getReport(@PathVariable Long id) {
-		return reportService.getReportById(id);
-	}
+    @GetMapping("/{id}")
+    public ReportDTO getReport(@PathVariable Long id) {
+        return reportService.getReportById(id);
+    }
 
-	@PostMapping("/{id}/resolve")
-	public ReportDTO resolveReport(@PathVariable Long id,
-								   @RequestBody @Valid ResolveReportDTO dto,
-								   @AuthenticationPrincipal User resolvedBy) {
-		return reportService.resolveReport(id, dto, resolvedBy);
-	}
+    @PostMapping("/{id}/resolve")
+    public ReportDTO resolveReport(
+            @PathVariable Long id,
+            @RequestBody @Valid ResolveReportDTO dto,
+            @AuthenticationPrincipal User resolvedBy) {
+        return reportService.resolveReport(id, dto, resolvedBy);
+    }
 }

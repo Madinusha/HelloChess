@@ -13,39 +13,40 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserLanguageService {
-	private final UserLanguageRepository userLanguageRepository;
+    private final UserLanguageRepository userLanguageRepository;
 
-	public List<UserLanguage> findByUser(User user) {
-		return userLanguageRepository.findByUser(user);
-	}
+    public List<UserLanguage> findByUser(User user) {
+        return userLanguageRepository.findByUser(user);
+    }
 
-	public void addLanguage(User user, String language, LanguageLevel level) {
-		UserLanguage userLanguage = new UserLanguage();
-		userLanguage.setUser(user);
-		userLanguage.setLanguage(language);
-		userLanguage.setLevel(level);
-		userLanguageRepository.save(userLanguage);
-	}
+    public void addLanguage(User user, String language, LanguageLevel level) {
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setUser(user);
+        userLanguage.setLanguage(language);
+        userLanguage.setLevel(level);
+        userLanguageRepository.save(userLanguage);
+    }
 
-	public void removeLanguage(User user, String language) {
-		userLanguageRepository.deleteByUserAndLanguage(user, language);
-	}
+    public void removeLanguage(User user, String language) {
+        userLanguageRepository.deleteByUserAndLanguage(user, language);
+    }
 
-	@Transactional
-	public void updateUserLanguages(User user, List<String> languages, List<LanguageLevel> levels) {
-		// Удаляем старые языки
-		userLanguageRepository.deleteByUser(user);
+    @Transactional
+    public void updateUserLanguages(User user, List<String> languages, List<LanguageLevel> levels) {
+        // Удаляем старые языки
+        userLanguageRepository.deleteByUser(user);
 
-		// Добавляем новые
-		if (languages != null && levels != null && languages.size() == levels.size()) {
-			for (int i = 0; i < languages.size(); i++) {
-				UserLanguage userLanguage = new UserLanguage();
-				userLanguage.setUser(user);
-				userLanguage.setLanguage(languages.get(i));
-				userLanguage.setLevel(levels.get(i));
-//				userLanguage.setLevel(UserLanguage.LanguageLevel.fromDisplayName(levels.get(i)));
-				userLanguageRepository.save(userLanguage);
-			}
-		}
-	}
+        // Добавляем новые
+        if (languages != null && levels != null && languages.size() == levels.size()) {
+            for (int i = 0; i < languages.size(); i++) {
+                UserLanguage userLanguage = new UserLanguage();
+                userLanguage.setUser(user);
+                userLanguage.setLanguage(languages.get(i));
+                userLanguage.setLevel(levels.get(i));
+                //
+                //	userLanguage.setLevel(UserLanguage.LanguageLevel.fromDisplayName(levels.get(i)));
+                userLanguageRepository.save(userLanguage);
+            }
+        }
+    }
 }

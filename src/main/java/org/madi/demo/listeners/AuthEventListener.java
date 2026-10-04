@@ -15,27 +15,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthEventListener {
 
-	private final OnlineUsersService onlineUsersService;
-	private final SimpMessagingTemplate messagingTemplate;
+    private final OnlineUsersService onlineUsersService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-	@EventListener
-	public void handleAuthenticationSuccess(AbstractAuthenticationEvent event) {
-		if (event instanceof AuthenticationSuccessEvent) {
-			String username = event.getAuthentication().getName();
-			onlineUsersService.userLoggedIn(username);
-			sendOnlineListToAll();
-		}
-	}
+    @EventListener
+    public void handleAuthenticationSuccess(AbstractAuthenticationEvent event) {
+        if (event instanceof AuthenticationSuccessEvent) {
+            String username = event.getAuthentication().getName();
+            onlineUsersService.userLoggedIn(username);
+            sendOnlineListToAll();
+        }
+    }
 
-	private void sendOnlineListToAll() {
-		List<String> users = onlineUsersService.getOnlineUsers();
-		messagingTemplate.convertAndSend("/topic/online", users);
-	}
+    private void sendOnlineListToAll() {
+        List<String> users = onlineUsersService.getOnlineUsers();
+        messagingTemplate.convertAndSend("/topic/online", users);
+    }
 
-	@EventListener
-	public void handleLogoutSuccessEvent(LogoutSuccessEvent event) {
-		String username = event.getAuthentication().getName();
-		onlineUsersService.userLoggedOut(username);
-		messagingTemplate.convertAndSend("/topic/online", onlineUsersService.getOnlineUsers());
-	}
+    @EventListener
+    public void handleLogoutSuccessEvent(LogoutSuccessEvent event) {
+        String username = event.getAuthentication().getName();
+        onlineUsersService.userLoggedOut(username);
+        messagingTemplate.convertAndSend("/topic/online", onlineUsersService.getOnlineUsers());
+    }
 }

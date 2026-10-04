@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserTaskProgressRepository extends JpaRepository<UserTaskProgress, Long> {
-	Optional<UserTaskProgress> findByUserAndTask(User user, Task task);
-	List<UserTaskProgress> findByUserAndTaskIn(User user, List<Task> tasks);
+    Optional<UserTaskProgress> findByUserAndTask(User user, Task task);
+
+    List<UserTaskProgress> findByUserAndTaskIn(User user, List<Task> tasks);
 }

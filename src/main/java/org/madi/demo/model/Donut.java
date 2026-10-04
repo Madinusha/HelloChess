@@ -7,26 +7,25 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Donut extends Piece {
-	@JsonProperty("color")
-	private String color = "pink";
+    @JsonProperty("color")
+    private String color = "pink";
 
-	public Donut(String color) {
-		super(color);
-	}
+    public Donut(String color) {
+        super(color);
+    }
 
-	@Override
-	public boolean isValidMove(Position from, Position to, Chessboard board) {
-		return false;
-	}
+    @Override
+    public boolean isValidMove(Position from, Position to, Chessboard board) {
+        return false;
+    }
 
-	@Override
-	public String getShortName() {
-		return "";
-	}
+    @Override
+    public String getShortName() {
+        return "";
+    }
 
-	@Override
-	public String toString()
-	{
-		return "o";
-	}
+    @Override
+    public String toString() {
+        return "o";
+    }
 }

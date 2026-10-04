@@ -27,51 +27,47 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TaskController {
 
-	private final TaskService taskService;
-	private final ChessService chessService;
+    private final TaskService taskService;
+    private final ChessService chessService;
 
+    @GetMapping
+    public List<TaskDTO> getLessonTasks(@PathVariable Long lessonId) {
+        return taskService.getTasksByLessonId(lessonId);
+    }
 
-	@GetMapping
-	public List<TaskDTO> getLessonTasks(@PathVariable Long lessonId) {
-		return taskService.getTasksByLessonId(lessonId);
-	}
+    @GetMapping("/{taskId}")
+    public TaskDTO getTask(@PathVariable Long lessonId, @PathVariable Long taskId) {
+        return taskService.getTaskById(taskId);
+    }
 
-	@GetMapping("/{taskId}")
-	public TaskDTO getTask(
-			@PathVariable Long lessonId,
-			@PathVariable Long taskId) {
-		return taskService.getTaskById(taskId);
-	}
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TaskDTO createTask(
+            @PathVariable Long lessonId, @Valid @RequestBody TaskCreateRequest request) {
+        return taskService.createTask(request, lessonId);
+    }
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public TaskDTO createTask(
-			@PathVariable Long lessonId,
-			@Valid @RequestBody TaskCreateRequest request) {
-		return taskService.createTask(request, lessonId);
-	}
+    @PostMapping("/possible-move")
+    public Map<String, Object> getPossibleMovesForOnePiece(
+            @RequestBody Map<String, Object> request) {
 
-	@PostMapping("/possible-move")
-	public Map<String, Object> getPossibleMovesForOnePiece(
-			@RequestBody Map<String, Object> request) {
+        String position = (String) request.get("position");
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, Object>> clientData =
+                (Map<String, Map<String, Object>>) request.get("clientData");
 
-		String position = (String) request.get("position");
-		@SuppressWarnings("unchecked")
-		Map<String, Map<String, Object>> clientData =
-				(Map<String, Map<String, Object>>) request.get("clientData");
+        List<Position> possibleMoves =
+                chessService.getPossibleMovesForOnePiece(position, clientData);
 
-		List<Position> possibleMoves = chessService.getPossibleMovesForOnePiece(position, clientData);
+        return Map.of(
+                "position", position,
+                "possibleMoves", possibleMoves);
+    }
 
-		return Map.of(
-				"position", position,
-				"possibleMoves", possibleMoves
-		);
-	}
-
-	@DeleteMapping("/{taskId}")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Void> deleteTask(@PathVariable Long lessonId, @PathVariable Long taskId) {
-		taskService.deleteTask(taskId);
-		return ResponseEntity.noContent().build();
-	}
+    @DeleteMapping("/{taskId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long lessonId, @PathVariable Long taskId) {
+        taskService.deleteTask(taskId);
+        return ResponseEntity.noContent().build();
+    }
 }

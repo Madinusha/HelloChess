@@ -13,20 +13,20 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class GameStatusDTO {
-	private Chessboard chessboard; // Текущее состояние доски
-	private String currentPlayerColor; // Цвет игрока, который должен ходить
-	private List<Map<String, Object>> moveHistory; // История ходов
-	private List<MutablePair<Integer, Piece>> eatenPieces;
-	private String whiteTime;
-	private String blackTime;
-	private Boolean timerActive;
-	private String gameStatus; // Статус игры (WAITING, ACTIVE, FINISHED)
-	private UserProfileDTO whitePlayerDTO;
-	private UserProfileDTO blackPlayerDTO;
-	private Boolean promotionRequired; // Требуется ли промоушен
-	private Position promotionPosition; // Позиция пешки для промоушена
-	private Boolean castlingPossible; // Возможна ли рокировка
-	private Map<String, Position> castlingData; // Данные для рокировки
-	private String gameResult; // Результат игры (если она завершена)
-	private List<ChatDTO> chatDTO;
+    private Chessboard chessboard; // Текущее состояние доски
+    private String currentPlayerColor; // Цвет игрока, который должен ходить
+    private List<Map<String, Object>> moveHistory; // История ходов
+    private List<MutablePair<Integer, Piece>> eatenPieces;
+    private String whiteTime;
+    private String blackTime;
+    private Boolean timerActive;
+    private String gameStatus; // Статус игры (WAITING, ACTIVE, FINISHED)
+    private UserProfileDTO whitePlayerDTO;
+    private UserProfileDTO blackPlayerDTO;
+    private Boolean promotionRequired; // Требуется ли промоушен
+    private Position promotionPosition; // Позиция пешки для промоушена
+    private Boolean castlingPossible; // Возможна ли рокировка
+    private Map<String, Position> castlingData; // Данные для рокировки
+    private String gameResult; // Результат игры (если она завершена)
+    private List<ChatDTO> chatDTO;
 }

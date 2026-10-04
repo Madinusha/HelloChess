@@ -12,23 +12,26 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RankService {
-	private final RankRepository rankRepository;
-	public List<Rank> getAllRanksSorted() {
-		return rankRepository.findAllByOrderByLevelAsc();
-	}
+    private final RankRepository rankRepository;
 
-	public Rank findById(Long id) {
-		return rankRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Rank not found"));
-	}
+    public List<Rank> getAllRanksSorted() {
+        return rankRepository.findAllByOrderByLevelAsc();
+    }
 
-	public Rank findByName(String name) {
-		return rankRepository.findByName(name)
-				.orElseThrow(() -> new EntityNotFoundException("Rank not found"));
-	}
+    public Rank findById(Long id) {
+        return rankRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Rank not found"));
+    }
 
-	public void updateUserRank(User user, Long rankId) {
-		Rank rank = findById(rankId);
-		user.setRank(rank);
-	}
+    public Rank findByName(String name) {
+        return rankRepository
+                .findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("Rank not found"));
+    }
+
+    public void updateUserRank(User user, Long rankId) {
+        Rank rank = findById(rankId);
+        user.setRank(rank);
+    }
 }

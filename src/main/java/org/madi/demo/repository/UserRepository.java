@@ -12,25 +12,32 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	User findByNickname(String nickname);
-	User findByEmail(String email);
-	List<User> findByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
-	boolean existsByNickname(String nickname);
-	List<User> findTop10ByOrderByRatingDesc();
-	@Query("SELECT new org.madi.demo.dto.RatingDistribution(" +
-			"CONCAT(FLOOR(u.rating/100)*100, '-', FLOOR(u.rating/100)*100+99), " +
-			"COUNT(u)) " +
-			"FROM User u " +
-			"GROUP BY FLOOR(u.rating/100) " +
-			"ORDER BY FLOOR(u.rating/100)")
-	List<RatingDistribution> getRatingDistribution();
+    User findByNickname(String nickname);
 
-	@Query("SELECT AVG(u.rating) FROM User u")
-	Double getAverageRating();
+    User findByEmail(String email);
 
-	List<User> findByIsBannedTrue();
-	List<User> findByIsAdminTrue();
+    List<User> findByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
 
-	@Query("SELECT u FROM User u WHERE LOWER(u.nickname) LIKE LOWER(concat('%', :query, '%'))")
-	List<User> searchByNickname(@Param("query") String query);
+    boolean existsByNickname(String nickname);
+
+    List<User> findTop10ByOrderByRatingDesc();
+
+    @Query(
+            "SELECT new org.madi.demo.dto.RatingDistribution("
+                    + "CONCAT(FLOOR(u.rating/100)*100, '-', FLOOR(u.rating/100)*100+99), "
+                    + "COUNT(u)) "
+                    + "FROM User u "
+                    + "GROUP BY FLOOR(u.rating/100) "
+                    + "ORDER BY FLOOR(u.rating/100)")
+    List<RatingDistribution> getRatingDistribution();
+
+    @Query("SELECT AVG(u.rating) FROM User u")
+    Double getAverageRating();
+
+    List<User> findByIsBannedTrue();
+
+    List<User> findByIsAdminTrue();
+
+    @Query("SELECT u FROM User u WHERE LOWER(u.nickname) LIKE LOWER(concat('%', :query, '%'))")
+    List<User> searchByNickname(@Param("query") String query);
 }

@@ -22,75 +22,80 @@ import java.util.stream.Collectors;
 @Transactional
 public class TaskService {
 
-	private final TaskRepository taskRepository;
-	private final LessonRepository lessonRepository;
-	private final ObjectMapper objectMapper;
+    private final TaskRepository taskRepository;
+    private final LessonRepository lessonRepository;
+    private final ObjectMapper objectMapper;
 
-	public List<TaskDTO> getTasksByLessonId(Long lessonId) {
-		List<Task> tasks = taskRepository.findByLessonIdOrderByOrderAsc(lessonId);
-		return tasks.stream()
-				.map(this::convertToDto)
-				.collect(Collectors.toList());
-	}
+    public List<TaskDTO> getTasksByLessonId(Long lessonId) {
+        List<Task> tasks = taskRepository.findByLessonIdOrderByOrderAsc(lessonId);
+        return tasks.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
 
-	public TaskDTO getTaskById(Long taskId) {
-		Task task = taskRepository.findById(taskId)
-				.orElseThrow(() -> new EntityNotFoundException("Task not found"));
-		return convertToDto(task);
-	}
+    public TaskDTO getTaskById(Long taskId) {
+        Task task =
+                taskRepository
+                        .findById(taskId)
+                        .orElseThrow(() -> new EntityNotFoundException("Task not found"));
+        return convertToDto(task);
+    }
 
-	public TaskDTO createTask(TaskCreateRequest request, Long lessonId) {
-		Lesson lesson = lessonRepository.findById(lessonId)
-				.orElseThrow(() -> new EntityNotFoundException("Lesson not found"));
+    public TaskDTO createTask(TaskCreateRequest request, Long lessonId) {
+        Lesson lesson =
+                lessonRepository
+                        .findById(lessonId)
+                        .orElseThrow(() -> new EntityNotFoundException("Lesson not found"));
 
-		int taskCount = (int) taskRepository.countByLessonId(lessonId);
-		int newOrder = taskCount + 1;
+        int taskCount = (int) taskRepository.countByLessonId(lessonId);
+        int newOrder = taskCount + 1;
 
-		if (taskRepository.existsByLessonIdAndOrder(lessonId, newOrder)) {
-			throw new RuntimeException("Task with this order already exists for the lesson");
-		}
+        if (taskRepository.existsByLessonIdAndOrder(lessonId, newOrder)) {
+            throw new RuntimeException("Task with this order already exists for the lesson");
+        }
 
-		Task task = new Task();
-		task.setLesson(lesson);
-		task.setDescription(request.getDescription());
-		task.setOrder(newOrder);
+        Task task = new Task();
+        task.setLesson(lesson);
+        task.setDescription(request.getDescription());
+        task.setOrder(newOrder);
 
-		try {
-			task.setChessData(objectMapper.writeValueAsString(request.getChessData()));
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException("Failed to serialize chess data", e);
-		}
+        try {
+            task.setChessData(objectMapper.writeValueAsString(request.getChessData()));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize chess data", e);
+        }
 
-		Task savedTask = taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
 
-		lesson.setTaskCount(lesson.getTaskCount() + 1);
-		lessonRepository.save(lesson);
-		return convertToDto(savedTask);
-	}
+        lesson.setTaskCount(lesson.getTaskCount() + 1);
+        lessonRepository.save(lesson);
+        return convertToDto(savedTask);
+    }
 
-	public void deleteTask(Long taskId) {
-		Task task = taskRepository.findById(taskId)
-				.orElseThrow(() -> new EntityNotFoundException("Task not found"));
+    public void deleteTask(Long taskId) {
+        Task task =
+                taskRepository
+                        .findById(taskId)
+                        .orElseThrow(() -> new EntityNotFoundException("Task not found"));
 
-		Long lessonId = task.getLesson().getId();
-		int deletedOrder = task.getOrder();
+        Long lessonId = task.getLesson().getId();
+        int deletedOrder = task.getOrder();
 
-		taskRepository.delete(task);
-		taskRepository.decrementOrdersAfterDeletion(lessonId, deletedOrder);
-	}
+        taskRepository.delete(task);
+        taskRepository.decrementOrdersAfterDeletion(lessonId, deletedOrder);
+    }
 
-	private TaskDTO convertToDto(Task task) {
-		TaskDTO dto = new TaskDTO();
-		dto.setId(task.getId());
-		dto.setDescription(task.getDescription());
-		dto.setOrder(task.getOrder());
-		try {
-			ChessTaskData chessData = objectMapper.readValue(task.getChessData(), ChessTaskData.class);
-			dto.setChessData(chessData);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException("Failed to parse chess data", e);
-		}
+    private TaskDTO convertToDto(Task task) {
+        TaskDTO dto = new TaskDTO();
+        dto.setId(task.getId());
+        dto.setDescription(task.getDescription());
+        dto.setOrder(task.getOrder());
+        try {
+            ChessTaskData chessData =
+                    objectMapper.readValue(task.getChessData(), ChessTaskData.class);
+            dto.setChessData(chessData);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse chess data", e);
+        }
 
-		return dto;
-	}
+        return dto;
+    }
 }

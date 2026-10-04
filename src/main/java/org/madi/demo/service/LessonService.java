@@ -16,67 +16,68 @@ import java.util.stream.Collectors;
 @Transactional
 public class LessonService {
 
-	private final LessonRepository lessonRepository;
+    private final LessonRepository lessonRepository;
 
-	public LessonService(LessonRepository lessonRepository) {
-		this.lessonRepository = lessonRepository;
-	}
+    public LessonService(LessonRepository lessonRepository) {
+        this.lessonRepository = lessonRepository;
+    }
 
-	public LessonDTO createLesson(CreateLessonDTO dto) {
-		Lesson lesson = new Lesson();
-		lesson.setTitle(dto.getTitle());
-		lesson.setDescription(dto.getDescription());
-		lesson.setLessonType(dto.getLessonType());
-		lesson.setImage(dto.getImage());
-		lesson = lessonRepository.save(lesson);
-		return mapToDTO(lesson);
-	}
+    public LessonDTO createLesson(CreateLessonDTO dto) {
+        Lesson lesson = new Lesson();
+        lesson.setTitle(dto.getTitle());
+        lesson.setDescription(dto.getDescription());
+        lesson.setLessonType(dto.getLessonType());
+        lesson.setImage(dto.getImage());
+        lesson = lessonRepository.save(lesson);
+        return mapToDTO(lesson);
+    }
 
-	public LessonDTO getLessonById(Long id) {
-		return lessonRepository.findById(id)
-				.map(this::mapToDTO)
-				.orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
-	}
+    public LessonDTO getLessonById(Long id) {
+        return lessonRepository
+                .findById(id)
+                .map(this::mapToDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + id));
+    }
 
-	public List<LessonDTO> getAllLessons() {
-		return lessonRepository.findAll().stream()
-				.map(this::mapToDTO)
-				.collect(Collectors.toList());
-	}
+    public List<LessonDTO> getAllLessons() {
+        return lessonRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
 
-	public List<LessonDTO> getLessonsByType(LessonType lessonType) {
-		return lessonRepository.findByLessonType(lessonType).stream()
-				.map(this::mapToDTO)
-				.collect(Collectors.toList());
-	}
+    public List<LessonDTO> getLessonsByType(LessonType lessonType) {
+        return lessonRepository.findByLessonType(lessonType).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 
-	public void deleteLesson(Long lessonId) {
-		if (!lessonRepository.existsById(lessonId)) {
-			throw new RuntimeException("Урок не найден");
-		}
-		lessonRepository.deleteById(lessonId);
-	}
+    public void deleteLesson(Long lessonId) {
+        if (!lessonRepository.existsById(lessonId)) {
+            throw new RuntimeException("Урок не найден");
+        }
+        lessonRepository.deleteById(lessonId);
+    }
 
-	public LessonDTO updateLesson(Long id, CreateLessonDTO dto) {
-		Lesson lesson = lessonRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Урок не найден"));
+    public LessonDTO updateLesson(Long id, CreateLessonDTO dto) {
+        Lesson lesson =
+                lessonRepository
+                        .findById(id)
+                        .orElseThrow(() -> new RuntimeException("Урок не найден"));
 
-		lesson.setTitle(dto.getTitle());
-		lesson.setDescription(dto.getDescription());
-		lesson.setLessonType(dto.getLessonType());
-		lesson.setImage(dto.getImage());
+        lesson.setTitle(dto.getTitle());
+        lesson.setDescription(dto.getDescription());
+        lesson.setLessonType(dto.getLessonType());
+        lesson.setImage(dto.getImage());
 
-		return mapToDTO(lessonRepository.save(lesson));
-	}
+        return mapToDTO(lessonRepository.save(lesson));
+    }
 
-	private LessonDTO mapToDTO(Lesson lesson) {
-		LessonDTO dto = new LessonDTO();
-		dto.setId(lesson.getId());
-		dto.setLessonType(lesson.getLessonType());
-		dto.setTitle(lesson.getTitle());
-		dto.setDescription(lesson.getDescription());
-		dto.setImage(lesson.getImage());
-		dto.setProgress(0);
-		return dto;
-	}
+    private LessonDTO mapToDTO(Lesson lesson) {
+        LessonDTO dto = new LessonDTO();
+        dto.setId(lesson.getId());
+        dto.setLessonType(lesson.getLessonType());
+        dto.setTitle(lesson.getTitle());
+        dto.setDescription(lesson.getDescription());
+        dto.setImage(lesson.getImage());
+        dto.setProgress(0);
+        return dto;
+    }
 }

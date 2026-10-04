@@ -17,99 +17,108 @@ import java.util.List;
 
 @Service
 public class UserService {
-	private final String DELETED_USER_NICKNAME = "Deleted_User";
+    private final String DELETED_USER_NICKNAME = "Deleted_User";
 
-	@Autowired
-	private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
 
-	@Autowired
-	private GameHistoryRepository gameHistoryRepository;
+    @Autowired private GameHistoryRepository gameHistoryRepository;
 
-	@Autowired
-	private FriendshipRepository friendshipRepository;
+    @Autowired private FriendshipRepository friendshipRepository;
 
-	@PostConstruct
-	public void init() {
-		ensureDeletedUserExists();
-	}
+    @PostConstruct
+    public void init() {
+        ensureDeletedUserExists();
+    }
 
-	public User findUserByNickname(String nickname) {
-		return userRepository.findByNickname(nickname);
-	}
-	public User findUserByEmail(String email) {
-		return userRepository.findByEmail(email);
-	}
-	public User getUserById(Long id) {
-		return userRepository.findById(id).orElse(null);
-	}
+    public User findUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname);
+    }
 
-	@Transactional
-	public void saveUser(User user) {
-		try {
-			userRepository.save(user);
-		} catch (DataIntegrityViolationException e) {
-			throw e;
-		}
-	}
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 
-	public List<User> searchUsers(String query, int limit) {
-		return userRepository.findByNicknameContainingIgnoreCase(query,
-				PageRequest.of(0, limit));
-	}
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
 
-	// Метод для инициализации удаленного пользователя
-	@Transactional
-	public void ensureDeletedUserExists() {
-		if (!userRepository.existsByNickname(DELETED_USER_NICKNAME)) {
-			User deletedUser = new User();
-			deletedUser.setNickname("Deleted_User");
-			deletedUser.setEmail("Deleted@user");
-			deletedUser.setPassword("deleted");
-			deletedUser.setRole("ROLE_DELETED");
-			deletedUser.setRating(0);
-			deletedUser.setCreatedAt(LocalDateTime.now());
-			userRepository.save(deletedUser);
-		}
-	}
+    @Transactional
+    public void saveUser(User user) {
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw e;
+        }
+    }
 
-	// Метод для удаления пользователя
-	@Transactional
-	public void deleteUser(User user) {
-		ensureDeletedUserExists();
+    public List<User> searchUsers(String query, int limit) {
+        return userRepository.findByNicknameContainingIgnoreCase(query, PageRequest.of(0, limit));
+    }
 
-		Long deletedUserId = userRepository.findByNickname(DELETED_USER_NICKNAME).getId();
-		gameHistoryRepository.updateWhitePlayerToDeletedUser(user.getId(), deletedUserId);
-		gameHistoryRepository.updateBlackPlayerToDeletedUser(user.getId(), deletedUserId);
+    // Метод для инициализации удаленного пользователя
+    @Transactional
+    public void ensureDeletedUserExists() {
+        if (!userRepository.existsByNickname(DELETED_USER_NICKNAME)) {
+            User deletedUser = new User();
+            deletedUser.setNickname("Deleted_User");
+            deletedUser.setEmail("Deleted@user");
+            deletedUser.setPassword("deleted");
+            deletedUser.setRole("ROLE_DELETED");
+            deletedUser.setRating(0);
+            deletedUser.setCreatedAt(LocalDateTime.now());
+            userRepository.save(deletedUser);
+        }
+    }
 
-		friendshipRepository.deleteByUserIdOrFriendId(user.getId());
+    // Метод для удаления пользователя
+    @Transactional
+    public void deleteUser(User user) {
+        ensureDeletedUserExists();
 
-		userRepository.delete(user);
-	}
+        Long deletedUserId = userRepository.findByNickname(DELETED_USER_NICKNAME).getId();
+        gameHistoryRepository.updateWhitePlayerToDeletedUser(user.getId(), deletedUserId);
+        gameHistoryRepository.updateBlackPlayerToDeletedUser(user.getId(), deletedUserId);
 
-	@Transactional
-	public void updateRating(User user, int newRating) {
-		user.setRating(newRating);
-		userRepository.save(user);
-	}
+        friendshipRepository.deleteByUserIdOrFriendId(user.getId());
 
-	public List<User> findTop10ByOrderByRatingDesc() {
-		List<User> topUsers = userRepository.findTop10ByOrderByRatingDesc();
+        userRepository.delete(user);
+    }
 
-		return topUsers.stream()
-				.filter(user -> !DELETED_USER_NICKNAME.equals(user.getNickname()))
-				.toList();
-	}
+    @Transactional
+    public void updateRating(User user, int newRating) {
+        user.setRating(newRating);
+        userRepository.save(user);
+    }
 
-	public List<AdminPageUserDTO> findBannedUsers() {
-		return userRepository.findByIsBannedTrue().stream()
-				.map(user -> new AdminPageUserDTO(user.getId(), user.getUsername(), user.isBanned(), user.isAdmin()))
-				.toList();
-	}
+    public List<User> findTop10ByOrderByRatingDesc() {
+        List<User> topUsers = userRepository.findTop10ByOrderByRatingDesc();
 
-	public List<AdminPageUserDTO> findAdmins() {
-		return userRepository.findByIsAdminTrue().stream()
-				.map(user -> new AdminPageUserDTO(user.getId(), user.getUsername(), user.isBanned(), user.isAdmin()))
-				.toList();
-	}
+        return topUsers.stream()
+                .filter(user -> !DELETED_USER_NICKNAME.equals(user.getNickname()))
+                .toList();
+    }
 
+    public List<AdminPageUserDTO> findBannedUsers() {
+        return userRepository.findByIsBannedTrue().stream()
+                .map(
+                        user ->
+                                new AdminPageUserDTO(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.isBanned(),
+                                        user.isAdmin()))
+                .toList();
+    }
+
+    public List<AdminPageUserDTO> findAdmins() {
+        return userRepository.findByIsAdminTrue().stream()
+                .map(
+                        user ->
+                                new AdminPageUserDTO(
+                                        user.getId(),
+                                        user.getUsername(),
+                                        user.isBanned(),
+                                        user.isAdmin()))
+                .toList();
+    }
 }
