@@ -1,6 +1,7 @@
 package org.madi.demo.service;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.entities.GameHistory;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.Chessboard;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class ChessService {
     private final GameSessionService gameSessionService;
@@ -62,7 +64,7 @@ public class ChessService {
         }
         if (result.containsKey("draw") || result.containsKey("victory")) {
             session.getTimer().stop();
-            System.out.println("Игра окончена");
+            log.info("Игра окончена");
             session.setStatus(GameSession.GameStatus.FINISHED);
             session.setEndTime(LocalDateTime.now());
             createGameHistoryAndSave(sessionId);
@@ -92,11 +94,7 @@ public class ChessService {
         GameSession session = gameSessionService.getSession(sessionId);
 
         if (session.getPlayerWhite() == null || session.getPlayerBlack() == null) {
-            System.out.println(
-                    "белый и черный игроки: "
-                            + session.getPlayerWhite()
-                            + " "
-                            + session.getPlayerBlack());
+            log.info("белый и черный игроки: {} {}", session.getPlayerWhite(), session.getPlayerBlack());
             throw new IllegalStateException("Нельзя сохранить игру без обоих игроков");
         }
 
@@ -139,10 +137,8 @@ public class ChessService {
         userService.updateRating(white, newWhiteRating);
         userService.updateRating(black, newBlackRating);
 
-        System.out.println(
-                "Рейтинг " + white + " изменился: " + whiteRating + " → " + newWhiteRating);
-        System.out.println(
-                "Рейтинг " + black + " изменился: " + blackRating + " → " + newBlackRating);
+        log.info("Рейтинг {} изменился: {} → {}", white, whiteRating, newWhiteRating);
+        log.info("Рейтинг {} изменился: {} → {}", black, blackRating, newBlackRating);
     }
 
     public Map<String, Object> promotePawn(
@@ -154,7 +150,7 @@ public class ChessService {
     public List<Position> getPossibleMovesForOnePiece(
             String position, Map<String, Map<String, Object>> clientData) {
         Chessboard board = new Chessboard(clientData, true);
-        System.out.println("chessboard:\n " + board.toString());
+        log.info("chessboard:\n {}", board);
         return board.getPossibleMovesForOnePiece(new Position(position), board);
     }
 }

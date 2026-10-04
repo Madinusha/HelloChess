@@ -1,5 +1,6 @@
 package org.madi.demo.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.dto.FriendDTO;
 import org.madi.demo.entities.User;
 import org.madi.demo.service.FriendshipService;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/friends")
 @PreAuthorize("isAuthenticated()")
@@ -34,7 +36,7 @@ public class FriendshipController {
     @GetMapping
     public ResponseEntity<List<FriendDTO>> getFriends() {
         User currentUser = getCurrentUser();
-        System.out.println("current user: " + currentUser.getNickname());
+        log.info("current user: {}", currentUser.getNickname());
         List<FriendDTO> friends = friendshipService.getUserFriends(currentUser);
         return ResponseEntity.ok(friends);
     }

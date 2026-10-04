@@ -3,6 +3,7 @@ package org.madi.demo.controller;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.madi.demo.dto.ChatDTO;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/game")
 public class ChessController {
@@ -143,9 +145,9 @@ public class ChessController {
 
         // 2. Обработка хода
         Map<String, Object> moveResult;
-        System.out.println("move.getPromotionPiece() :" + move.getPromotionPiece());
+        log.info("move.getPromotionPiece() :{}", move.getPromotionPiece());
         if (move.getPromotionPiece() != null) {
-            System.out.println("в сервисе пытаюсь делать промоушн");
+            log.info("в сервисе пытаюсь делать промоушн");
             moveResult =
                     chessService.promotePawn(
                             sessionId, move.getFrom(), move.getTo(), move.getPromotionPiece());

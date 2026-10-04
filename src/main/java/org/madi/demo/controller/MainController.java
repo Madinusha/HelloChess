@@ -2,6 +2,7 @@ package org.madi.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.dto.ProfileUpdateDTO;
 import org.madi.demo.dto.TaskDTO;
@@ -39,6 +40,7 @@ import static org.madi.demo.enums.LessonType.ADVANCED_LEVEL;
 import static org.madi.demo.enums.LessonType.PIECE_TECHNIQUE;
 import static org.madi.demo.enums.LessonType.TACTICS;
 
+@Slf4j
 @Controller
 public class MainController {
 
@@ -157,8 +159,8 @@ public class MainController {
         List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
         List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
         for (var lesson : piece) {
-            System.out.println("lesson есть " + lesson.getTitle());
-            System.out.println("json " + objectMapper.writeValueAsString(piece));
+            log.info("lesson есть {}", lesson.getTitle());
+            log.info("json {}", objectMapper.writeValueAsString(piece));
         }
 
         model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
@@ -183,8 +185,8 @@ public class MainController {
         List<LessonDTO> advanced = lessonService.getLessonsByType(ADVANCED_LEVEL);
         List<LessonDTO> tactics = lessonService.getLessonsByType(TACTICS);
         for (var lesson : piece) {
-            System.out.println("lesson есть " + lesson.getTitle());
-            System.out.println("json " + objectMapper.writeValueAsString(piece));
+            log.info("lesson есть {}", lesson.getTitle());
+            log.info("json {}", objectMapper.writeValueAsString(piece));
         }
 
         model.addAttribute("pieceLessonsJson", objectMapper.writeValueAsString(piece));
@@ -213,15 +215,15 @@ public class MainController {
         }
         ObjectMapper mapper = new ObjectMapper();
         String lessonJson = mapper.writeValueAsString(lesson);
-        System.out.println("lessonJson " + lessonJson);
+        log.info("lessonJson " + lessonJson);
 
         List<LessonDTO> sameTypeLessons = lessonService.getLessonsByType(lesson.getLessonType());
 
         List<TaskDTO> tasks = taskService.getTasksByLessonId(lessonId);
-        System.out.println("tasks len" + tasks.size());
+        log.info("tasks len" + tasks.size());
         for (var task : tasks) {
-            System.out.println("task есть " + task.getOrder());
-            System.out.println("json " + objectMapper.writeValueAsString(task));
+            log.info("task есть {}", task.getOrder());
+            log.info("json {}", objectMapper.writeValueAsString(task));
         }
         model.addAttribute("userId", user != null ? user.getId() : null);
         model.addAttribute("currentLessonJson", lessonJson);
@@ -256,14 +258,14 @@ public class MainController {
 
         User currentUser = userService.findUserByNickname(principal.getName());
         User requestedUser = userService.findUserByNickname(nickname);
-        System.out.println("currentUser: " + currentUser.getNickname());
-        System.out.println("requestedUser: " + requestedUser.getNickname());
+        log.info("currentUser: {}", currentUser.getNickname());
+        log.info("requestedUser: {}", requestedUser.getNickname());
 
         boolean isMyProfile = currentUser.getNickname().equals(nickname);
 
         String friendshipStatusDetailed =
                 friendshipService.getDetailedFriendshipStatus(currentUser, requestedUser);
-        System.out.println("friendshipStatusDetailed " + friendshipStatusDetailed);
+        log.info("friendshipStatusDetailed {}", friendshipStatusDetailed);
 
         UserProfilePageDTO profile = new UserProfilePageDTO();
         profile.setNickname(requestedUser.getNickname());

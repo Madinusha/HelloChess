@@ -2,6 +2,7 @@ package org.madi.demo.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @Setter
 @Getter
+@Slf4j
 public class Chessboard {
 
     private Map<Position, Piece> board;
@@ -307,7 +309,7 @@ public class Chessboard {
                 }
             }
             if (isCastleMove(from, to, board) != null) {
-                System.out.println("Можно сделать рокировку");
+                log.info("Можно сделать рокировку");
                 return true;
             }
             return false;
@@ -355,7 +357,7 @@ public class Chessboard {
             // под шахом
             if (!currentFigure.getColor().equals(kingColor)
                     && currentFigure.isValidMove(currentPosition, kingPosition, cb)) {
-                // System.out.println("фигура " + currentFigure.getFileName() + " принадлежит
+                // log.info("фигура " + currentFigure.getFileName() + " принадлежит
                 // другому игроку и может атаковать короля, ШАХ королю цвета " +
                 // cb.getFigureAt(kingPosition).getColor() +
                 // cb.getFigureAt(kingPosition).getFileName());
@@ -431,7 +433,7 @@ public class Chessboard {
     }
 
     public Position findKingPosition(String kingColor, Map<Position, Piece> board) {
-        // System.out.println("Ищем короля ");
+        // log.info("Ищем короля ");
         Chessboard cb = new Chessboard();
         cb.board = board;
         for (Map.Entry<Position, Piece> entry : board.entrySet()) {
@@ -465,8 +467,8 @@ public class Chessboard {
 
         Position rookPosition = new Position(rookCol, rookRow);
         Piece rook = board.getFigureAt(rookPosition);
-        System.out.println("king = " + king);
-        System.out.println("rook = " + rook);
+        log.info("king = {}", king);
+        log.info("rook = {}", rook);
 
         // Проверяем, находится ли король в начальной позиции
         if (((King) king).isHasMoved() || ((Rook) rook).isHasMoved()) {
@@ -480,35 +482,27 @@ public class Chessboard {
         int dir = from.getColAsNumber() > to.getColAsNumber() ? -1 : 1;
         Chessboard tempBoard = copyChessboard(board);
         while (currentKingPos.getColAsNumber() != to.getColAsNumber()) {
-            System.out.println(currentKingPos.getColAsNumber() + " " + to.getColAsNumber());
+            log.info("{} {}", currentKingPos.getColAsNumber(), to.getColAsNumber());
             // Проверяем, не находится ли король под шахом на этой позиции
             if (tempBoard.isKingInCheck(king.getColor(), tempBoard.getChessboard())) {
-                System.out.println(
-                        "Во время рокировки король находится под шахом в позиции "
-                                + currentKingPos);
+                log.info("Во время рокировки король находится под шахом в позиции {}", currentKingPos);
                 return null; // Позиция находится под шахом
             }
 
             Position nextPosition =
                     new Position(currentKingPos.getColAsNumber() + dir, from.getRow());
-            System.out.println("currentKingPos " + currentKingPos + " " + nextPosition);
+            log.info("currentKingPos {} {}", currentKingPos, nextPosition);
 
             tempBoard.moveFigure(currentKingPos, nextPosition, tempBoard);
 
             currentKingPos = nextPosition;
-            System.out.println("tempBoard");
-            System.out.println(tempBoard);
+            log.info("tempBoard \n{}",  tempBoard);
         }
-        System.out.println("основная доска");
-        System.out.println(board);
+        log.info("основная доска\n{}",  board);
 
         int futureRookCol = 8 - to.getColAsNumber() == 1 ? 6 : 4;
         Position futureRookPos = new Position(futureRookCol, from.getRow());
-        System.out.println(
-                "Все условия для рокировки выполнены, позиции ладьи для рокировки: "
-                        + rookPosition
-                        + " -> "
-                        + futureRookPos);
+        log.info("Все условия для рокировки выполнены, позиции ладьи для рокировки: {} -> {}", rookPosition, futureRookPos);
         return new MutablePair<>(rookPosition, futureRookPos);
     }
 
@@ -587,16 +581,7 @@ public class Chessboard {
             }
             if (movingFigure instanceof Rook) ((Rook) movingFigure).setHasMoved();
             // Вывести информацию о ходе
-            System.out.println(
-                    "Успех! "
-                            + movingFigure.getColor()
-                            + " "
-                            + movingFigure.getClass().getSimpleName()
-                            + " сделала ход с "
-                            + from
-                            + " на "
-                            + to
-                            + ".\n");
+            log.info("Успех! {} {} сделала ход с {} на {}.\n", movingFigure.getColor(), movingFigure.getClass().getSimpleName(), from, to);
             result.put("move", Map.of("from", from.toString(), "to", to.toString()));
             String opponentColor = movingFigure.getColor().equals("white") ? "black" : "white";
             String checkCheckmate = isCheckmate(opponentColor, board);
@@ -666,7 +651,7 @@ public class Chessboard {
             Position positionFrom, Position positionTo, String newPieceType) {
         Map<String, Object> result = new HashMap<>();
         Piece pawn = getFigureAt(positionFrom);
-        System.out.println("newPieceType: " + newPieceType);
+        log.info("newPieceType: {}", newPieceType);
         Piece newPiece = null;
         switch (newPieceType) {
             case "Queen":
@@ -711,7 +696,7 @@ public class Chessboard {
     private void figureCapture(Piece capturedFigure) {
         // код для обработки события съедания фигуры
         eatenFigures.add(new MutablePair<>(motionList.size(), capturedFigure));
-        System.out.println("Фигура " + capturedFigure.getFileName() + " съедена!");
+        log.info("Фигура {} съедена!", capturedFigure.getFileName());
     }
 
     public Piece getFigureAt(Position position) {

@@ -1,5 +1,6 @@
 package org.madi.demo.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.dto.CreateGameRequest;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.GameSession;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.madi.demo.model.GameSession.GameStatus.REQUEST;
 import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class GameConstructorController {
@@ -48,7 +50,7 @@ public class GameConstructorController {
                         request.getPlayerColor(),
                         request.getTimeControl().getMinutes(),
                         request.getTimeControl().getIncrement());
-        System.out.println(request.getTimeControl().getMinutes());
+        log.info(String.valueOf(request.getTimeControl().getMinutes()));
 
         // Отправляем ответ создателю
         messagingTemplate.convertAndSendToUser(
@@ -181,13 +183,13 @@ public class GameConstructorController {
     public void handleJoinRetryGame(@DestinationVariable String sessionId, Principal principal) {
         GameSession session = gameSessionService.getSession(sessionId);
         User joiningUser = userService.findUserByNickname(principal.getName());
-        System.out.println("статус: " + session.getStatus());
+        log.info("статус: {}", session.getStatus());
         if (session.getStatus() == REQUEST) {
             try {
                 session.joinPlayer(joiningUser);
                 User creator = session.getCreator();
-                System.out.println("creator: " + creator.getNickname());
-                System.out.println("joiningUser: " + joiningUser.getNickname());
+                log.info("creator: {}", creator.getNickname());
+                log.info("joiningUser: {}", joiningUser.getNickname());
                 // Уведомление для создателя
                 messagingTemplate.convertAndSendToUser(
                         creator.getNickname(), "/queue/game-start", Map.of("sessionId", sessionId));

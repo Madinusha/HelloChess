@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.GameSession;
 import org.madi.demo.model.GameTimer;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 
+@Slf4j
 @Service
 public class GameSessionService {
     private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
@@ -44,7 +46,7 @@ public class GameSessionService {
     }
 
     public void removeSession(String sessionId) {
-        System.out.println("Удаляется сессия по id");
+        log.info("Удаляется сессия по id");
         sessions.remove(sessionId);
     }
 
