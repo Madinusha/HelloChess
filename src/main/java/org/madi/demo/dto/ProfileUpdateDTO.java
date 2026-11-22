@@ -1,11 +1,10 @@
 package org.madi.demo.dto;
 
+import java.time.LocalDate;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.madi.demo.enums.Sex;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter

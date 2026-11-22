@@ -1,6 +1,7 @@
 package org.madi.demo.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.madi.demo.dto.CreateReportDTO;
 import org.madi.demo.dto.ReportDTO;
 import org.madi.demo.dto.ResolveReportDTO;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/reports")

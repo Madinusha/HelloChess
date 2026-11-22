@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.madi.demo.dto.RatingDistribution;
@@ -7,8 +8,6 @@ import org.madi.demo.entities.User;
 import org.madi.demo.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class RatingDistributionService {

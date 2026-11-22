@@ -1,9 +1,8 @@
 package org.madi.demo.dto;
 
+import java.time.LocalDateTime;
 import lombok.Data;
 import org.madi.demo.enums.ReportType;
-
-import java.time.LocalDateTime;
 
 @Data
 public class ReportDTO {

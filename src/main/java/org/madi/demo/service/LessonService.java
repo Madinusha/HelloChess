@@ -1,6 +1,8 @@
 package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.madi.demo.dto.CreateLessonDTO;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.entities.Lesson;
@@ -8,9 +10,6 @@ import org.madi.demo.enums.LessonType;
 import org.madi.demo.repository.LessonRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional

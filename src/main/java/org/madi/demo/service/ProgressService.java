@@ -1,6 +1,8 @@
 package org.madi.demo.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.entities.Lesson;
 import org.madi.demo.entities.Task;
@@ -12,9 +14,6 @@ import org.madi.demo.repository.UserLessonProgressRepository;
 import org.madi.demo.repository.UserTaskProgressRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

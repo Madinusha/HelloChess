@@ -1,7 +1,15 @@
 package org.madi.demo.controller;
 
+import static org.madi.demo.enums.LessonType.ADVANCED_LEVEL;
+import static org.madi.demo.enums.LessonType.PIECE_TECHNIQUE;
+import static org.madi.demo.enums.LessonType.TACTICS;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.security.Principal;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.dto.ProfileUpdateDTO;
@@ -30,15 +38,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.security.Principal;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.madi.demo.enums.LessonType.ADVANCED_LEVEL;
-import static org.madi.demo.enums.LessonType.PIECE_TECHNIQUE;
-import static org.madi.demo.enums.LessonType.TACTICS;
 
 @Slf4j
 @Controller

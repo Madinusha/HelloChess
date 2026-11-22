@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.ChessTaskData;
 import org.madi.demo.dto.TaskCreateRequest;
@@ -13,9 +15,6 @@ import org.madi.demo.entities.Task;
 import org.madi.demo.repository.LessonRepository;
 import org.madi.demo.repository.TaskRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

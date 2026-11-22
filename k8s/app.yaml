@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: hellochess:1.0.0
+          image: hellochess:1.0.4
           imagePullPolicy: Never
           ports:
             - containerPort: 8080

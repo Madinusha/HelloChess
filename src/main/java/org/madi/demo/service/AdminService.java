@@ -1,12 +1,11 @@
 package org.madi.demo.service;
 
+import java.time.LocalDateTime;
 import org.madi.demo.entities.User;
 import org.madi.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @Transactional

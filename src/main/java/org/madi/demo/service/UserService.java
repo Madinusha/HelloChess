@@ -1,6 +1,8 @@
 package org.madi.demo.service;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.AdminPageUserDTO;
 import org.madi.demo.entities.User;
@@ -11,9 +13,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service

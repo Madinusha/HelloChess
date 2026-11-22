@@ -1,5 +1,6 @@
 package org.madi.demo.repository;
 
+import java.util.List;
 import org.madi.demo.entities.Friendship;
 import org.madi.demo.entities.User;
 import org.madi.demo.enums.FriendshipStatus;
@@ -8,8 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {

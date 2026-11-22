@@ -1,5 +1,6 @@
 package org.madi.demo.controller;
 
+import java.util.List;
 import org.madi.demo.dto.CreateLessonDTO;
 import org.madi.demo.dto.LessonDTO;
 import org.madi.demo.repository.UserRepository;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/lessons")

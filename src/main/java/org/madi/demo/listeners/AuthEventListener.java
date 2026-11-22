@@ -1,5 +1,6 @@
 package org.madi.demo.listeners;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.service.OnlineUsersService;
 import org.springframework.context.event.EventListener;
@@ -8,8 +9,6 @@ import org.springframework.security.authentication.event.AbstractAuthenticationE
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.authentication.event.LogoutSuccessEvent;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

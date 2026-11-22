@@ -1,5 +1,10 @@
 package org.madi.demo.service;
 
+import static org.madi.demo.model.GameSession.GameStatus.WAITING;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.entities.User;
 import org.madi.demo.model.GameSession;
@@ -7,12 +12,6 @@ import org.madi.demo.model.GameTimer;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 
 @Slf4j
 @Service

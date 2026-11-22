@@ -1,5 +1,12 @@
 package org.madi.demo.controller;
 
+import static org.madi.demo.model.GameSession.GameStatus.REQUEST;
+import static org.madi.demo.model.GameSession.GameStatus.WAITING;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.dto.CreateGameRequest;
 import org.madi.demo.entities.User;
@@ -16,14 +23,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.madi.demo.model.GameSession.GameStatus.REQUEST;
-import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 
 @Slf4j
 @RestController

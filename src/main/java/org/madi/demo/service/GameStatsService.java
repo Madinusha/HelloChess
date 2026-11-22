@@ -1,5 +1,7 @@
 package org.madi.demo.service;
 
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.dto.ColorStatsDTO;
 import org.madi.demo.dto.UserGameStatsDTO;
@@ -7,9 +9,6 @@ import org.madi.demo.entities.GameHistory;
 import org.madi.demo.entities.User;
 import org.madi.demo.repository.GameStatsRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

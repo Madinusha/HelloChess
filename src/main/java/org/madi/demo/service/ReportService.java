@@ -1,6 +1,12 @@
 package org.madi.demo.service;
 
+import static org.madi.demo.enums.ReportStatus.PENDING;
+import static org.madi.demo.enums.ReportStatus.RESOLVED;
+
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.madi.demo.dto.CreateReportDTO;
 import org.madi.demo.dto.ReportDTO;
 import org.madi.demo.dto.ResolveReportDTO;
@@ -12,13 +18,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.madi.demo.enums.ReportStatus.PENDING;
-import static org.madi.demo.enums.ReportStatus.RESOLVED;
 
 @Service
 public class ReportService {

@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLanguage;
@@ -7,8 +8,6 @@ import org.madi.demo.enums.LanguageLevel;
 import org.madi.demo.repository.UserLanguageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

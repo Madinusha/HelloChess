@@ -1,14 +1,13 @@
 package org.madi.demo.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.MutablePair;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 @Setter
 @Getter
@@ -485,7 +484,9 @@ public class Chessboard {
             log.info("{} {}", currentKingPos.getColAsNumber(), to.getColAsNumber());
             // Проверяем, не находится ли король под шахом на этой позиции
             if (tempBoard.isKingInCheck(king.getColor(), tempBoard.getChessboard())) {
-                log.info("Во время рокировки король находится под шахом в позиции {}", currentKingPos);
+                log.info(
+                        "Во время рокировки король находится под шахом в позиции {}",
+                        currentKingPos);
                 return null; // Позиция находится под шахом
             }
 
@@ -496,13 +497,16 @@ public class Chessboard {
             tempBoard.moveFigure(currentKingPos, nextPosition, tempBoard);
 
             currentKingPos = nextPosition;
-            log.info("tempBoard \n{}",  tempBoard);
+            log.info("tempBoard \n{}", tempBoard);
         }
-        log.info("основная доска\n{}",  board);
+        log.info("основная доска\n{}", board);
 
         int futureRookCol = 8 - to.getColAsNumber() == 1 ? 6 : 4;
         Position futureRookPos = new Position(futureRookCol, from.getRow());
-        log.info("Все условия для рокировки выполнены, позиции ладьи для рокировки: {} -> {}", rookPosition, futureRookPos);
+        log.info(
+                "Все условия для рокировки выполнены, позиции ладьи для рокировки: {} -> {}",
+                rookPosition,
+                futureRookPos);
         return new MutablePair<>(rookPosition, futureRookPos);
     }
 
@@ -581,7 +585,12 @@ public class Chessboard {
             }
             if (movingFigure instanceof Rook) ((Rook) movingFigure).setHasMoved();
             // Вывести информацию о ходе
-            log.info("Успех! {} {} сделала ход с {} на {}.\n", movingFigure.getColor(), movingFigure.getClass().getSimpleName(), from, to);
+            log.info(
+                    "Успех! {} {} сделала ход с {} на {}.\n",
+                    movingFigure.getColor(),
+                    movingFigure.getClass().getSimpleName(),
+                    from,
+                    to);
             result.put("move", Map.of("from", from.toString(), "to", to.toString()));
             String opponentColor = movingFigure.getColor().equals("white") ? "black" : "white";
             String checkCheckmate = isCheckmate(opponentColor, board);

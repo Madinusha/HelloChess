@@ -1,10 +1,9 @@
 package org.madi.demo.dto;
 
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.madi.demo.controller.ChessController;
-
-import java.util.Map;
 
 @Data
 @AllArgsConstructor

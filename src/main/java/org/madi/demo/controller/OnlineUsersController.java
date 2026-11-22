@@ -1,5 +1,7 @@
 package org.madi.demo.controller;
 
+import java.security.Principal;
+import java.util.List;
 import org.madi.demo.service.OnlineUsersService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-
-import java.security.Principal;
-import java.util.List;
 
 @Controller
 public class OnlineUsersController {
