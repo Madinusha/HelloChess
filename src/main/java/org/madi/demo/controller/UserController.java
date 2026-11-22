@@ -16,6 +16,7 @@ import org.madi.demo.dto.UserProfileDTO;
 import org.madi.demo.dto.UserProfilePageDTO;
 import org.madi.demo.dto.UserRegistrationDTO;
 import org.madi.demo.entities.User;
+import org.madi.demo.metrics.AppMetrics;
 import org.madi.demo.service.FriendshipService;
 import org.madi.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class UserController {
 
     @Autowired private PasswordEncoder passwordEncoder;
 
+    @Autowired private AppMetrics appMetrics;
+
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistrationDTO userDTO) {
         User user = new User();
@@ -54,6 +57,7 @@ public class UserController {
         user.setEmail(userDTO.getEmail());
         user.setRole("user");
         userService.saveUser(user);
+        appMetrics.userRegistered();
         return ResponseEntity.ok("Пользователь успешно зарегистрирован");
     }
 

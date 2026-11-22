@@ -9,6 +9,7 @@ import org.madi.demo.entities.Task;
 import org.madi.demo.entities.User;
 import org.madi.demo.entities.UserLessonProgress;
 import org.madi.demo.entities.UserTaskProgress;
+import org.madi.demo.metrics.AppMetrics;
 import org.madi.demo.repository.LessonRepository;
 import org.madi.demo.repository.UserLessonProgressRepository;
 import org.madi.demo.repository.UserTaskProgressRepository;
@@ -22,10 +23,14 @@ public class ProgressService {
     private final UserLessonProgressRepository lessonProgressRepository;
     private final UserTaskProgressRepository taskProgressRepository;
     private final LessonRepository lessonRepository;
+    private final AppMetrics appMetrics;
 
     @Transactional
     public void updateTaskProgress(User user, Task task, int stars) {
         stars = Math.max(0, Math.min(3, stars));
+        if (stars > 0) {
+            appMetrics.lessonTaskCompleted(stars);
+        }
 
         // 1. Обновляем прогресс по задаче
         UserTaskProgress taskProgress =

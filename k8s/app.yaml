@@ -11,13 +11,19 @@ spec:
     metadata:
       labels:
         app: hellochess
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: app
-          image: hellochess:1.0.4
+          image: hellochess:1.0.5
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
+            - name: metrics
+              containerPort: 8081
           envFrom:
             - configMapRef:
                 name: hellochess-config
@@ -29,13 +35,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8080
+              port: 8081
             initialDelaySeconds: 15
             periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8080
+              port: 8081
             initialDelaySeconds: 30
             periodSeconds: 10
 ---

@@ -1,0 +1,15 @@
+# VictoriaMetrics Single — TSDB для метрик (ДЗ №3).
+# Установка: helm install vm-single vm/victoria-metrics-single -n monitoring --create-namespace -f k8s-monitoring/vm-single-values.yaml
+server:
+  retentionPeriod: 7d
+  # Сбор метрик выполняет vmagent (отдельный чарт) через remote write,
+  # поэтому встроенный scrape у single-server не используется.
+  scrape:
+    enabled: false
+  resources:
+    requests:
+      cpu: 200m
+      memory: 300Mi
+    limits:
+      cpu: 500m
+      memory: 600Mi

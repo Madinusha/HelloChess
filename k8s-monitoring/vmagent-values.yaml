@@ -1,0 +1,16 @@
+# vmagent — сбор метрик с подов через service discovery (аннотации prometheus.io/*).
+# Установка: helm install vm-single-agent vm/victoria-metrics-agent -n monitoring -f k8s-monitoring/vmagent-values.yaml
+remoteWrite:
+  - url: http://vm-single-victoria-metrics-single-server.monitoring.svc.cluster.local:8428/api/v1/write
+
+config:
+  global:
+    scrape_interval: 15s
+
+# Service нужен для port-forward и проверки статуса скрейпинга (vm-agent:8429/targets)
+service:
+  enabled: true
+
+# Дефолтный scrape_configs чарта уже содержит job "kubernetes-pods", который
+# учитывает аннотации prometheus.io/scrape, prometheus.io/path, prometheus.io/port
+# (условие: аннотированный порт должен совпадать с containerPort пода).

@@ -1,5 +1,6 @@
 package org.madi.demo.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,10 @@ public class OnlineUsersService {
 
     private final Set<String> activeCommunityUsers =
             Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    public OnlineUsersService(MeterRegistry meterRegistry) {
+        meterRegistry.gauge("chess.users.online", onlineUsers, Set::size);
+    }
 
     public void userLoggedIn(String username) {
         onlineUsers.add(username);

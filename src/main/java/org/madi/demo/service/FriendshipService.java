@@ -13,6 +13,7 @@ import org.madi.demo.dto.FriendDTO;
 import org.madi.demo.entities.Friendship;
 import org.madi.demo.entities.User;
 import org.madi.demo.enums.FriendshipStatus;
+import org.madi.demo.metrics.AppMetrics;
 import org.madi.demo.repository.FriendshipRepository;
 import org.madi.demo.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ public class FriendshipService {
     private final FriendshipRepository friendshipRepository;
 
     private final UserRepository userRepository;
+
+    private final AppMetrics appMetrics;
 
     public List<FriendDTO> getUserFriends(User user) {
         // Получаем друзей, где текущий пользователь инициатор
@@ -86,6 +89,7 @@ public class FriendshipService {
         friendship.setStatus(PENDING);
         friendship.setCreatedAt(LocalDateTime.now());
         friendshipRepository.save(friendship);
+        appMetrics.friendRequestSent();
     }
 
     @Transactional
@@ -107,6 +111,7 @@ public class FriendshipService {
 
         request.setStatus(ACCEPTED);
         friendshipRepository.save(request);
+        appMetrics.friendRequestAccepted();
     }
 
     @Transactional

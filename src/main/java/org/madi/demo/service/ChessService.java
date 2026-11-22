@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.entities.GameHistory;
 import org.madi.demo.entities.User;
+import org.madi.demo.metrics.AppMetrics;
 import org.madi.demo.model.Chessboard;
 import org.madi.demo.model.GameSession;
 import org.madi.demo.model.Position;
@@ -23,6 +24,7 @@ public class ChessService {
     private final GameHistoryRepository gameHistoryRepository;
     private final UserService userService;
     private final RatingService ratingService;
+    private final AppMetrics appMetrics;
     @Getter private Chessboard chessboard = new Chessboard();
 
     @Autowired
@@ -31,12 +33,14 @@ public class ChessService {
             SimpMessagingTemplate messagingTemplate,
             GameHistoryRepository gameHistoryRepository,
             UserService userService,
-            RatingService ratingService) {
+            RatingService ratingService,
+            AppMetrics appMetrics) {
         this.gameSessionService = gameSessionService;
         this.messagingTemplate = messagingTemplate;
         this.gameHistoryRepository = gameHistoryRepository;
         this.userService = userService;
         this.ratingService = ratingService;
+        this.appMetrics = appMetrics;
 
         startNewGame();
     }
@@ -53,6 +57,7 @@ public class ChessService {
     public Map<String, Object> makeMove(String sessionId, Position from, Position to) {
         GameSession session = gameSessionService.getSession(sessionId);
         var result = session.getChessboard().moveFigure(from, to);
+        appMetrics.moveMade();
         if (session.getChessboard().getMotionList().size() == 1) {
             session.getTimer().switchTurn();
         } else if (session.getChessboard().getMotionList().size() == 2) {
@@ -104,6 +109,7 @@ public class ChessService {
         history.setWhitePlayer(session.getPlayerWhite());
         history.setBlackPlayer(session.getPlayerBlack());
         history.setResult(session.getChessboard().getStatus());
+        appMetrics.gameFinished(session.getChessboard().getStatus());
         history.setInitialTimeMinutes(session.getTimer().getInitialTimeMinutes());
         history.setInitialTimeIncrement(session.getTimer().getIncrementSeconds());
         history.setStartTime(session.getStartTime());

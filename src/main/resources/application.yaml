@@ -41,6 +41,15 @@ server:
   port: ${SERVER_PORT:8080}
 
 management:
+  server:
+    port: 8081   # выделенный порт: недоступен извне кластера (нет Service), security-чейн приложения не применяется
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
   endpoint:
     health:
       probes:

@@ -2,11 +2,13 @@ package org.madi.demo.service;
 
 import static org.madi.demo.model.GameSession.GameStatus.WAITING;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.madi.demo.entities.User;
+import org.madi.demo.metrics.AppMetrics;
 import org.madi.demo.model.GameSession;
 import org.madi.demo.model.GameTimer;
 import org.springframework.context.annotation.Lazy;
@@ -20,11 +22,17 @@ public class GameSessionService {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChessService chessService;
+    private final AppMetrics appMetrics;
 
     public GameSessionService(
-            SimpMessagingTemplate messagingTemplate, @Lazy ChessService chessService) {
+            SimpMessagingTemplate messagingTemplate,
+            @Lazy ChessService chessService,
+            MeterRegistry meterRegistry,
+            AppMetrics appMetrics) {
         this.messagingTemplate = messagingTemplate;
         this.chessService = chessService;
+        this.appMetrics = appMetrics;
+        meterRegistry.gauge("chess.games.active", sessions, Map::size);
     }
 
     public GameSession createSession(
@@ -33,6 +41,7 @@ public class GameSessionService {
             GameSession.PieceColor color,
             int initialTime,
             int increment) {
+        appMetrics.gameCreated();
         GameTimer timer =
                 new GameTimer(initialTime, increment, messagingTemplate, sessionId, chessService);
         GameSession session = new GameSession(sessionId, creator, color, timer);
